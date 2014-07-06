@@ -1165,7 +1165,7 @@ namespace server
 		int size; //in KB
 		string name; //packname eg. "reissen"
 		string author;
-		struct file { int filesize; char *name; };
+		struct file { int filesize; char *name; uint crc; };
 		vector<file *> files; //all included files and dependencies
 		void calcsize()
 		{
@@ -1176,6 +1176,7 @@ namespace server
 				if(!f) continue;
 				size += ((int)f->size())/1024; 
 				files[i]->filesize =  ((int)f->size())/1024; 
+				files[i]->crc = f->getcrc();
 				delete f;
 			}
 		}
@@ -1229,10 +1230,13 @@ namespace server
 		packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_PACKFILES);
 		putint(p, pack);
+		sendstring(cp->name, p);
+		putint(p, cp->size);
 		putint(p, cp->files.length());
 		loopv(cp->files) { 
-			putint(p, cp->files[i]->filesize);
 			sendstring(cp->files[i]->name, p); 
+			putint(p, cp->files[i]->filesize);
+			p.put((uchar*)&cp->files[i]->crc, 3);
 		}
         sendpacket(cn, 1, p.finalize());
     }
