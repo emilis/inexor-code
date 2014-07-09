@@ -1163,22 +1163,28 @@ namespace server
 
 	struct contentpack {
 		int size; //in KB
-		string name; //packname eg. "reissen"
-		string author;
-		struct file { int filesize; string name; uint crc; };
+		string name, //packname eg. "reissen"
+		       author;
+
+		struct file { 
+			string name; 
+			int filesize;
+			uint crc;  
+			file(const char *n) : filesize(0), crc(NULL) {
+				copystring(name, n);
+				stream *f = openfile(name, "r");
+				if(!f) return;
+				
+				filesize =  ((int)f->size())/1024; 
+				delete f;
+			}
+		};
 		vector<file *> files; //all included files and dependencies
+		
 		void calcsize()
 		{
 			size = 0;
-			loopv(files)
-			{
-				stream *f = openfile(files[i]->name, "r");
-				if(!f) continue;
-				size += ((int)f->size())/1024; 
-				files[i]->filesize =  ((int)f->size())/1024; 
-				files[i]->crc = f->getcrc();
-				delete f;
-			}
+			loopv(files) size += files[i]->filesize;
 		}
 	};
 	vector<contentpack *> contentpacks;
@@ -1197,7 +1203,7 @@ namespace server
 	{
 		if(!fn || !fn[0] || !contentpacks.length()) return;
 		contentpack *p = contentpacks.last();
-		copystring(p->files.add(new contentpack::file)->name, fn);
+		p->files.add(new contentpack::file(fn));
 	}
 	ICOMMAND(packfile, "s", (const char *fn), newpackfile(fn));
 	
@@ -1234,10 +1240,13 @@ namespace server
 		putint(p, cp->size);
 		putint(p, cp->files.length());
 		loopv(cp->files) { 
-			sendstring(cp->files[i]->name, p); 
-			putint(p, cp->files[i]->filesize);
-			//p.put((uchar*)&cp->files[i]->crc, 3);
+			contentpack::file *f = cp->files[i];
+			sendstring(f->name, p); 
+			putint(p, f->filesize);
+			putint(p, f->crc);
+			conoutf("sent: %s (%d KB) : %u", f->name, f->filesize, f->crc);
 		}
+		
         sendpacket(cn, 1, p.finalize());
     }
 
