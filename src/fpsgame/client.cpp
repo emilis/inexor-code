@@ -877,19 +877,41 @@ namespace game
 		vector<file *> files; //all included files and dependencies
 	};
 	vector<contentpack *> contentpacks;
+
+	SVARP(allowedfileext, ".cfg .jpg .ogz .png");
+
 	bool allowedfile(const char *name)
 	{
-		//todo
-		return true;
+		if(!name) return false; //todo ?
+		vector<char *> exts;
+		char *pos = strtok(newstring(allowedfileext), "\n\t ");;
+		while(pos)
+		{
+			exts.add(newstring(pos));
+			pos = strtok(NULL, "\n\t ");
+		}
+		if(exts.empty()) return true;
+		
+		loopv(exts) {
+			int exlen = strlen(exts[i]);  
+			int nlen = strlen(name); 
+			if(name[nlen-exlen] && !strcmp(&name[nlen-exlen], exts[i])) return true;
+		}
+		return false;
 	}
+
 	bool sendfilerequest(int pack, int file)
 	{
 		if(!contentpacks.inrange(pack) || !contentpacks[pack] || !contentpacks[pack]->files.inrange(file) || !contentpacks[pack]->files[file]) return false;
 		contentpack::file *fi = contentpacks[pack]->files[file];
 		const char *fname = findfile(fi->name, "r");
-		if(!allowedfile(fname)) return false;
-		if(fileexists(fname, "r")) {
-			conoutf("skipped .. %s already exists", fname);
+		
+		string msg;
+        msg[0] = '\0';
+		if(!allowedfile(fname)) formatstring(msg) ("skipped .. %s \f3not allowed filetype", fname);
+		if(fileexists(fname, "r")) formatstring(msg) ("skipped .. %s already exists", fname);
+		if(msg[0]) {
+			conoutf(msg);
 			sendfilerequest(pack, file +1);
 			return false;
 		}
@@ -1950,7 +1972,7 @@ namespace game
 						}
 						conoutf("%s is %d KB big and is registered as %d", text, size, crc);
 					}
-					sendfilerequest(pack, 0); //not in the loop anymore, just the first file, go for the next file afterwards
+					sendfilerequest(pack, 0); //go for the first file (the next file afterwards..)
 				}				
 				break;
 			}
@@ -2020,17 +2042,21 @@ namespace game
 				string  filename;
 				int pack = getint(p); //not explicitly 
 				int file = getint(p); //neccessary, just for requesting the next file afterwards
-
 				getstring(filename, p); 
 				int finished = getint(p); //in %
+
 				if(finished < 0 || !allowedfile(filename)) break;
+				
 				stream *f = openrawfile(filename, "wb");
 				if(!f) { conoutf("could not save file (%s)", filename); break; }
-				if(finished <= 100) { 
+				
+				if(finished <= 100) 
+				{ 
 					conoutf("downloaded %d%% .. received %s", finished, filename);
-					sendfilerequest(pack, file+1); //request next file, todo check names and existens
+					sendfilerequest(pack, file+1); //request next file
 				}
-				else conoutf("received package");
+				else conoutf("\f0Received package (%d files)", file+1);
+
 				ucharbuf b = p.subbuf(p.remaining());
 				f->write(b.buf, b.maxlen);
 				delete f;
