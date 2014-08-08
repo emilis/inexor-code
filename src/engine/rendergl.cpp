@@ -64,6 +64,10 @@ PFNGLGENERATEMIPMAPEXTPROC          glGenerateMipmap_          = NULL;
 // GL_EXT_framebuffer_blit
 PFNGLBLITFRAMEBUFFEREXTPROC         glBlitFramebuffer_         = NULL;
 
+// GL_ARB_point_parameters
+PFNGLPOINTPARAMETERFARBPROC         glPointParameterfARB_      = NULL;
+PFNGLPOINTPARAMETERFVARBPROC        glPointParameterfvARB_     = NULL;
+
 // OpenGL 2.0: GL_ARB_shading_language_100, GL_ARB_shader_objects, GL_ARB_fragment_shader, GL_ARB_vertex_shader
 #ifndef __APPLE__
 PFNGLCREATEPROGRAMPROC            glCreateProgram_            = NULL;
@@ -354,6 +358,13 @@ void gl_checkextensions()
         }
     }
     else conoutf(CON_WARN, "WARNING: No framebuffer object support. (reflective water may be slow)");
+
+    if(hasext(exts, "GL_ARB_point_parameters"))
+    {
+    	glPointParameterfARB_  = (PFNGLPOINTPARAMETERFARBPROC)            getprocaddress("glPointParameterfARB");
+    	glPointParameterfvARB_ = (PFNGLPOINTPARAMETERFVARBPROC)           getprocaddress("glPointParameterfvARB");
+    }
+    else conoutf(CON_WARN, "WARNING: No point sprite support.");
 
     if(hasext(exts, "GL_ARB_occlusion_query"))
     {
@@ -1423,6 +1434,7 @@ void drawglare()
     renderwater();
     rendermaterials();
     renderalphageom();
+//    render_particles();
     renderparticles();
 
     glFogf(GL_FOG_START, oldfogstart);
@@ -2097,6 +2109,7 @@ void gl_drawframe(int w, int h)
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+    render_particles();
     renderparticles(true);
 
     glDisable(GL_FOG);
@@ -2223,7 +2236,10 @@ void drawdamagescreen(int w, int h)
     glEnable(GL_TEXTURE_2D);
 
     static Texture *damagetex = NULL;
-    if(!damagetex) damagetex = textureload("packages/hud/damage.png", 3);
+    if(!damagetex) {
+        defformatstring(damagetex_filename)("%s/damage.png", huddir);
+    	damagetex = textureload(damagetex_filename, 3);
+    }
 
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, damagetex->id);
@@ -2344,6 +2360,7 @@ VARP(showfps, 0, 1, 1);
 VARP(showfpsrange, 0, 0, 1);
 VAR(showeditstats, 0, 0, 1);
 VAR(statrate, 1, 200, 1000);
+VARP(showpps, 0, 1, 1);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
 
@@ -2429,6 +2446,13 @@ void gl_drawhud(int w, int h)
                 if(showfpsrange) draw_textf("fps %d+%d-%d", conw-7*FONTH, conh-FONTH*3/2, curfps[0], curfps[1], curfps[2]);
                 else draw_textf("fps %d", conw-5*FONTH, conh-FONTH*3/2, curfps[0]);
                 roffset += FONTH;
+            }
+            if(showpps)
+            {
+                draw_textf("particles %5d:%2d %5d:%5d", conw-25*FONTH, conh-FONTH*9/2, (int) particle_instances.size(), (int) particle_types.size(), (int) alive_pool.size(), (int) dead_pool.size());
+                draw_textf("emitters [%3d ms] %2d:%2d:%2d", conw-25*FONTH, conh-FONTH*7/2, timer_emitter, (int) particle_emitter_instances.size(), (int) particle_emitter_types.size(), (int) particle_emitter_implementations.size());
+                draw_textf("modifier [%3d ms] %2d:%2d:%2d", conw-25*FONTH, conh-FONTH*5/2, timer_modifier, (int) particle_modifier_instances.size(), (int) particle_modifier_types.size(), (int) particle_modifier_implementations.size());
+                draw_textf("renderer [%3d ms] %2d:%2d:%2d", conw-25*FONTH, conh-FONTH*3/2, timer_renderer, (int) particle_renderer_instances.size(), (int) particle_renderer_types.size(), (int) particle_renderer_implementations.size());
             }
 
             if(wallclock)

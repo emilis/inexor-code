@@ -11,6 +11,7 @@ endif()
 
 set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/crypto
+    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/io
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/stream
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools
@@ -54,11 +55,30 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/glare
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/blob
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/osd
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/particles
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/emitter
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/renderer
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifier
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/particletype
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/massspring
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/velocity
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/randomv
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/randomw
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/gravitypoint
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/blackhole
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/modifiers/damper
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/emitters/point
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/emitters/field
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/emitters/sphere
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/renderers/billboard
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/renderers/cube
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/particles/ptest
 
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ai
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/client       
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/entities
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/fps
+    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/hud
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/monster
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/movable
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/render

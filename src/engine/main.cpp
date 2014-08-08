@@ -6,6 +6,7 @@ extern void cleargamma();
 
 void cleanup()
 {
+	shutdown_particles();
     recorder::stop();
     cleanupserver();
     SDL_ShowCursor(1);
@@ -1146,7 +1147,8 @@ int main(int argc, char **argv)
     logoutf("init: gl");
     gl_checkextensions();
     gl_init(scr_w, scr_h, usedcolorbits, useddepthbits, usedfsaa);
-    notexture = textureload("packages/textures/notexture.png");
+    defformatstring(notexture_filename)("%s/notexture.png", texturesdir);
+    notexture = textureload(notexture_filename);
     if(!notexture) fatal("could not find core textures");
 
     logoutf("init: console");
@@ -1223,6 +1225,8 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
+    init_particles();
+
     for(;;)
     {
         static int frames = 0;
@@ -1255,6 +1259,7 @@ int main(int argc, char **argv)
         // miscellaneous general game effects
         recomputecamera();
         updateparticles();
+        update_particle_system();
         updatesounds();
 
         if(minimized) continue;
