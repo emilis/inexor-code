@@ -30,7 +30,7 @@ namespace game
         intret(f ? f->clientnum : -1);
     });
 
-    void follow(char *arg)
+	void follow(char *arg)
     {
         if(arg[0] ? player1->state==CS_SPECTATOR : following>=0)
         {
@@ -931,9 +931,9 @@ namespace game
     {
         switch(index)
         {
-            case 2: return "data/hit.png";
-            case 1: return "data/teammate.png";
-            default: return "data/crosshair.png";
+            case 2: return "media/interface/crosshair/default_hit.png";
+            case 1: return "media/interface/crosshair/default_teammate.png";
+            default: return "media/interface/crosshair/default_normal.png";
         }
     }
 
@@ -1101,11 +1101,11 @@ namespace game
     void writegamedata(vector<char> &extras) {}
     void readgamedata(vector<char> &extras) {}
 
-    const char *savedconfig() { return "config.cfg"; }
-    const char *restoreconfig() { return "restore.cfg"; }
-    const char *defaultconfig() { return "data/defaults.cfg"; }
-    const char *autoexec() { return "autoexec.cfg"; }
-    const char *savedservers() { return "servers.cfg"; }
+    const char *savedconfig() { return "config/saved.cfg"; }
+    const char *restoreconfig() { return "config/restore.cfg"; }
+    const char *defaultconfig() { return "config/default.cfg"; }
+    const char *autoexec() { return "config/autoexec.cfg"; }
+    const char *savedservers() { return "config/servers.cfg"; }
 
     void loadconfigs()
     {
