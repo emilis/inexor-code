@@ -141,6 +141,21 @@ void restorebackground()
     if(renderedframe) return;
     renderbackground(backgroundcaption[0] ? backgroundcaption : NULL, backgroundmapshot, backgroundmapname[0] ? backgroundmapname : NULL, backgroundmapinfo, true);
 }
+/* bgquad: Background-Quad
+*  Draws a 2D-Quadrangle with the length w and the height h.
+*  It lower left corner is specified by the coordinates x and y.
+*  It is texturated while ty and ty are the coordinates on the image where the lower left corner gets its color from
+*  and tw and th specify the width and height of this texture (or specify how far to go from the starting point on the texture)
+*/
+void bgquad(float x, float y, float w, float h, float tx = 0, float ty = 0, float tw = 1, float th = 1)
+{
+    glBegin(GL_TRIANGLE_STRIP);
+    glTexCoord2f(tx,      ty);      glVertex2f(x,   y);   
+    glTexCoord2f(tx + tw, ty);      glVertex2f(x+w, y);   
+    glTexCoord2f(tx,      ty + th); glVertex2f(x,   y+h); 
+    glTexCoord2f(tx + tw, ty + th); glVertex2f(x+w, y+h); 
+    glEnd();
+}
 
 void renderbackground(const char *caption, Texture *mapshot, const char *mapname, const char *mapinfo, bool restore, bool force)
 {
@@ -190,44 +205,23 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     loopi(restore ? 1 : 3)
     {
         glColor3f(1, 1, 1);
-        settexture("data/background.png", 0);
+        settexture(""media/interface/background.png", 0);
         float bu = w*0.67f/256.0f + backgroundu, bv = h*0.67f/256.0f + backgroundv;
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0,  0);  glVertex2f(0, 0);
-        glTexCoord2f(bu, 0);  glVertex2f(w, 0);
-        glTexCoord2f(0,  bv); glVertex2f(0, h);
-        glTexCoord2f(bu, bv); glVertex2f(w, h);
-        glEnd();
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        bgquad(0, 0, w, h, 0, 0, bu, bv);
+
         glEnable(GL_BLEND);
-        settexture("data/background_detail.png", 0);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        settexture("media/interface/shadow.png", 3);
         float du = w*0.8f/512.0f + detailu, dv = h*0.8f/512.0f + detailv;
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0,  0);  glVertex2f(0, 0);
-        glTexCoord2f(du, 0);  glVertex2f(w, 0);
-        glTexCoord2f(0,  dv); glVertex2f(0, h);
-        glTexCoord2f(du, dv); glVertex2f(w, h);
-        glEnd();
-        settexture("data/background_decal.png", 3);
-        glBegin(GL_QUADS);
-        loopj(numdecals)
-        {
-            float hsz = decals[j].size, hx = clamp(decals[j].x, hsz, w-hsz), hy = clamp(decals[j].y, hsz, h-hsz), side = decals[j].side;
-            glTexCoord2f(side,   0); glVertex2f(hx-hsz, hy-hsz);
-            glTexCoord2f(1-side, 0); glVertex2f(hx+hsz, hy-hsz);
-            glTexCoord2f(1-side, 1); glVertex2f(hx+hsz, hy+hsz);
-            glTexCoord2f(side,   1); glVertex2f(hx-hsz, hy+hsz);
-        }
-        glEnd();
+		bgquad(0, 0, w, h);
+
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
         float lh = 0.5f*min(w, h), lw = lh*2,
               lx = 0.5f*(w - lw), ly = 0.5f*(h*0.5f - lh);
-        settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (screen->w > 1280 || screen->h > 800) ? "data/logo_1024.png" : "data/logo.png", 3);
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(lx,    ly);
-        glTexCoord2f(1, 0); glVertex2f(lx+lw, ly);
-        glTexCoord2f(0, 1); glVertex2f(lx,    ly+lh);
-        glTexCoord2f(1, 1); glVertex2f(lx+lw, ly+lh);
-        glEnd();
+        settexture((maxtexsize ? min(maxtexsize, hwtexsize) : hwtexsize) >= 1024 && (screen->w > 1280 || screen->h > 800) ? "<premul>media/interface/logo_1024.png" : "<premul>media/interface/logo.png", 3);
+        bgquad(lx, ly, lw, lh);
 
         if(caption)
         {
@@ -253,12 +247,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
             if(mapshot && mapshot!=notexture)
             {
                 glBindTexture(GL_TEXTURE_2D, mapshot->id);
-                glBegin(GL_TRIANGLE_STRIP);
-                glTexCoord2f(0, 0); glVertex2f(x,    y);
-                glTexCoord2f(1, 0); glVertex2f(x+sz, y);
-                glTexCoord2f(0, 1); glVertex2f(x,    y+sz);
-                glTexCoord2f(1, 1); glVertex2f(x+sz, y+sz);
-                glEnd();
+                bgquad(x, y, sz, sz);
             }
             else
             {
@@ -272,13 +261,8 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
                 glPopMatrix();
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }        
-            settexture("data/mapshot_frame.png", 3);
-            glBegin(GL_TRIANGLE_STRIP);
-            glTexCoord2f(0, 0); glVertex2f(x,    y);
-            glTexCoord2f(1, 0); glVertex2f(x+sz, y);
-            glTexCoord2f(0, 1); glVertex2f(x,    y+sz);
-            glTexCoord2f(1, 1); glVertex2f(x+sz, y+sz);
-            glEnd();
+            settexture("media/interface/mapshot_frame.png", 3);
+            bgquad(x, y, sz, sz);
             if(mapname)
             {
                 int tw = text_width(mapname);
@@ -331,8 +315,7 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
     interceptkey(SDLK_UNKNOWN); // keep the event queue awake to avoid 'beachball' cursor
     #endif
 
-    extern int sdl_backingstore_bug;
-    if(background || sdl_backingstore_bug > 0) restorebackground();
+    if(background) restorebackground();
 
     int w = screen->w, h = screen->h;
     if(forceaspect) w = int(ceil(h*forceaspect));
@@ -353,52 +336,31 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
 
     float fh = 0.075f*min(w, h), fw = fh*10,
           fx = renderedframe ? w - fw - fh/4 : 0.5f*(w - fw), 
-          fy = renderedframe ? fh/4 : h - fh*1.5f,
-          fu1 = 0/512.0f, fu2 = 511/512.0f,
-          fv1 = 0/64.0f, fv2 = 52/64.0f;
-    settexture("data/loading_frame.png", 3);
-    glBegin(GL_TRIANGLE_STRIP);
-    glTexCoord2f(fu1, fv1); glVertex2f(fx,    fy);
-    glTexCoord2f(fu2, fv1); glVertex2f(fx+fw, fy);
-    glTexCoord2f(fu1, fv2); glVertex2f(fx,    fy+fh);
-    glTexCoord2f(fu2, fv2); glVertex2f(fx+fw, fy+fh);
-    glEnd();
+          fy = renderedframe ? fh/4 : h - fh*1.5f;
+    settexture("media/interface/loading_frame.png", 3);
+    bgquad(fx, fy, fw, fh);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    float bw = fw*(511 - 2*17)/511.0f, bh = fh*20/52.0f,
-          bx = fx + fw*17/511.0f, by = fy + fh*16/52.0f,
-          bv1 = 0/32.0f, bv2 = 20/32.0f,
-          su1 = 0/32.0f, su2 = 7/32.0f, sw = fw*7/511.0f,
-          eu1 = 23/32.0f, eu2 = 30/32.0f, ew = fw*7/511.0f,
+    float bw = fw*(512 - 2*8)/512.0f, bh = fh*20/32.0f,
+          bx = fx + fw*8/512.0f, by = fy + fh*6/32.0f,
+          su1 = 0/32.0f, su2 = 8/32.0f, sw = fw*8/512.0f,
+          eu1 = 24/32.0f, eu2 = 32/32.0f, ew = fw*8/512.0f,
           mw = bw - sw - ew,
-          ex = bx+sw + max(mw*bar, fw*7/511.0f);
+          ex = bx+sw + max(mw*bar, fw*8/512.0f);
     if(bar > 0)
     {
-        settexture("data/loading_bar.png", 3);
-        glBegin(GL_QUADS);
-        glTexCoord2f(su1, bv1); glVertex2f(bx,    by);
-        glTexCoord2f(su2, bv1); glVertex2f(bx+sw, by);
-        glTexCoord2f(su2, bv2); glVertex2f(bx+sw, by+bh);
-        glTexCoord2f(su1, bv2); glVertex2f(bx,    by+bh);
-
-        glTexCoord2f(su2, bv1); glVertex2f(bx+sw, by);
-        glTexCoord2f(eu1, bv1); glVertex2f(ex,    by);
-        glTexCoord2f(eu1, bv2); glVertex2f(ex,    by+bh);
-        glTexCoord2f(su2, bv2); glVertex2f(bx+sw, by+bh);
-
-        glTexCoord2f(eu1, bv1); glVertex2f(ex,    by);
-        glTexCoord2f(eu2, bv1); glVertex2f(ex+ew, by);
-        glTexCoord2f(eu2, bv2); glVertex2f(ex+ew, by+bh);
-        glTexCoord2f(eu1, bv2); glVertex2f(ex,    by+bh);
-        glEnd();
+        settexture("media/interface/loading_bar.png", 3);
+        bgquad(bx, by, sw, bh, su1, 0, su2-su1, 1);
+        bgquad(bx+sw, by, ex-(bx+sw), bh, su2, 0, eu1-su2, 1);
+        bgquad(ex, by, ew, bh, eu1, 0, eu2-eu1, 1);
     }
 
     if(text)
     {
         int tw = text_width(text);
-        float tsz = bh*0.8f/FONTH;
+        float tsz = bh*0.5f/FONTH;
         if(tw*tsz > mw) tsz = mw/tw;
         glPushMatrix();
         glTranslatef(bx+sw, by + (bh - FONTH*tsz)/2, 0);
@@ -413,22 +375,12 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
     {
         glBindTexture(GL_TEXTURE_2D, tex);
         float sz = 0.35f*min(w, h), x = 0.5f*(w-sz), y = 0.5f*min(w, h) - sz/15;
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(x,    y);
-        glTexCoord2f(1, 0); glVertex2f(x+sz, y);
-        glTexCoord2f(0, 1); glVertex2f(x,    y+sz);
-        glTexCoord2f(1, 1); glVertex2f(x+sz, y+sz);
-        glEnd();
+        bgquad(x, y, sz, sz);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        settexture("data/mapshot_frame.png", 3);
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(0, 0); glVertex2f(x,    y);
-        glTexCoord2f(1, 0); glVertex2f(x+sz, y);
-        glTexCoord2f(0, 1); glVertex2f(x,    y+sz);
-        glTexCoord2f(1, 1); glVertex2f(x+sz, y+sz);
-        glEnd();
+        settexture("media/interface/mapshot_frame.png", 3);
+        bgquad(x, y, sz, sz);
         glDisable(GL_BLEND);
     }
 
@@ -692,14 +644,13 @@ void resetgl()
     extern void reloadshaders();
     inbetweenframes = false;
     if(!reloadtexture(*notexture) ||
-       !reloadtexture("data/logo.png") ||
-       !reloadtexture("data/logo_1024.png") || 
-       !reloadtexture("data/background.png") ||
-       !reloadtexture("data/background_detail.png") ||
-       !reloadtexture("data/background_decal.png") ||
-       !reloadtexture("data/mapshot_frame.png") ||
-       !reloadtexture("data/loading_frame.png") ||
-       !reloadtexture("data/loading_bar.png"))
+       !reloadtexture("<premul>media/interface/logo.png") ||
+       !reloadtexture("<premul>media/interface/logo_1024.png") ||
+       !reloadtexture("media/interface/background.png") ||
+       !reloadtexture("media/interface/shadow.png") ||
+       !reloadtexture("media/interface/mapshot_frame.png") ||
+       !reloadtexture("media/interface/loading_frame.png") ||
+       !reloadtexture("media/interface/loading_bar.png"))
         fatal("failed to reload core texture");
     reloadfonts();
     inbetweenframes = true;
