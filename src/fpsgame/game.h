@@ -718,6 +718,7 @@ struct fpsstate
         return gun >= 0 && gun <= NUMGUNS && gun != exclude && ammo[gun] > 0;
     }
 };
+#define MAXTEAMS 2
 
 struct fpsent : dynent, fpsstate
 {

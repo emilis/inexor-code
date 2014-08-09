@@ -433,7 +433,7 @@ struct collectclientmode : clientmode
     void drawbaseblip(fpsent *d, float x, float y, float s, int i)
     {
         base &b = bases[i];
-        settexture(b.team==collectteambase(player1->team) ? "packages/hud/blip_blue.png" : "packages/hud/blip_red.png", 3);
+        setbliptex(b.team);
         drawblip(d, x, y, s, b.o);
     }
 
@@ -463,13 +463,15 @@ struct collectclientmode : clientmode
         if(minimapalpha >= 1) glEnable(GL_BLEND);
         glColor3f(1, 1, 1);
         float margin = 0.04f, roffset = s*margin, rsize = s + 2*roffset;
-        settexture("packages/hud/radar.png", 3);
+
+        setradartex();
         drawradar(x - roffset, y - roffset, rsize);
         #if 0
-        settexture("packages/hud/compass.png", 3);
+        settexture("media/interface/radar/compass.png", 3);
         glPushMatrix();
         glTranslatef(x - roffset + 0.5f*rsize, y - roffset + 0.5f*rsize, 0);
         glRotatef(camera1->yaw + 180, 0, 0, -1);
+
         drawradar(-0.5f*rsize, -0.5f*rsize, rsize);
         glPopMatrix();
         #endif
@@ -479,13 +481,19 @@ struct collectclientmode : clientmode
             if(!collectbaseteam(b.team)) continue;
             drawbaseblip(d, x, y, s, i);
         }
-        int team = collectteambase(d->team);
-        settexture(team == collectteambase(player1->team) ? "packages/hud/blip_red_skull.png" : "packages/hud/blip_blue_skull.png", 3);
+        int lastteam = -1;
         loopv(players)
         {
             fpsent *o = players[i];
-            if(o != d && o->state == CS_ALIVE && o->tokens > 0 && collectteambase(o->team) != team)
+            if(o != d && o->state == CS_ALIVE && o->tokens > 0 && o->team != d->team)
+            {
+                if(lastteam != o->team)
+                {
+                    setbliptex(o->team, "_skull");
+                    lastteam = o->team;
+                }
                 drawblip(d, x, y, s, o->o, 0.07f);
+            }
         }
         drawteammates(d, x, y, s);
         if(d->state == CS_DEAD)

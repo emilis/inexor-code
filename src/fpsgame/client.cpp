@@ -33,6 +33,11 @@ namespace game
         glEnd();
     }
 
+    void setradartex()
+    {
+        settexture("media/interface/radar/radar.png", 3);
+    }
+
     void drawradar(float x, float y, float s)
     {
         glBegin(GL_TRIANGLE_STRIP);
@@ -61,6 +66,12 @@ namespace game
         glTexCoord2f(0.0f, 1.0f); glVertex2f(bx - bs*v.y, by + bs*v.x);
     }
 
+    void setbliptex(int team, const char *type = "")
+    {
+        defformatstring(blipname)("media/interface/radar/blip%s%s.png", teamblipcolor[validteam(team) ? team : 0], type);
+        settexture(blipname, 3);
+    }
+
     void drawteammates(fpsent *d, float x, float y, float s)
     {
         if(!radarteammates) return;
@@ -73,8 +84,9 @@ namespace game
             {
                 if(!alive++) 
                 {
-                    settexture(isteam(d->team, player1->team) ? "packages/hud/blip_blue_alive.png" : "packages/hud/blip_red_alive.png");
+                    setbliptex(d->team, "_alive");
                     glBegin(GL_QUADS);
+                    
                 }
                 drawteammate(d, x, y, s, o, scale);
             }
@@ -87,7 +99,7 @@ namespace game
             {
                 if(!dead++) 
                 {
-                    settexture(isteam(d->team, player1->team) ? "packages/hud/blip_blue_dead.png" : "packages/hud/blip_red_dead.png");
+                    setbliptex(d->team, "_dead");
                     glBegin(GL_QUADS);
                 }
                 drawteammate(d, x, y, s, o, scale);
@@ -1504,7 +1516,7 @@ namespace game
             }
 
             case N_TEAMINFO:
-                for(;;)
+                loopi(MAXTEAMS)
                 {
                     getstring(text, p);
                     if(p.overread() || !text[0]) break;
