@@ -16,7 +16,7 @@ static bool canemit = false, regenemitters = false, canstep = false;
 static bool canemitparticles()
 {
     if(reflecting || refracting) return false;
-    return canemit || emitoffset;
+    return (canemit || emitoffset) && !minimized;
 }
 
 VARP(showparticles, 0, 1, 1);
