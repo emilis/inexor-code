@@ -1,5 +1,55 @@
+struct vec;
 struct vec4;
-struct vec2;
+
+struct vec2
+{
+    union
+    {
+        struct { float x, y; };
+        float v[2];
+    };
+
+    vec2() {}
+    vec2(float x, float y) : x(x), y(y) {}
+    explicit vec2(const vec &v);
+    explicit vec2(const vec4 &v);
+
+    float &operator[](int i)       { return v[i]; }
+    float  operator[](int i) const { return v[i]; }
+
+    bool operator==(const vec2 &o) const { return x == o.x && y == o.y; }
+    bool operator!=(const vec2 &o) const { return x != o.x || y != o.y; }
+
+    bool iszero() const { return x==0 && y==0; }
+    float dot(const vec2 &o) const  { return x*o.x + y*o.y; }
+    float squaredlen() const { return dot(*this); }
+    float magnitude() const  { return sqrtf(squaredlen()); }
+    vec2 &normalize() { mul(1/magnitude()); return *this; }
+    float cross(const vec2 &o) const { return x*o.y - y*o.x; }
+
+    vec2 &mul(float f)       { x *= f; y *= f; return *this; }
+    vec2 &mul(const vec2 &o) { x *= o.x; y *= o.y; return *this; }
+    vec2 &div(float f)       { x /= f; y /= f; return *this; }
+    vec2 &div(const vec2 &o) { x /= o.x; y /= o.y; return *this; }
+    vec2 &add(float f)       { x += f; y += f; return *this; }
+    vec2 &add(const vec2 &o) { x += o.x; y += o.y; return *this; }
+    vec2 &sub(float f)       { x -= f; y -= f; return *this; }
+    vec2 &sub(const vec2 &o) { x -= o.x; y -= o.y; return *this; }
+    vec2 &neg()              { x = -x; y = -y; return *this; }
+};
+
+static inline bool htcmp(const vec2 &x, const vec2 &y)
+{
+    return x == y;
+}
+
+static inline uint hthash(const vec2 &k)
+{
+    union { uint i; float f; } x, y;
+    x.f = k.x; y.f = k.y;
+    uint v = x.i^y.i;
+    return v + (v>>12);
+}
 
 struct vec
 {
@@ -15,9 +65,9 @@ struct vec
     explicit vec(float a) : x(a), y(a), z(a) {} 
     vec(float a, float b, float c) : x(a), y(b), z(c) {}
     explicit vec(int v[3]) : x(v[0]), y(v[1]), z(v[2]) {}
-    explicit vec(float *v) : x(v[0]), y(v[1]), z(v[2]) {}
+    explicit vec(const float *v) : x(v[0]), y(v[1]), z(v[2]) {}
+    explicit vec(const vec2 &v, float z = 0) : x(v.x), y(v.y), z(z) {}
     explicit vec(const vec4 &v);
-    explicit vec(const vec2 &v, float z = 0);
 
     vec(float yaw, float pitch) : x(-sinf(yaw)*cosf(pitch)), y(cosf(yaw)*cosf(pitch)), z(sinf(pitch)) {}
 
@@ -97,11 +147,9 @@ struct vec
     vec &rotate_around_x(float angle) { return rotate_around_x(cosf(angle), sinf(angle)); }
     vec &rotate_around_y(float angle) { return rotate_around_y(cosf(angle), sinf(angle)); }
 
-    vec &rotate(float angle, const vec &d)
-    {
-        float c = cosf(angle), s = sinf(angle);
-        return rotate(c, s, d);
-    }
+    vec &rotate_around_z(const vec2 &sc) { return rotate_around_z(sc.x, sc.y); }
+    vec &rotate_around_x(const vec2 &sc) { return rotate_around_x(sc.x, sc.y); }
+    vec &rotate_around_y(const vec2 &sc) { return rotate_around_y(sc.x, sc.y); }
 
     vec &rotate(float c, float s, const vec &d)
     {
@@ -110,6 +158,8 @@ struct vec
                     x*(d.x*d.z*(1-c)-d.y*s) + y*(d.y*d.z*(1-c)+d.x*s) + z*(d.z*d.z*(1-c)+c));
         return *this;
     }
+    vec &rotate(float angle, const vec &d) { return rotate(cosf(angle), sinf(angle), d); }
+    vec &rotate(const vec2 &sc, const vec &d) { return rotate(sc.x, sc.y, d); }
 
     void orthogonal(const vec &d)
     {
@@ -152,7 +202,21 @@ struct vec
     {
         return dist_to_bb(o, T(o).add(size));
     }
+
+    template<class T> float project_bb(const T &min, const T &max) const
+    {
+        return x*(x < 0 ? max.x : min.x) + y*(y < 0 ? max.y : min.y) + z*(z < 0 ? max.z : min.z);
+    }
+
+    static vec hexcolor(int color)
+    {
+        return vec(((color>>16)&0xFF)*(1.0f/255.0f), ((color>>8)&0xFF)*(1.0f/255.0f), (color&0xFF)*(1.0f/255.0f));
+    }
+
+    int tohexcolor() const { return (int(::clamp(r, 0.0f, 1.0f)*255)<<16)|(int(::clamp(g, 0.0f, 1.0f)*255)<<8)|int(::clamp(b, 0.0f, 1.0f)*255); }
 };
+
+inline vec2::vec2(const vec &v) : x(v.x), y(v.y) {}
 
 static inline bool htcmp(const vec &x, const vec &y)
 {
@@ -172,15 +236,20 @@ struct vec4
     union
     {
         struct { float x, y, z, w; };
+        struct { float r, g, b, a; };
         float v[4];
     };
 
     vec4() {}
     explicit vec4(const vec &p, float w = 0) : x(p.x), y(p.y), z(p.z), w(w) {}
     vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    explicit vec4(const float *v) : x(v[0]), y(v[1]), z(v[2]), w(v[3]) {}
 
     float &operator[](int i)       { return v[i]; }
     float  operator[](int i) const { return v[i]; }
+
+    bool operator==(const vec4 &o) const { return x == o.x && y == o.y && z == o.z && w == o.w; }
+    bool operator!=(const vec4 &o) const { return x != o.x || y != o.y || z != o.z || w != o.w; }
 
     float dot3(const vec4 &o) const { return x*o.x + y*o.y + z*o.z; }
     float dot3(const vec &o) const { return x*o.x + y*o.y + z*o.z; }
@@ -232,59 +301,8 @@ struct vec4
     vec4 &rotate_around_y(float angle) { return rotate_around_y(cosf(angle), sinf(angle)); }
 };
 
+inline vec2::vec2(const vec4 &v) : x(v.x), y(v.y) {}
 inline vec::vec(const vec4 &v) : x(v.x), y(v.y), z(v.z) {}
-
-struct vec2
-{
-    union
-    {
-        struct { float x, y; };
-        float v[2];
-    };
-
-    vec2() {}
-    vec2(float x, float y) : x(x), y(y) {}
-    explicit vec2(const vec &v) : x(v.x), y(v.y) {}
-    explicit vec2(const vec4 &v) : x(v.x), y(v.y) {}
-
-    float &operator[](int i)       { return v[i]; }
-    float  operator[](int i) const { return v[i]; }
-
-    bool operator==(const vec2 &o) const { return x == o.x && y == o.y; }
-    bool operator!=(const vec2 &o) const { return x != o.x || y != o.y; }
-
-    bool iszero() const { return x==0 && y==0; }
-    float dot(const vec2 &o) const  { return x*o.x + y*o.y; }
-    float squaredlen() const { return dot(*this); }
-    float magnitude() const  { return sqrtf(squaredlen()); }
-    vec2 &normalize() { mul(1/magnitude()); return *this; }
-    float cross(const vec2 &o) const { return x*o.y - y*o.x; }
-
-    vec2 &mul(float f)       { x *= f; y *= f; return *this; }
-    vec2 &mul(const vec2 &o) { x *= o.x; y *= o.y; return *this; }
-    vec2 &div(float f)       { x /= f; y /= f; return *this; }
-    vec2 &div(const vec2 &o) { x /= o.x; y /= o.y; return *this; }
-    vec2 &add(float f)       { x += f; y += f; return *this; }
-    vec2 &add(const vec2 &o) { x += o.x; y += o.y; return *this; }
-    vec2 &sub(float f)       { x -= f; y -= f; return *this; }
-    vec2 &sub(const vec2 &o) { x -= o.x; y -= o.y; return *this; }
-    vec2 &neg()              { x = -x; y = -y; return *this; }
-};
-
-inline vec::vec(const vec2 &v, float z) : x(v.x), y(v.y), z(z) {}
-
-static inline bool htcmp(const vec2 &x, const vec2 &y)
-{
-    return x == y;
-}
-
-static inline uint hthash(const vec2 &k)
-{
-    union { uint i; float f; } x, y;
-    x.f = k.x; y.f = k.y;
-    uint v = x.i^y.i;
-    return v + (v>>12);
-}
 
 struct matrix3x3;
 struct matrix3x4;

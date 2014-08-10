@@ -205,7 +205,7 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
     loopi(restore ? 1 : 3)
     {
         glColor3f(1, 1, 1);
-        settexture(""media/interface/background.png", 0);
+        settexture("media/interface/background.png", 0);
         float bu = w*0.67f/256.0f + backgroundu, bv = h*0.67f/256.0f + backgroundv;
         bgquad(0, 0, w, h, 0, 0, bu, bv);
 
@@ -213,7 +213,6 @@ void renderbackground(const char *caption, Texture *mapshot, const char *mapname
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         settexture("media/interface/shadow.png", 3);
-        float du = w*0.8f/512.0f + detailu, dv = h*0.8f/512.0f + detailv;
 		bgquad(0, 0, w, h);
 
         glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);

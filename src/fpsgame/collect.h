@@ -433,7 +433,7 @@ struct collectclientmode : clientmode
     void drawbaseblip(fpsent *d, float x, float y, float s, int i)
     {
         base &b = bases[i];
-        setbliptex(b.team);
+        setbliptex(b.team==collectteambase(player1->team) ? TEAM_OWN : TEAM_OPPONENT);
         drawblip(d, x, y, s, b.o);
     }
 
@@ -466,32 +466,20 @@ struct collectclientmode : clientmode
 
         setradartex();
         drawradar(x - roffset, y - roffset, rsize);
-        #if 0
-        settexture("media/interface/radar/compass.png", 3);
-        glPushMatrix();
-        glTranslatef(x - roffset + 0.5f*rsize, y - roffset + 0.5f*rsize, 0);
-        glRotatef(camera1->yaw + 180, 0, 0, -1);
 
-        drawradar(-0.5f*rsize, -0.5f*rsize, rsize);
-        glPopMatrix();
-        #endif
         loopv(bases)
         {
             base &b = bases[i];
             if(!collectbaseteam(b.team)) continue;
             drawbaseblip(d, x, y, s, i);
         }
-        int lastteam = -1;
+
         loopv(players)
         {
             fpsent *o = players[i];
-            if(o != d && o->state == CS_ALIVE && o->tokens > 0 && o->team != d->team)
+            if(o != d && o->state == CS_ALIVE && o->tokens > 0 && !isteam(o->team, d->team))
             {
-                if(lastteam != o->team)
-                {
-                    setbliptex(o->team, "_skull");
-                    lastteam = o->team;
-                }
+                setbliptex(TEAM_OPPONENT, "_skull");
                 drawblip(d, x, y, s, o->o, 0.07f);
             }
         }

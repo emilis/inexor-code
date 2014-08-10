@@ -482,8 +482,11 @@ struct ctfclientmode : clientmode
     void drawblip(fpsent *d, float x, float y, float s, int i, bool flagblip)
     {
         flag &f = flags[i];
+		int blip = TEAM_NONE;
+		if(m_hold && f.owner && (flagblip || lastmillis%1000 >= 500) ) blip = ctfteamflag(f.owner->team) == ctfteamflag(player1->team) ? TEAM_OWN : TEAM_OPPONENT;
+		else if(!m_hold) blip = f.team == ctfteamflag(player1->team) ? TEAM_OWN : TEAM_OPPONENT;
+        setbliptex( blip, flagblip ? "_flag" : "");
 
-        setbliptex(f.team, flagblip ? "_flag" : "");
         drawblip(d, x, y, s, flagblip ? (f.owner ? f.owner->o : (f.droptime ? f.droploc : f.spawnloc)) : f.spawnloc, flagblip);
     }
 

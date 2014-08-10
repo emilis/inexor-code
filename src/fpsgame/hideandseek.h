@@ -64,11 +64,14 @@ struct hideandseekclientmode : clientmode
             drawblip(d, x, y, s, m->o, 1.0f);
         }
         // show other players on minimap
-        loopv(players) {
-            fpsent *p = players[i];
-            if(p == player1 || p->state!=CS_ALIVE || ishider(p)) continue;
-            settexture("packages/hud/blip_red.png", 3);
-            drawblip(d, x, y, s, p->o, 2.0f);
+		loopv(players)
+        {
+            fpsent *o = players[i];
+            if(o != d && o->state == CS_ALIVE && !ishider(o))
+            {
+				setbliptex(TEAM_OPPONENT);
+                drawblip(d, x, y, s, o->o, 2.0f);
+            }
         }
     }
 

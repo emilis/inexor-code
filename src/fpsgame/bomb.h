@@ -114,11 +114,12 @@ struct bombclientmode : clientmode
         // show other players on minimap
         loopv(players)
         {
-            fpsent *p = players[i];
-            if(p == player1 || p->state!=CS_ALIVE) continue;
-            if(!m_teammode || strcmp(p->team, player1->team) != 0) settexture("packages/hud/blip_red.png", 3);
-            else settexture("packages/hud/blip_blue.png", 3);
-            drawblip(d, x, y, s, p->o, 2.0f);
+            fpsent *o = players[i];
+            if(o != d && o->state == CS_ALIVE)
+            {
+				setbliptex(!m_teammode || !isteam(o->team, player1->team) ? TEAM_OPPONENT : TEAM_OWN);
+                drawblip(d, x, y, s, o->o, 2.0f);
+            }
         }
 
         // show fired bombs on minimap

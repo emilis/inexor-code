@@ -68,7 +68,7 @@ namespace game
 
     void setbliptex(int team, const char *type = "")
     {
-        defformatstring(blipname)("media/interface/radar/blip%s%s.png", teamblipcolor[validteam(team) ? team : 0], type);
+        defformatstring(blipname)("media/interface/radar/blip%s%s.png", teamblipcolor[team], type);
         settexture(blipname, 3);
     }
 
@@ -84,7 +84,7 @@ namespace game
             {
                 if(!alive++) 
                 {
-                    setbliptex(d->team, "_alive");
+                    setbliptex(TEAM_OWN, "_alive");
                     glBegin(GL_QUADS);
                     
                 }
@@ -99,7 +99,7 @@ namespace game
             {
                 if(!dead++) 
                 {
-                    setbliptex(d->team, "_dead");
+                    setbliptex(TEAM_OWN, "_dead");
                     glBegin(GL_QUADS);
                 }
                 drawteammate(d, x, y, s, o, scale);
