@@ -1172,10 +1172,10 @@ namespace server
 			uint crc;  
 			file(const char *n) : filesize(0), crc(NULL) {
 				copystring(name, n);
-				stream *f = openfile(name, "r");
+				stream *f = openfile(name, "rb");
 				if(!f) return;
-				
-				filesize =  ((int)f->size())/1024; 
+				filesize =  ((int)f->size())/1024;
+				crc = f->getcrc();
 				delete f;
 			}
 		};
@@ -1244,7 +1244,7 @@ namespace server
 			sendstring(f->name, p); 
 			putint(p, f->filesize);
 			putint(p, f->crc);
-			conoutf("sent: %s (%d KB) : %u", f->name, f->filesize, f->crc);
+			conoutf("sent: %s (%d KB) : %X", f->name, f->filesize, f->crc);
 		}
 		
         sendpacket(cn, 1, p.finalize());
@@ -1272,7 +1272,7 @@ namespace server
 		if(!s) { 
 			formatstring(msg) ("corrupted pack: %s (%d). File %s (%d) not found on the server", cp->name, pack, f->name, file); 
 			sendf(ci->clientnum, 1, "ris", N_SERVMSG, msg);
-			sendf(ci->clientnum, 2, "riiisi", N_SENDFILE, pack, file, f->name, -1);
+			sendf(ci->clientnum, 2, "riiisi", N_SENDFILE, pack, file, f->name, -1); //skip message for the queue
 			return; 
 		}
 		int cursize = 0;
