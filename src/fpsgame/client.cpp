@@ -878,11 +878,12 @@ namespace game
 	};
 	vector<contentpack *> contentpacks;
 
-	SVARP(allowedfileext, ".cfg .jpg .ogz .png");
+	SVARP(allowedfileext, ".cfg .jpg .ogz .png .tex");
+	VARP(allowfilereplacement, 0, 1, 1); //whether a downloadable modified file will be downloaded or skipped	
 
 	bool hasextension(const char *name, const char *extensions)
 	{
-		if(!name) return false; //todo ?
+		if(!name || !extensions) return false;
 		vector<char *> exts;
 		char *pos = strtok(newstring(extensions), "\n\t ");;
 		while(pos)
@@ -899,6 +900,10 @@ namespace game
 		}
 		return false;
 	}
+
+	/**
+	* returns the crc-checksum of the file "name" or 0 if file not found
+	**/
 	uint getfilecrc(const char *name)
 	{
 		stream *f = openfile(name, "rb");
@@ -907,30 +912,39 @@ namespace game
 		delete f;
 		return crc;
 	}
-	VARP(allowfilereplacement, 0, 1, 1); //whether a downloadable modified file will be downloaded or skipped
 
-	bool firewall(const char *name)
+	bool passedfirewall(const char *name, uint orgcrc, const char *msgprefix, int msgtype)
 	{
-		return hasextension(name, allowedfileext);
+		string msg;
+        msg[0] = '\0';
+		if(!hasextension(name, allowedfileext)) formatstring(msg) ("%s %s \f3not allowed filetype", msgprefix, name);
+		if(fileexists(name, "r"))  {
+			if(getfilecrc(name) == orgcrc)	formatstring(msg) ("%s %s already exists", msgprefix, name);
+			else if(!allowfilereplacement) formatstring(msg) ("%s %s already exists in another version", msgprefix, name); 
+		}
+		if(msg[0]) 
+		{ 
+			conoutf(msgtype, msg);
+			return false;
+		}
+		return true;
+	}
+
+	contentpack::file *getpackfile(int pack, int file)
+	{
+		if(!contentpacks.inrange(pack) || !contentpacks[pack] || !contentpacks[pack]->files.inrange(file) || !contentpacks[pack]->files[file]) return NULL;
+		return contentpacks[pack]->files[file];
 	}
 
 	bool sendfilerequest(int pack, int file)
 	{
-		if(!contentpacks.inrange(pack) || !contentpacks[pack] || !contentpacks[pack]->files.inrange(file) || !contentpacks[pack]->files[file]) return false;
-		contentpack::file *fi = contentpacks[pack]->files[file];
+		contentpack::file *fi = getpackfile(pack, file);
+		if(!fi) return false; //last file will be false
 		const char *fname = findfile(fi->name, "r");
 		
-		string msg;
-        msg[0] = '\0';
-		if(!hasextension(fname, allowedfileext)) formatstring(msg) ("skipped .. %s \f3not allowed filetype", fname);
-		if(fileexists(fname, "r"))  {
-			if(getfilecrc(fname) == fi->crc)	formatstring(msg) ("skipped .. %s already exists", fname);
-			else if(!allowfilereplacement) formatstring(msg) ("skipped .. %s already exists in another version", fname); 
-		}
-		if(msg[0]) {
-			conoutf(msg);
-			sendfilerequest(pack, file +1);
-			return false;
+		if(!passedfirewall(fname, fi->crc, "skipped .. ", CON_WARN))
+		{
+			return sendfilerequest(pack, file +1); //go for the next file
 		}
         else addmsg(N_GETFILE, "rii", pack, file);
 		return true;
@@ -1989,7 +2003,7 @@ namespace game
 						}
 						conoutf("%s is %d KB big and is registered as %d", text, size, crc);
 					}
-					sendfilerequest(pack, 0); //go for the first file (the next file afterwards..)
+					if(!sendfilerequest(pack, 0)) conoutf(CON_ERROR, "%s was not downloaded", packname); //go for the first file (the next file afterwards..)
 				}				
 				break;
 			}
@@ -2061,8 +2075,8 @@ namespace game
 				int file = getint(p); //neccessary, just for requesting the next file afterwards
 				getstring(filename, p); 
 				int finished = getint(p); //in %
-
-				if(finished < 0 || !firewall(filename)) break;
+				contentpack::file *fi = getpackfile(pack, file);
+				if(finished < 0 || !passedfirewall(filename, fi->crc, "blocked .. ", CON_ERROR) || strcmp(fi->name, filename)) break;
 				
 				stream *f = openrawfile(filename, "wb");
 				if(!f) { conoutf(CON_ERROR, "could not save file (%s)", filename); break; }
@@ -2073,7 +2087,8 @@ namespace game
 				if(finished <= 100) 
 				{ 
 					conoutf("downloaded %d%% .. received %s", finished, filename);
-					sendfilerequest(pack, file+1); //request next file
+					if(!sendfilerequest(pack, file+1)) //request next file
+						conoutf("\f0Received package (%d files)", file+1);
 				}
 				else conoutf("\f0Received package (%d files)", file+1);
 
