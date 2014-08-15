@@ -913,14 +913,14 @@ namespace game
 		return crc;
 	}
 
-	bool passedfirewall(const char *name, uint orgcrc, const char *msgprefix, int msgtype)
+	bool passedfirewall(const char *name, int orgcrc, const char *msgprefix, int msgtype)
 	{
 		string msg;
         msg[0] = '\0';
 		if(!hasextension(name, allowedfileext)) formatstring(msg) ("%s %s \f3not allowed filetype", msgprefix, name);
 		if(fileexists(name, "r"))  {
-			if(getfilecrc(name) == orgcrc)	formatstring(msg) ("%s %s already exists", msgprefix, name);
-			else if(!allowfilereplacement) formatstring(msg) ("%s %s already exists in another version", msgprefix, name); 
+			if((int)getfilecrc(name) == orgcrc)	formatstring(msg) ("%s %s \f3already exists", msgprefix, name);
+			else if(!allowfilereplacement) formatstring(msg) ("%s %s \f3already exists in another version", msgprefix, name); 
 		}
 		if(msg[0]) 
 		{ 
@@ -929,11 +929,20 @@ namespace game
 		}
 		return true;
 	}
-
+	contentpack *getcontentpack(int pack)
+	{
+		if(!contentpacks.inrange(pack) || !contentpacks[pack]) return NULL;
+		return contentpacks[pack];
+	}
+	contentpack::file *getpackfile(contentpack *p, int file)
+	{
+		if(!p || !p->files.inrange(file) || !p->files[file]) return NULL;
+		return p->files[file];
+	}
 	contentpack::file *getpackfile(int pack, int file)
 	{
-		if(!contentpacks.inrange(pack) || !contentpacks[pack] || !contentpacks[pack]->files.inrange(file) || !contentpacks[pack]->files[file]) return NULL;
-		return contentpacks[pack]->files[file];
+		contentpack *p = getcontentpack(pack);
+		return getpackfile(p, file);
 	}
 
 	bool sendfilerequest(int pack, int file)
@@ -942,7 +951,7 @@ namespace game
 		if(!fi) return false; //last file will be false
 		const char *fname = findfile(fi->name, "r");
 		
-		if(!passedfirewall(fname, fi->crc, "skipped .. ", CON_WARN))
+		if(!passedfirewall(newstring(fname), fi->crc, "skipped .. ", CON_WARN))
 		{
 			return sendfilerequest(pack, file +1); //go for the next file
 		}
@@ -1987,23 +1996,25 @@ namespace game
 				int files = getint(p);
 				
 				if(files > 0) { 
+					contentpack *cp = getcontentpack(pack);
+					if(cp)  cp->files.shrink(0); //todo: safetycheck
 					loopi(files) { 
 						
 						getstring(text, p);
 						int size = getint(p);
 						int crc = getint(p);
 						if(p.overread()) break;
-						if(contentpacks.inrange(pack) && contentpacks[pack]) {
-							contentpack *cp = contentpacks[pack];
+						
+						if(cp) {
 							cp->size = totalsize;
 							contentpack::file *file = cp->files.add(new contentpack::file);
 							copystring(file->name, text);
 							file->filesize = size;
 							file->crc = crc;
 						}
-						conoutf("%s is %d KB big and is registered as %d", text, size, crc);
+						//conoutf("N_PACKFILES: %s is queued. %d KB big and crc %d", text, size, crc);
 					}
-					if(!sendfilerequest(pack, 0)) conoutf(CON_ERROR, "%s was not downloaded", packname); //go for the first file (the next file afterwards..)
+					if(!sendfilerequest(pack, 0)) conoutf(CON_ERROR, "\f3%s was not downloaded", packname); //go for the first file (the next file afterwards..)
 				}				
 				break;
 			}
@@ -2075,7 +2086,8 @@ namespace game
 				int file = getint(p); //neccessary, just for requesting the next file afterwards
 				getstring(filename, p); 
 				int finished = getint(p); //in %
-				contentpack::file *fi = getpackfile(pack, file);
+				contentpack *cp = getcontentpack(pack);
+				contentpack::file *fi = getpackfile(cp, file);
 				if(finished < 0 || !passedfirewall(filename, fi->crc, "blocked .. ", CON_ERROR) || strcmp(fi->name, filename)) break;
 				
 				stream *f = openrawfile(filename, "wb");
@@ -2086,11 +2098,11 @@ namespace game
 				
 				if(finished <= 100) 
 				{ 
-					conoutf("downloaded %d%% .. received %s", finished, filename);
+					conoutf("%d%% .. received %s", finished, filename);
 					if(!sendfilerequest(pack, file+1)) //request next file
-						conoutf("\f0Received package (%d files)", file+1);
+						conoutf("\f0Received package %s (%d files)", cp->name, file+1);
 				}
-				else conoutf("\f0Received package (%d files)", file+1);
+				else conoutf("\f0Received package %s (%d files)", cp->name, file+1);
 
 				break;
 			}
