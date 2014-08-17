@@ -26,6 +26,21 @@ typedef unsigned long long int ullong;
 #define RESTRICT
 #endif
 
+inline void *operator new(size_t size)
+{
+    void *p = malloc(size);
+    if(!p) abort();
+    return p;
+}
+inline void *operator new[](size_t size)
+{
+    void *p = malloc(size);
+    if(!p) abort();
+    return p;
+}
+inline void operator delete(void *p) { if(p) free(p); }
+inline void operator delete[](void *p) { if(p) free(p); }
+
 inline void *operator new(size_t, void *p) { return p; }
 inline void *operator new[](size_t, void *p) { return p; }
 inline void operator delete(void *, void *) {}
@@ -72,7 +87,11 @@ static inline T clamp(T a, U b, U c)
 #define loopj(m) loop(j,m)
 #define loopk(m) loop(k,m)
 #define loopl(m) loop(l,m)
-#define loopirev(v) for(int i = v-1; i>=0; i--)
+#define looprev(v,m) for(int v = int(m)-1; v>=0; v--)
+#define loopirev(m) looprev(i,m)
+#define loopjrev(m) looprev(j,m)
+#define loopkrev(m) looprev(k,m)
+#define looplrev(m) looprev(l,m)
 
 #define DELETEP(p) if(p) { delete   p; p = 0; }
 #define DELETEA(p) if(p) { delete[] p; p = 0; }
@@ -123,6 +142,14 @@ typedef char string[MAXSTRLEN];
 inline void vformatstring(char *d, const char *fmt, va_list v, int len = MAXSTRLEN) { _vsnprintf(d, len, fmt, v); d[len-1] = 0; }
 inline char *copystring(char *d, const char *s, size_t len = MAXSTRLEN) { strncpy(d, s, len); d[len-1] = 0; return d; }
 inline char *concatstring(char *d, const char *s, size_t len = MAXSTRLEN) { size_t used = strlen(d); return used < len ? copystring(d+used, s, len-used) : d; }
+inline char *prependstring(char *d, const char *s, size_t len = MAXSTRLEN)
+{
+    size_t slen = min(strlen(s), len);
+    memmove(&d[slen], s, min(len - slen, strlen(d) + 1));
+    memcpy(d, s, slen);
+    d[len-1] = 0;
+    return d;
+}
 
 struct stringformatter
 {
@@ -392,6 +419,34 @@ static inline bool htcmp(const char *x, const char *y)
     return !strcmp(x, y);
 }
 
+struct stringslice
+{
+    const char *str;
+    int len;
+    stringslice() {}
+    stringslice(const char *str, int len) : str(str), len(len) {}
+    stringslice(const char *str, const char *end) : str(str), len(int(end-str)) {}
+
+    const char *end() const { return &str[len]; }
+};
+
+inline const char *stringptr(const char *s) { return s; }
+inline const char *stringptr(const stringslice &s) { return s.str; }
+inline int stringlen(const char *s) { return int(strlen(s)); }
+inline int stringlen(const stringslice &s) { return s.len; }
+
+static inline uint hthash(const stringslice &s)
+{
+    uint h = 5381;
+    loopi(s.len) h = ((h<<5)+h)^s.str[i];
+    return h;
+}
+
+static inline bool htcmp(const stringslice &x, const char *y)
+{
+    return x.len == (int)strlen(y) && !memcmp(x.str, y, x.len);
+}
+
 static inline uint hthash(int key)
 {
     return key;
@@ -530,7 +585,7 @@ template <class T> struct vector
         uchar *newbuf = new uchar[alen*sizeof(T)];
         if(olen > 0)
         {
-            memcpy(newbuf, (void *)buf, olen*sizeof(T));
+            if(ulen > 0) memcpy(newbuf, (void *)buf, ulen*sizeof(T));
             delete[] (uchar *)buf;
         }
         buf = (T *)newbuf;
@@ -719,7 +774,7 @@ template<class T> struct hashset
         chunks = NULL;
         unused = NULL;
         chains = new chain *[size];
-        loopi(size) chains[i] = NULL;
+        memset(chains, 0, size*sizeof(chain *));
     }
 
     ~hashset()
@@ -817,7 +872,7 @@ template<class T> struct hashset
     void clear()
     {
         if(!numelems) return;
-        loopi(size) chains[i] = NULL;
+        memset(chains, 0, size*sizeof(chain *));
         numelems = 0;
         unused = NULL;
         deletechunks();
@@ -864,27 +919,32 @@ template<class K, class T> struct hashtable : hashset<hashtableentry<K, T> >
         return c->elem;
     }
 
-    T *access(const K &key)
+    template<class U>
+    T *access(const U &key)
     {
         HTFIND(key, &c->elem.data, NULL);
     }
 
-    T &access(const K &key, const T &data)
+    template<class U>
+    T &access(const U &key, const T &data)
     {
         HTFIND(key, c->elem.data, insert(key, h).data = data);
     }
 
-    T &operator[](const K &key)
+    template<class U>
+    T &operator[](const U &key)
     {
         HTFIND(key, c->elem.data, insert(key, h).data);
     }
 
-    T &find(const K &key, T &notfound)
+    template<class U>
+    T &find(const U &key, T &notfound)
     {
         HTFIND(key, c->elem.data, notfound);
     }
 
-    const T &find(const K &key, const T &notfound)
+    template<class U>
+    const T &find(const U &key, const T &notfound)
     {
         HTFIND(key, c->elem.data, notfound);
     }   
@@ -938,6 +998,46 @@ struct unionfind
     }
 };
 
+template <class T, int SIZE> struct ringbuf
+{
+    int index, len;
+    T data[SIZE];
+
+    ringbuf() { clear(); }
+
+    void clear()
+    {
+        index = len = 0;
+    }
+
+    bool empty() const { return !len; }
+
+    const int length() const { return len; }
+
+    T &add()
+    {
+        T &t = data[index];
+        index++;
+        if(index >= SIZE) index -= SIZE;
+        if(len < SIZE) len++;
+        return t;
+    }
+
+    T &add(const T &e) { return add() = e; }
+
+    T &operator[](int i)
+    {
+        i += index - len;
+        return data[i < 0 ? i + SIZE : i%SIZE];
+    }
+
+    const T &operator[](int i) const
+    {
+        i += index - len;
+        return data[i < 0 ? i + SIZE : i%SIZE];
+    }
+};
+
 template <class T, int SIZE> struct queue
 {
     int head, tail, len;
@@ -951,50 +1051,29 @@ template <class T, int SIZE> struct queue
     bool empty() const { return !len; }
     bool full() const { return len == SIZE; }
 
-    bool inrange(size_t i) const { return i<size_t(len); }
-    bool inrange(int i) const { return i>=0 && i<len; }
-
     T &added() { return data[tail > 0 ? tail-1 : SIZE-1]; }
     T &added(int offset) { return data[tail-offset > 0 ? tail-offset-1 : tail-offset-1 + SIZE]; }
     T &adding() { return data[tail]; }
     T &adding(int offset) { return data[tail+offset >= SIZE ? tail+offset - SIZE : tail+offset]; }
     T &add()
     {
+        ASSERT(len < SIZE);
         T &t = data[tail];
-        tail++;
-        if(tail >= SIZE) tail -= SIZE;
-        if(len < SIZE) len++;
+        tail = (tail + 1)%SIZE;
+        len++;
         return t;
-    }
-    T &add(const T &e) { return add() = e; }
-
-    T &pop()
-    {
-        tail--;
-        if(tail < 0) tail += SIZE;
-        len--;
-        return data[tail];
     }
 
     T &removing() { return data[head]; }
     T &removing(int offset) { return data[head+offset >= SIZE ? head+offset - SIZE : head+offset]; }
     T &remove()
     {
+        ASSERT(len > 0);
         T &t = data[head];
-        head++;
-        if(head >= SIZE) head -= SIZE;
-        len--; 
+        head = (head + 1)%SIZE;
+        len--;
         return t;
     }
-
-    T &operator[](int offset) { return removing(offset); }
-    const T &operator[](int offset) const { return removing(offset); }
-};
-
-template <class T, int SIZE> struct reversequeue : queue<T, SIZE>
-{
-    T &operator[](int offset) { return queue<T, SIZE>::added(offset); }
-    const T &operator[](int offset) const { return queue<T, SIZE>::added(offset); }
 };
 
 inline char *newstring(size_t l)                { return new char[l+1]; }
@@ -1002,9 +1081,6 @@ inline char *newstring(const char *s, size_t l) { return copystring(newstring(l)
 inline char *newstring(const char *s)           { return newstring(s, strlen(s)); }
 inline char *newstringbuf(const char *s)        { return newstring(s, MAXSTRLEN-1); }
 inline char *newstring(const stringslice &s)    { return newstring(s.str, s.len); }
-
-inline size_t stringlength(const char *s) { return strlen(s); }
-inline size_t stringlength(const stringslice &s) { return s.len; }
 
 const int islittleendian = 1;
 #ifdef SDL_BYTEORDER
@@ -1182,7 +1258,8 @@ extern void sendstring(const char *t, packetbuf &p);
 extern void sendstring(const char *t, vector<uchar> &p);
 extern void getstring(char *t, ucharbuf &p, int len);
 template<size_t N> static inline void getstring(char (&t)[N], ucharbuf &p) { getstring(t, p, int(N)); }
-extern void filtertext(char *dst, const char *src, bool whitespace = true, int len = sizeof(string)-1);
+extern void filtertext(char *dst, const char *src, bool whitespace, int len);
+template<size_t N> static inline void filtertext(char (&dst)[N], const char *src, bool whitespace = true) { filtertext(dst, src, whitespace, int(N)-1); }
 
 #endif
 
