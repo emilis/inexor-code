@@ -423,6 +423,7 @@ namespace game
         else if(isteam(d->team, actor->team))
         {
             contype |= CON_TEAMKILL;
+			actor->teamkills++;
             if(actor==player1) conoutf(contype, "\f6%s fragged a teammate (%s)", aname, dname);
             else if(d==player1) conoutf(contype, "\f6%s got fragged by a teammate (%s)", dname, aname);
             else conoutf(contype, "\f2%s fragged a teammate (%s)", aname, dname);
@@ -467,6 +468,7 @@ namespace game
     ICOMMAND(getfrags, "", (), intret(player1->frags));
     ICOMMAND(getflags, "", (), intret(player1->flags));
     ICOMMAND(getdeaths, "", (), intret(player1->deaths));
+	ICOMMAND(getteamkills, "", (), intret(player1->teamkills));
     ICOMMAND(getaccuracy, "", (), intret((player1->totaldamage*100)/max(player1->totalshots, 1)));
     ICOMMAND(gettotaldamage, "", (), intret(player1->totaldamage));
     ICOMMAND(gettotalshots, "", (), intret(player1->totalshots));
