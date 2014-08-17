@@ -758,6 +758,18 @@ namespace game
     struct scoregroup : teamscore
     {
         vector<fpsent *> players;
+
+		char *sametag() //returns whether this scoregroup is a clan/playing-group, whatever. it returns null if players in this group have different tags and the tag if they all share the same one
+		{
+			fpsent *prev = NULL;
+			loopv(players)
+			{
+				fpsent *p = players[i];
+				if(!prev) { prev = p; continue; }
+				if(strcmp(p->tag, prev->tag)) return NULL; //two tags are not matching
+			}
+			return prev ? prev->tag : NULL;
+		}
     };
 
     struct clientmode

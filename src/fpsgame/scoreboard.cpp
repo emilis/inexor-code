@@ -218,9 +218,10 @@ namespace game
             if(sg.team && m_teammode)
             {
                 g.pushlist(); // vertical
-
-                if(sg.score>=10000) g.textf("%s: WIN", fgcolor, NULL, sg.team);
-                else g.textf("%s: %d", fgcolor, NULL, sg.team, sg.score);
+				const char *teamname = sg.sametag();
+				if(!teamname) teamname = sg.team;
+                if(sg.score>=10000) g.textf("%s: WIN", fgcolor, NULL, teamname);
+                else g.textf("%s: %d", fgcolor, NULL, teamname, sg.score);
 
                 g.pushlist(); // horizontal
             }
