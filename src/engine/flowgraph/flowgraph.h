@@ -69,30 +69,48 @@
 struct SNode;
 
 
+/*
+* A built-in structure for the node's position
+*/
+struct SPosition 
+{
+	// standard coordinates
+	float x;
+	float y;
+	float z;
+
+	// position constructor
+	SPosition() {
+		// set all coordinates to 0
+		x = y = z = 0;
+	}
+};
+
 /**
 * A basic node implementation
 */
-struct SNode {
+class CNode {
 	
-	/*
-	* A built-in structure for the node's position
+	public:
+
+	/** 
+	* Constructor
 	*/
-	struct SPosition {
+	CNode() {
+		// construct here...
+	}
+	/** 
+	* Destructor
+	*/
+	~CNode() {
+		// destruct here...
+	}
 
-		// standard coordinates
-		float x;
-		float y;
-		float z;
 
-		/*
-		* Position constructor
-		*/
-		SPosition() {
-			// set all coordinates to 0
-			x = y = z = 0;
-		}
-		// no destructor required (yet)
-	};
+	/**
+	* The node's position
+	*/
+	SPosition m_Position;
 
 	/*
 	* Nodes can be commented
@@ -110,13 +128,22 @@ struct SNode {
 	* The parents of this node.
 	* pointers
 	*/
-	std::vector< SNode* > m_pNodeParents;
+	std::vector<CNode* > m_pNodeParents;
 
 	/**
 	* The childs of this node.
 	* pointers
 	*/
-	std::vector< SNode* > m_pChilds;
+	std::vector<CNode* > m_pChilds;
+
+	/**
+	* Virtual function which will be called once this node is active
+	* Nodes do not have parameters: anything that is needed in the node
+	* can be changed before node_input is called
+	*/
+	virtual void node_input(void) = 0;
+	// virtual void node_output(void) = 0;
+
 };
 
 
