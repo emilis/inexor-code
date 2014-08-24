@@ -17,6 +17,10 @@
 * Include flowgraph header file
 */
 #include "flowgraph/flowgraph.h"
+/**
+* Include bezier curve header file
+*/
+#include "flowgraph/curves/bezier.h"
 
 
 // GL_ARB_multitexture
