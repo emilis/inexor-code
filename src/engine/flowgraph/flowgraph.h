@@ -86,6 +86,8 @@ struct SPosition
 	}
 };
 
+class CCondition;
+
 /**
 * A basic node implementation
 */
