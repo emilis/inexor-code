@@ -1223,6 +1223,31 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
+	/**
+	* Bezier curve renderer here
+	*/
+	CBezierCurve curve;
+	curve.AddParamPoint(512.0f, 600.0f, -600.0f);
+	curve.AddParamPoint(423.0, 300.0f, 400.0f);
+	curve.AddParamPoint(-512.0f, -530.0f, 612.0f);
+	curve.AddParamPoint(412.0f, 1000.0f, -612.0f);
+	curve.AddParamPoint(-532.0f, -530.0f, 512.0f);
+	curve.AddParamPoint(-302.0f, 200.0f, -612.0f);
+	curve.AddParamPoint(-112.0f, -530.0f, 512.0f);
+
+
+	/**
+	* Calculate points
+	*/
+	curve.CalculateCurve_BernsteinPolynom();
+
+	/**
+	* Initialise curve renderer
+	*/
+	CCurveRenderer curve_renderer;
+	curve_renderer.SetCurve( &curve);
+
+
     for(;;)
     {
         static int frames = 0;
@@ -1256,6 +1281,11 @@ int main(int argc, char **argv)
         recomputecamera();
         updateparticles();
         updatesounds();
+
+		/**
+		* Render curve
+		*/
+		curve_renderer.RenderCurve();
 
         if(minimized) continue;
 

@@ -817,7 +817,7 @@ struct gui : g3d_gui
 				
 				/* Give some debug messages
 				*/
-				#define DEBUG_MENU_RENDER_POSITION 1
+				//#define DEBUG_MENU_RENDER_POSITION
 				#ifdef DEBUG_MENU_RENDER_POSITION
 					conoutf(CON_DEBUG, "left: %f top: %f", left, top);
 				#endif

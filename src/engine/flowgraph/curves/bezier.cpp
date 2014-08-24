@@ -1,11 +1,10 @@
 /**
 * Include bezier curve header file
+* and Sauerbraten engine file
 */
+#include "engine.h"
 #include "bezier.h"
 
-/**
-* Now lets implement the class functions
-*/
 
 /**
 * Constructor
@@ -14,7 +13,7 @@ CBezierCurve::CBezierCurve() {
 	// curve not computed in the beginning
 	m_bComputed = false;
 	// set default precision
-	m_fCalcPrecision = 1.0f; // 1.0f up to 20.0f ?
+	m_fCalcPrecision = 30.0f; // 1.0f up to 20.0f ?
 	// set parameter point limit
 	m_uiParamLimit = 7;
 }
@@ -75,6 +74,12 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 	// Calculate precision
 	float fStep = 1.0f / m_fCalcPrecision;
 
+	// debug messages
+	#define CURVE_RENDERER_DEBUG_MODE
+	#ifdef CURVE_RENDERER_DEBUG_MODE
+		conoutf(CON_DEBUG, "Precision: %f", fStep);
+	#endif
+
 	// the number of parameter points given
 	int uiElements = m_ParameterPoints.size() - 1;
 
@@ -95,6 +100,11 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 			finished_point.y += binomialCoef( uiElements, i) * pow( fPos, i) * pow(  (1-fPos),  (uiElements-i) ) * m_ParameterPoints[ i ].y;
 			finished_point.z += binomialCoef( uiElements, i) * pow( fPos, i) * pow(  (1-fPos),  (uiElements-i) ) * m_ParameterPoints[ i ].z;
 		}
+
+		// debug messages
+		#ifdef CURVE_RENDERER_DEBUG_MODE
+			conoutf(CON_DEBUG, "Output position: %f %f %f", finished_point.x,finished_point.y,finished_point.z);
+		#endif
 
 		// add computed point
 		m_ComputedPoints.push_back(finished_point);
