@@ -122,7 +122,7 @@ namespace game
     bool senditemstoserver = false, sendcrc = false; // after a map change, since server doesn't have map data
     int lastping = 0;
 
-    bool connected = false, remote = false, demoplayback = false, gamepaused = false;
+	bool connected = false, remote = false, demoplayback = false, gamepaused = false, teamspersisted = false;
     int sessionid = 0, mastermode = MM_OPEN, gamespeed = 100;
     string servinfo = "", servauth = "", connectpass = "";
 
@@ -739,6 +739,14 @@ namespace game
 
     bool ispaused() { return gamepaused; }
 
+	void persistteams(bool val) //disable reshuffeling teams on mapchange
+	{
+		if(!connected) return;
+        if(!remote) server::forcepersist(val); //do it on direct way, when playing locally
+        else addmsg(N_PERSISTTEAMS, "ri", val ? 1 : 0);
+    }
+	ICOMMAND(persistteams, "i", (int *val), persistteams(*val > 0));
+	bool ispersisted() { return teamspersisted; }
     bool allowmouselook() { return !gamepaused || !remote || m_edit; }
 
     void changegamespeed(int val)
@@ -1241,7 +1249,16 @@ namespace game
                 else conoutf("game is %s", val ? "paused" : "resumed");
                 break;
             }
-
+			case N_PERSISTTEAMS:
+			{
+				bool val = getint(p) > 0;
+				if(!demopacket) 
+				{
+					teamspersisted = true;
+				}
+				conoutf("teams will be %s next game", val ? "persistent" : "reshuffled");
+				break;
+			}
             case N_GAMESPEED:
             {
                 int val = clamp(getint(p), 10, 1000), cn = getint(p);

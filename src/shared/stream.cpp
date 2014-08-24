@@ -719,7 +719,8 @@ struct gzstream : stream
     z_stream zfile;
     uchar *buf;
     bool reading, writing, autoclose;
-    uint crc;
+    uint crc;      // Cycle Redundant Checksum: a checksum which is fast too compute hence ideal for files, plus its easily extendable: 
+			       //after a chunk with new data appeared, you can easily compute the newcrc = crc32(oldcrc, newdata, 
     size_t headersize;
 
     gzstream() : file(NULL), buf(NULL), reading(false), writing(false), autoclose(false), crc(0), headersize(0)
