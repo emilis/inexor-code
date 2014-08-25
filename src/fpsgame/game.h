@@ -317,6 +317,7 @@ struct demoheader
 #define MAXNAMELEN 15
 #define MAXTEAMLEN 4
 #define MAXTAGLEN 8
+#define BOTTAG "Bot"
 
 enum
 {
@@ -765,6 +766,7 @@ namespace game
 			loopv(players)
 			{
 				fpsent *p = players[i];
+				if(!p->tag[0]) return NULL; 
 				if(!prev) { prev = p; continue; }
 				if(strcmp(p->tag, prev->tag)) return NULL; //two tags are not matching
 			}
@@ -817,6 +819,7 @@ namespace game
     extern int following;
     extern int smoothmove, smoothdist;
 
+	// osd
     extern int hudannounce_begin;
     extern int hudannounce_timeout;
     extern int hudannounce_effect;

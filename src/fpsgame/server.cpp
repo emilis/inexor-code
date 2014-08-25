@@ -1820,6 +1820,7 @@ namespace server
             putint(p, ci->playermodel);
             sendstring(ci->name, p);
             sendstring(ci->team, p);
+			sendstring(BOTTAG, p);
         }
         else
         {

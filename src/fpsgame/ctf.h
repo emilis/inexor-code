@@ -173,11 +173,12 @@ struct ctfclientmode : clientmode
 #endif
     {
         flag &f = flags[i];
-        f.droptime = f.runstart = 0;
+        f.droptime = 0;
 #ifdef SERVMODE
         f.dropcount = 0;
         f.owner = f.dropper = -1;
         f.invistime = invistime;
+		f.runstart = 0;
 #else
         loopv(players) players[i]->flagpickup &= ~(1<<f.id);
         f.vistime = vistime;
@@ -341,7 +342,7 @@ struct ctfclientmode : clientmode
 
     void scoreflag(clientinfo *ci, int goal, int relay = -1)
     {
-		int flagruntime = m_ctf && flags.inrange(relay) && flags[relay] && flags[relay].runstart > 0 ? clamp(lastmillis-flags[relay].runstart, 0, 600000)/100 : 0;
+		int flagruntime = m_ctf && flags.inrange(relay) && flags[relay].runstart > 0 ? clamp(lastmillis-flags[relay].runstart, 0, 600000)/100 : 0;
         returnflag(relay >= 0 ? relay : goal, m_protect ? lastmillis : 0);
         ci->state.flags++;
         int team = ctfteamflag(ci->team), score = addscore(team, 1);

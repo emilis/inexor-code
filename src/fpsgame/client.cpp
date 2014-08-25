@@ -1258,7 +1258,7 @@ namespace game
 				bool val = getint(p) > 0;
 				if(!demopacket) 
 				{
-					teamspersisted = true;
+					teamspersisted = val;
 				}
 				conoutf("teams will be %s next game", val ? "persistent" : "reshuffled");
 				break;
@@ -1368,8 +1368,9 @@ namespace game
                 fpsent *d = newclient(cn);
                 if(!d)
                 {
-                    getstring(text, p);
-                    getstring(text, p);
+                    getstring(text, p);//name 
+                    getstring(text, p); //team
+					getstring(text, p); //tag
                     getint(p);
                     break;
                 }
@@ -1913,14 +1914,17 @@ namespace game
             case N_INITAI:
             {
                 int bn = getint(p), on = getint(p), at = getint(p), sk = clamp(getint(p), 1, 101), pm = getint(p);
-                string name, team;
+                string name, team, tag;
                 getstring(text, p);
                 filtertext(name, text, false, MAXNAMELEN);
                 getstring(text, p);
                 filtertext(team, text, false, MAXTEAMLEN);
+				getstring(text, p);
+                filtertext(tag, text, false, MAXTAGLEN);
+
                 fpsent *b = newclient(bn);
                 if(!b) break;
-                ai::init(b, at, on, sk, bn, pm, name, team);
+                ai::init(b, at, on, sk, bn, pm, name, team, tag);
                 break;
             }
 
