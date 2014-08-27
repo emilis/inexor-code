@@ -1575,7 +1575,7 @@ namespace game
                 for(;;)
                 {
                     int cn = getint(p);
-                    if(p.overread() || cn<0) break;
+                    if(p.overread() || cn<0) break; //list ends either by packet-end or a -1
                     fpsent *d = (cn == player1->clientnum ? player1 : newclient(cn));
                     parsestate(d, p, true);
                 }

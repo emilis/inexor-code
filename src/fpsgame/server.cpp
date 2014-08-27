@@ -122,7 +122,7 @@ namespace server
         int lastdeath, deadflush, lastspawn, lifesequence;
         int lastshot;
         projectilestate<8> rockets, grenades, bombs;
-        int frags, flags, deaths, teamkills, shotdamage, damage, tokens;
+        int frags, flags, deaths, teamkills, shotdamage, damage, tokens; //shotdamage = all damage your shots could have made, tokens for collect mode
         int lasttimeplayed, timeplayed;
         float effectiveness;
 
@@ -1771,7 +1771,7 @@ namespace server
     }
 
     template<class T>
-    void sendstate(gamestate &gs, T &p)
+    void putstate(gamestate &gs, T &p)
     {
         putint(p, gs.lifesequence);
         putint(p, gs.health);
@@ -1794,10 +1794,11 @@ namespace server
     {
         gamestate &gs = ci->state;
         spawnstate(ci);
-        sendf(ci->ownernum, MSG_CHANNEL, "rii7v", N_SPAWNSTATE, ci->clientnum, gs.lifesequence,
-            gs.health, gs.maxhealth,
-            gs.armour, gs.armourtype,
-            gs.gunselect, GUN_PISTOL-GUN_SG+1, &gs.ammo[GUN_SG]);
+		packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+		putint(p, N_SPAWNSTATE);
+		putint(p, ci->clientnum);
+        putstate(gs, p);
+		sendpacket(ci->ownernum, MSG_CHANNEL, p.finalize());
         gs.lastspawn = gamemillis;
     }
 
@@ -1850,24 +1851,26 @@ namespace server
                (smapname[0] && (!m_timed || gamemillis < gamelimit || (ci->state.state==CS_SPECTATOR && !ci->privilege && !ci->local) || numclients(ci->clientnum, true, true, true)));
     }
 	
-	void putresume(packetbuf &p, clientinfo *ci)
+	void putresume(packetbuf &p, clientinfo *ci) //Puts all information needed of client into packetbuf p (when game resumes). mostly its current state and stats. Note: does NOT put N_RESUME into p
 	{
-
+		gamestate &gs = ci->state;
+        putint(p, ci->clientnum);
+        putint(p, gs.state);
+        putint(p, gs.frags);
+        putint(p, gs.flags);
+        putint(p, gs.quadmillis);
+		putint(p, gs.deaths);
+		putint(p, gs.teamkills);
+		putint(p, gs.damage);
+		putint(p, gs.shotdamage);
+        putstate(gs, p);
 	}
 	void sendresume(clientinfo *ci)
     {
 		packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+		putint(p, N_RESUME);
         putresume(p, ci);
-        sendpacket(ci->clientnum, MSG_CHANNEL, p.finalize());
-
-        gamestate &gs = ci->state;
-        sendf(-1, MSG_CHANNEL,"ri7i9vi", N_RESUME, ci->clientnum,
-            gs.state, gs.frags, gs.flags, gs.quadmillis,
-			gs.deaths, gs.teamkills, gs.damage, gs.shotdamage,
-            gs.lifesequence,
-            gs.health, gs.maxhealth,
-            gs.armour, gs.armourtype,
-            gs.gunselect, GUN_PISTOL-GUN_SG+1, &gs.ammo[GUN_SG], -1);
+        sendpacket(-1, MSG_CHANNEL, p.finalize());
     }
 
     int welcomepacket(packetbuf &p, clientinfo *ci)
@@ -1953,7 +1956,7 @@ namespace server
                 spawnstate(ci);
                 putint(p, N_SPAWNSTATE);
                 putint(p, ci->clientnum);
-                sendstate(gs, p);
+                putstate(gs, p);
                 gs.lastspawn = gamemillis;
             }
         }
@@ -1971,16 +1974,7 @@ namespace server
             {
                 clientinfo *oi = clients[i];
                 if(ci && oi->clientnum==ci->clientnum) continue;
-                putint(p, oi->clientnum);
-                putint(p, oi->state.state);
-                putint(p, oi->state.frags);
-                putint(p, oi->state.flags);
-                putint(p, oi->state.quadmillis);
-				putint(p, oi->state.deaths);
-				putint(p, oi->state.teamkills);
-				putint(p, oi->state.damage);
-				putint(p, oi->state.shotdamage); //all damage your shots could have made
-                sendstate(oi->state, p);
+                putresume(p, oi);
             }
             putint(p, -1);
             welcomeinitclient(p, ci ? ci->clientnum : -1);
@@ -3245,7 +3239,7 @@ namespace server
                 QUEUE_AI;
                 QUEUE_BUF({
                     putint(cm->messages, N_SPAWN);
-                    sendstate(cq->state, cm->messages);
+                    putstate(cq->state, cm->messages);
                 });
                 break;
             }
