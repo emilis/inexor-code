@@ -1010,6 +1010,19 @@ int getclockmillis()
 
 VAR(numcpus, 1, 1, 16);
 
+
+
+
+
+/**
+* Make curve global
+*/
+CBezierCurve curve;
+CCurveRenderer curve_renderer;
+
+
+
+
 // FIXME: WTF? - main is in macutils.mm?
 #ifdef __APPLE__
 int real_main(int argc, char **argv)
@@ -1226,9 +1239,8 @@ int main(int argc, char **argv)
 	/**
 	* Bezier curve renderer here
 	*/
-	CBezierCurve curve;
 	// randomly fill with parameter points
-	curve.GenerateRandomCurve();
+	curve.GenerateRandomCurve((unsigned)5);
 
 	/**
 	* Calculate points
@@ -1239,7 +1251,6 @@ int main(int argc, char **argv)
 	/**
 	* Initialise curve renderer
 	*/
-	CCurveRenderer curve_renderer;
 	curve_renderer.SetCurve( &curve);
 
 
@@ -1275,23 +1286,20 @@ int main(int argc, char **argv)
 		/***************************************************/
 		// miscellaneous general game effects
         recomputecamera();
-        updateparticles();
+        updateparticles(); // no
         updatesounds();
-
-		/**
-		* Render curve
-		*/
-		curve_renderer.RenderCurve();
-
+		
 		/**
 		* Regenerate curve
 		*/
-		
-		if(SDL_GetTicks() % 2000 < 40) 
+		#define BEZIER_CURVE_RESET_INTERVAL 4000 // every 7 seconds
+
+		if(SDL_GetTicks() % BEZIER_CURVE_RESET_INTERVAL < 40) 
 		{
-			conoutf(CON_DEBUG, "Curve regenerated");
+			//conoutf(CON_DEBUG, "Curve regenerated");
 			curve.ClearPoints();
-			curve.GenerateRandomCurve();
+			curve.GenerateRandomCurve((unsigned)20);
+			curve.SetPrecision(100);
 			curve.CalculateCurve_BernsteinPolynom();
 		}
 		
@@ -1300,6 +1308,7 @@ int main(int argc, char **argv)
         inbetweenframes = false;
         if(mainmenu) gl_drawmainmenu(screen->w, screen->h);
         else gl_drawframe(screen->w, screen->h);
+
         swapbuffers();
         renderedframe = inbetweenframes = true;
     }

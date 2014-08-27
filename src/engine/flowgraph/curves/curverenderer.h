@@ -28,6 +28,16 @@ class CCurveRenderer {
 	void RenderCurve(void);
 
 	/**
+	* Render parameter points 
+	*/
+	void RenderParameterPoints(void);
+
+	/**
+	* Render point at current position
+	*/
+	void RenderPoint(vec pointposition);
+
+	/**
 	* The curve to render
 	*/
 	void SetCurve(CBezierCurve *curve);

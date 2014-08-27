@@ -74,23 +74,23 @@ unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 /**
 * Generate random curve
 */
-void CBezierCurve::GenerateRandomCurve(void) 
+void CBezierCurve::GenerateRandomCurve(unsigned int maxparameterpoints) 
 {
 	// Initialise random number generator
 	srand((unsigned)time(NULL) + SDL_GetTicks() );
 
-	// Generate at most 20 points with random positions
-	for(int i=0; i<30;  i++) 
+	// Generate at most 100 points with random positions
+	for(unsigned int i=0; i<maxparameterpoints;  i++) 
 	{
 		vec point;
 		
 		// Generate positions
 		point.x = rand() % 512 - rand() % 512 + 512;
-		point.y = rand() % 512 - rand() % 512 + 512;
-		point.z = rand() % 512 - rand() % 512 + 512;
+		point.y = 550 + rand() % 512;
+		point.z = rand() % 512 + rand() % 512 + 512;
 
 		// Debug messages
-		#define BEZ_CURVE_TEST
+		//#define BEZ_CURVE_TEST
 		#ifdef BEZ_CURVE_TEST
 			conoutf(CON_DEBUG, "%f %f %f", point.x, point.y, point.z);
 		#endif
@@ -98,6 +98,28 @@ void CBezierCurve::GenerateRandomCurve(void)
 		// Add point
 		m_ParameterPoints.push_back(point);
 	}
+}
+
+
+/**
+* Get point number # from computed curve
+*/
+vec CBezierCurve::GetComputedPointIndexed(unsigned int index) 
+{
+	// return null vector if setup is invalid
+	if(index > m_ComputedPoints.size() || m_bComputed == false) return vec(0.0f, 0.0f, 0.0f);
+	// return point
+	return vec( m_ComputedPoints[index].x,m_ComputedPoints[index].y ,m_ComputedPoints[index].z );
+}
+/**
+* Get parameter point number # from computed curve
+*/
+vec CBezierCurve::GetParameterPointIndexed(unsigned int index) 
+{
+	// return null vector if setup is invalid
+	if(index > m_ParameterPoints.size() || m_bComputed == false) return vec(0.0f, 0.0f, 0.0f);
+	// return point
+	return vec( m_ParameterPoints[index].x,m_ParameterPoints[index].y ,m_ParameterPoints[index].z );
 }
 
 
@@ -114,43 +136,64 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 	#ifdef CURVE_RENDERER_DEBUG_MODE
 		conoutf(CON_DEBUG, "Precision: %f", fStep);
 	#endif
-
-	// the number of parameter points given
-	int uiElements = m_ParameterPoints.size() - 1;
-
+	
 	// go along our curve in fPos steps
 	for( float fPos=0.0f;  fPos <= 1.0f;  fPos+=fStep) 
 	{
-		// computed point
-		vec finished_point;
-		finished_point.x = 0.0f;
-		finished_point.y = 0.0f;
-		finished_point.z = 0.0f;
-					
-		// apply fPos to our bernstein polynom					
-		for( int i=0; i<=uiElements; i++) 
-		{
-			// compute bezier coordinates using bernstein polynoms
-			finished_point.x += binomialCoef( uiElements, i) * pow( fPos, i) * pow(  (1-fPos),  (uiElements-i) ) * m_ParameterPoints[ i ].x;
-			finished_point.y += binomialCoef( uiElements, i) * pow( fPos, i) * pow(  (1-fPos),  (uiElements-i) ) * m_ParameterPoints[ i ].y;
-			finished_point.z += binomialCoef( uiElements, i) * pow( fPos, i) * pow(  (1-fPos),  (uiElements-i) ) * m_ParameterPoints[ i ].z;
-		}
-
-		// debug messages
-		#ifdef CURVE_RENDERER_DEBUG_MODE
-			conoutf(CON_DEBUG, "Output position: %f %f %f", finished_point.x,finished_point.y,finished_point.z);
-		#endif
-
 		// add computed point
-		m_ComputedPoints.push_back(finished_point);
+		m_ComputedPoints.push_back(  calculateposition(fPos) );
 	}
+
+	// curve computed!
+	m_bComputed = true;
 }
+
+
+
+/**
+* Calculate exact point
+*/
+vec CBezierCurve::calculateposition(float position)
+{
+	// computed point
+	vec finished_point;
+	finished_point.x = 0.0f;
+	finished_point.y = 0.0f;
+	finished_point.z = 0.0f;
+
+	// the number of parameter points given
+	int uiElements = m_ParameterPoints.size() -1;
+
+	// apply fPos to our bernstein polynom					
+	for(int i=0; i<=uiElements; i++) 
+	{
+		// compute bezier coordinates using bernstein polynoms
+		finished_point.x += binomialCoef( uiElements, i) * pow( position, i) * pow(  (1-position),  (uiElements-i) ) * m_ParameterPoints[ i ].x;
+		finished_point.y += binomialCoef( uiElements, i) * pow( position, i) * pow(  (1-position),  (uiElements-i) ) * m_ParameterPoints[ i ].y;
+		finished_point.z += binomialCoef( uiElements, i) * pow( position, i) * pow(  (1-position),  (uiElements-i) ) * m_ParameterPoints[ i ].z;
+	}
+
+	// return finished point
+	return finished_point;
+}
+
+
+/**
+* Render current point position
+*/
+vec CBezierCurve::CalculatePointFromFloat(float curveposition) 
+{
+	// return calculated position
+	return calculateposition(curveposition);
+}
+
 
 /**
 * Calculate (Method 2)
 */
 void CBezierCurve::CalculateCurve_DeCasteljauRecursive(void) {
-
+	// curve computed!
+	m_bComputed = true;
 }
 
 // set parameter point limit

@@ -30,43 +30,61 @@ void CCurveRenderer::SetCurve(CBezierCurve *curve)
 }
 
 
-
 /**
 * Render curve
 */
 void CCurveRenderer::RenderCurve(void) 
 {
-	Shader* shader = lookupshaderbyname("stdworld");
-
 	glPushMatrix();
-	// use standard shader
-	shader->set();
 	// begin render process
 	glBegin(GL_LINES);
 	
-	// what is blending?
-	glEnable(GL_BLEND);
-
-	glColor4f(1.0f, 0.0f, 1.0f, 0.75f);
+	// Set color to red
+	glColor3f(1.0f, 0.0f, 0.0f);
 
 	// loop through computed points and render them	
 	for(unsigned int i=0; i<m_pCurve->m_ComputedPoints.size()   /*!!!*/ -1 ; i++) 
 	{
 		vec* cur = &m_pCurve->m_ComputedPoints[i];
 		vec* next = &m_pCurve->m_ComputedPoints[i  +1];
-
-		// render path using standard particles
-		particle_text( vec(m_pCurve->m_ComputedPoints[i].x,
-							m_pCurve->m_ComputedPoints[i].y,
-							m_pCurve->m_ComputedPoints[i].z) 
-							, "H", PART_TEXT, 1, 0xFF00B2, 10.0f);
-		
+				
 		// set vertices
-		glVertex3d(cur->x, cur->y, cur->z);
-		glVertex3d(next->x, next->y, next->z);
+		glVertex3f(cur->x, cur->y, cur->z);
+		glVertex3f(next->x, next->y, next->z);
 		
 	}
 	// end render process
 	glEnd();
 	glPopMatrix();
+}
+
+
+/**
+* Render big point at the current position
+*/
+void CCurveRenderer::RenderPoint(vec point) 
+{
+	glPushMatrix();
+	glBegin(GL_POINT);
+	
+	// set big point
+	glPointSize(100.0f);
+	glColor3f(0.0f, 1.0f, 1.0f);
+	glVertex3f(point.x, point.y, point.z);
+
+	glEnd();
+	glPopMatrix();
+}
+
+/**
+* Render parameter points
+*/
+void CCurveRenderer::RenderParameterPoints(void) 
+{
+	// loop through computed points and render them	
+	for(unsigned int i=0; i<m_pCurve->m_ParameterPoints.size(); i++) 
+	{
+		// render text
+		particle_text( m_pCurve->GetParameterPointIndexed(i), "H", PART_TEXT, 1, 0x00FF19, 10.0f);
+	}
 }

@@ -28,8 +28,8 @@
 
 /**
 * In honor of:
-* Pierre Étienne Bézier (September 1, 1910 – November 25, 1999), Rrench mathematician and engineer at RENAULT.
-* Sergei Natanovich Bernstein (March 5, 1880 – October 26, 1968), Russian mathematician.
+*	Pierre Étienne Bézier (September 1, 1910 – November 25, 1999), Rrench mathematician and engineer at RENAULT.
+*	Sergei Natanovich Bernstein (March 5, 1880 – October 26, 1968), Russian mathematician.
 */
 
 
@@ -49,23 +49,6 @@
 #include <list>
 #include <deque>
 #include <iterator>
-
-/**
-* Include Sauerbratens Engine
-*/
-
-/**
-* Maybe we could use Sauerbratens vector/point classes here
-* Replace it if you want to...
-*/
-/*struct SPoint 
-{
-	// just simple coordinates
-	float x;
-	float y;
-	float z;
-};
-*/
 
 
 /**
@@ -87,6 +70,13 @@ class CBezierCurve
 	std::vector<vec> m_ComputedPoints;
 
 	/**
+	* TODO: Store a map of "current points"
+	*/
+	//std::map<char*, vec> m_NamedPoints;
+
+	vec m_CurrentPoint;
+
+	/**
 	* Adding parameter points
 	* As soon as we add points, the curve is NOT computed (again)
 	*/
@@ -96,7 +86,7 @@ class CBezierCurve
 	/**
 	* Add random curve
 	*/
-	void GenerateRandomCurve(void);
+	void GenerateRandomCurve(unsigned int maxparameterpoints);
 
 	/**
 	* Clear parameter input and output buffer
@@ -129,11 +119,24 @@ class CBezierCurve
 	void CalculateCurve_DeCasteljauRecursive(void);
 
 	/**
+	* Get a point
+	*/
+	vec CalculatePointFromFloat(float curveposition);
+
+	/**
 	* Get finished curve data
 	*/
 	vec GetCurvePos(float interpolation_value);
 
+	/**
+	* Get point number # from computed curve
+	*/
+	vec GetComputedPointIndexed(unsigned int index);
 
+	/**
+	* Get Parameter point number # from this curve
+	*/
+	vec GetParameterPointIndexed(unsigned int index);
 
 	/**
 	* We will add some get/set functions so we cann keep this private
@@ -142,6 +145,9 @@ class CBezierCurve
 	
 	// binomial coefficient for bernstein polynom
 	unsigned int binomialCoef(unsigned int n, const unsigned int k);
+
+	// calculate point
+	vec calculateposition(float position);
 
 	/**
 	* Maybe we should add a limit for parameter points

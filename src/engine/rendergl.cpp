@@ -2005,6 +2005,14 @@ void gl_drawhud(int w, int h);
 
 int xtraverts, xtravertsva;
 
+/**
+* Render main frame
+*/
+extern CBezierCurve curve;
+extern CCurveRenderer curve_renderer;
+
+
+
 void gl_drawframe(int w, int h)
 {
     if(deferdrawtextures) drawtextures();
@@ -2084,6 +2092,13 @@ void gl_drawframe(int w, int h)
 
     renderdecals(true);
 
+	/**
+	* Render parameter points (using particle_text) here
+	*/
+	// render curve parameters as well
+	curve_renderer.RenderParameterPoints();
+
+
     rendermapmodels();
     rendergame(true);
     if(!isthirdperson())
@@ -2118,12 +2133,30 @@ void gl_drawframe(int w, int h)
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
+
+
     addmotionblur();
     addglare();
     if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
     renderpostfx();
 
     defaultshader->set();
+
+
+	/**
+	* Render curve
+	*/
+	curve_renderer.RenderCurve();
+
+	// render current point
+	float bezier_pos_parameter = 0.33f;
+	// feed output position with float val (range: 0.0f to 1.0f);
+	vec custom_bez_point = curve.CalculatePointFromFloat(bezier_pos_parameter);
+	
+	// render big point at current position
+	curve_renderer.RenderPoint(custom_bez_point);
+
+
     g3d_render();
 
     glDisable(GL_TEXTURE_2D);
