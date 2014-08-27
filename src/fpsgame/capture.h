@@ -834,7 +834,7 @@ ICOMMAND(insidebases, "", (),
             if(b.valid() && insidebase(b, ci->state.o) && !ci->state.hasmaxammo(b.ammotype-1+I_SHELLS) && b.takeammo(ci->team))
             {
                 sendbaseinfo(i);
-                sendf(-1, 1, "riii", N_REPAMMO, ci->clientnum, b.ammotype);
+                sendf(-1, MSG_CHANNEL,"riii", N_REPAMMO, ci->clientnum, b.ammotype);
                 ci->state.addammo(b.ammotype);
                 break;
             }
@@ -871,7 +871,7 @@ ICOMMAND(insidebases, "", (),
         if(!n) return;
         score &cs = findscore(team);
         cs.total += n;
-        sendf(-1, 1, "riisi", N_BASESCORE, base, team, cs.total);
+        sendf(-1, MSG_CHANNEL,"riisi", N_BASESCORE, base, team, cs.total);
     }
 
     void regenowners(baseinfo &b, int ticks)
@@ -907,7 +907,7 @@ ICOMMAND(insidebases, "", (),
                     }
                 }
                 if(notify)
-                    sendf(-1, 1, "ri6", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
+                    sendf(-1, MSG_CHANNEL,"ri6", N_BASEREGEN, ci->clientnum, ci->state.health, ci->state.armour, b.ammotype, b.valid() ? ci->state.ammo[b.ammotype] : 0);
             }
         }
     }
@@ -951,14 +951,14 @@ ICOMMAND(insidebases, "", (),
     void sendbaseinfo(int i)
     {
         baseinfo &b = bases[i];
-        sendf(-1, 1, "riissii", N_BASEINFO, i, b.owner, b.enemy, b.enemy[0] ? b.converted : 0, b.owner[0] ? b.ammo : 0);
+        sendf(-1, MSG_CHANNEL,"riissii", N_BASEINFO, i, b.owner, b.enemy, b.enemy[0] ? b.converted : 0, b.owner[0] ? b.ammo : 0);
     }
 
     void sendbases()
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         initclient(NULL, p, false);
-        sendpacket(-1, 1, p.finalize());
+        sendpacket(-1, MSG_CHANNEL, p.finalize());
     }
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)
@@ -1013,7 +1013,7 @@ ICOMMAND(insidebases, "", (),
 
         if(!lastteam) return;
         findscore(lastteam).total = 10000;
-        sendf(-1, 1, "riisi", N_BASESCORE, -1, lastteam, 10000);
+        sendf(-1, MSG_CHANNEL,"riisi", N_BASESCORE, -1, lastteam, 10000);
         startintermission();
     }
 

@@ -306,7 +306,7 @@ struct bombclientmode : clientmode
     	switch(sequence){
     	case 0:
     		if(totalmillis - timecounter >= 10000) {
-            sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_BOTTOM, "Map load complete (grannies left behind)");
+            sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_BOTTOM, "Map load complete (grannies left behind)");
     		} else {
     			loopv(spawnlocs){
     				if(spawnlocs[i]->cn == -1) continue;
@@ -314,7 +314,7 @@ struct bombclientmode : clientmode
     				if(!ci || ci->state.state==CS_SPECTATOR || ci->state.aitype != AI_NONE || ci->clientmap[0] || ci->mapcrc) continue;
     				return;
     			}
-          sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_BOTTOM, "Map load complete");
+          sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_BOTTOM, "Map load complete");
     		}
     		sequence = 1;
     		timecounter = totalmillis;
@@ -325,12 +325,12 @@ struct bombclientmode : clientmode
     		int remaining = COUNTDOWNSECONDS*1000 - (totalmillis - timecounter);
     		if(remaining <= 0){
     			sequence = 2;
-          sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 2000, E_ZOOM_IN, "F I G H T");
+          sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 2000, E_ZOOM_IN, "F I G H T");
     			pausegame(false);
     		}
     		else if(remaining/1000 != countdown){
           defformatstring(msg)("- %d -", countdown--);
-          sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 2000, E_ZOOM_IN, msg);
+          sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 2000, E_ZOOM_IN, msg);
     		}
     		break;
     	}
@@ -363,7 +363,7 @@ struct bombclientmode : clientmode
     		vector<spawnloc*>& tpool = pool[m_teammode ? bombteamname(activepl[i]->team) : 0];
     		if(tpool.length()){
     			tpool[0]->cn = activepl[i]->clientnum;
-    			sendf(tpool[0]->cn, 1, "ri2", N_SPAWNLOC, tpool[0]->index);
+    			sendf(tpool[0]->cn, MSG_CHANNEL, "ri2", N_SPAWNLOC, tpool[0]->index);
     			if(resuscitate) sendspawn(activepl[i]);
     			tpool.removeunordered(0);
     		}
@@ -384,7 +384,7 @@ struct bombclientmode : clientmode
     	for(; i < spawnlocs.length(); i++) if(spawnlocs[i]->cn == ci->clientnum) break;
     	if(i == spawnlocs.length()) {conoutf("player has got no spawn location"); return false; }
     	if(ci->state.deaths==0) {conoutf("player has no deaths"); return true; } // ci->state.aitype!=AI_NONE &&
-    	sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_IN, "You cannot respawn this round");
+    	sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_IN, "You cannot respawn this round");
     	return false;
     }
 
@@ -398,7 +398,7 @@ struct bombclientmode : clientmode
         sents[id].type = ments[id].type;
         sents[id].spawned = true;
         ivec io(o.mul(DMF));
-        sendf(-1, 1, "ri6", N_ITEMPUSH, id, type, io.x-120+rnd(240), io.y-120+rnd(240), io.z + rnd(2)*180);
+        sendf(-1, MSG_CHANNEL,"ri6", N_ITEMPUSH, id, type, io.x-120+rnd(240), io.y-120+rnd(240), io.z + rnd(2)*180);
     }
 
     void died(clientinfo *target, clientinfo *actor)
@@ -409,10 +409,10 @@ struct bombclientmode : clientmode
         for(int i=0; i<target->state.bombdelay/3; i++) { pushentity(I_BOMBDELAY, target->state.o); leftitems++; }
         if (leftitems > 0) {
             defformatstring(msg)("%s died and left %d %s!", target->name, leftitems, leftitems > 1 ? "items" : "item");
-            sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_OUT, msg);
+            sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_OUT, msg);
         } else {
             defformatstring(msg)("%s died!", target->name);
-            sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_OUT, msg);
+            sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 1250, E_ZOOM_OUT, msg);
         }
     }
 

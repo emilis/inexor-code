@@ -613,7 +613,7 @@ namespace game
         putint(p, inlen);
         putint(p, outlen);
         if(outlen > 0) p.put(outbuf, outlen);
-        sendclientpacket(p.finalize(), 1);
+        sendclientpacket(p.finalize(), MSG_CHANNEL);
         needclipboard = -1;
     }
 
@@ -942,7 +942,7 @@ namespace game
         if(d->state != CS_ALIVE && d->state != CS_EDITING) return;
         packetbuf q(100, reliable ? ENET_PACKET_FLAG_RELIABLE : 0);
         sendposition(d, q);
-        sendclientpacket(q.finalize(), 0);
+        sendclientpacket(q.finalize(), POS_CHANNEL);
     }
 
     void sendpositions()
@@ -960,7 +960,7 @@ namespace game
                     if((d == player1 || d->ai) && (d->state == CS_ALIVE || d->state == CS_EDITING))
                         sendposition(d, q);
                 }
-                sendclientpacket(q.finalize(), 0);
+                sendclientpacket(q.finalize(), POS_CHANNEL);
                 break;
             }
         }
@@ -999,7 +999,7 @@ namespace game
             putint(p, totalmillis);
             lastping = totalmillis;
         }
-        sendclientpacket(p.finalize(), 1);
+        sendclientpacket(p.finalize(), MSG_CHANNEL);
     }
 
     void c2sinfo(bool force) // send update to the server
@@ -1037,7 +1037,7 @@ namespace game
             sendstring("", p);
             sendstring("", p);
         }
-        sendclientpacket(p.finalize(), 1);
+        sendclientpacket(p.finalize(), MSG_CHANNEL);
     }
 
     void updatepos(fpsent *d)
@@ -2059,7 +2059,7 @@ namespace game
             else if(len <= 0) conoutf(CON_ERROR, "could not read map");
             else
             {
-                sendfile(-1, 2, map);
+                sendfile(-1, FILE_CHANNEL, map);
                 if(needclipboard >= 0) needclipboard++;
             }
             delete map;

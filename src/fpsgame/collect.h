@@ -210,7 +210,7 @@ struct collectclientmode : clientmode
     void losetokens(clientinfo *ci)
     {
         if(notgotbases || ci->state.tokens <= 0) return;
-        sendf(-1, 1, "ri2", N_LOSETOKENS, ci->clientnum); 
+        sendf(-1, MSG_CHANNEL,"ri2", N_LOSETOKENS, ci->clientnum); 
         ci->state.tokens = 0;
     }    
 #endif
@@ -246,7 +246,7 @@ struct collectclientmode : clientmode
             putint(p, t.yaw);
         }
         putint(p, -1);
-        sendpacket(-1, 1, p.finalize());
+        sendpacket(-1, MSG_CHANNEL, p.finalize());
         ci->state.tokens = 0;
     }
  
@@ -277,7 +277,7 @@ struct collectclientmode : clientmode
                         }
                     }
                     putint(p, -1);
-                    sendpacket(-1, 1, p.finalize());
+                    sendpacket(-1, MSG_CHANNEL, p.finalize());
                 }
             }
         }
@@ -314,7 +314,7 @@ struct collectclientmode : clientmode
             b.laststeal = gamemillis;
             ci->state.flags += ci->state.tokens;
             int score = addscore(team, ci->state.tokens);
-            sendf(-1, 1, "ri7", N_DEPOSITTOKENS, ci->clientnum, basenum, ci->state.tokens, team, score, ci->state.flags);
+            sendf(-1, MSG_CHANNEL,"ri7", N_DEPOSITTOKENS, ci->clientnum, basenum, ci->state.tokens, team, score, ci->state.flags);
             ci->state.tokens = 0;
             if(score >= SCORELIMIT) startintermission();
         }
@@ -329,7 +329,7 @@ struct collectclientmode : clientmode
                 b.laststeal = gamemillis;
                 int score = addscore(b.team, -1);
                 token &t = droptoken(b.o, rnd(360), team, lastmillis, -1 - basenum);
-                sendf(-1, 1, "ri9i3", N_STEALTOKENS, ci->clientnum, team, basenum, b.team, score, int(t.o.x*DMF), int(t.o.y*DMF), int(t.o.z*DMF), t.id, t.yaw, -1);
+                sendf(-1, MSG_CHANNEL,"ri9i3", N_STEALTOKENS, ci->clientnum, team, basenum, b.team, score, int(t.o.x*DMF), int(t.o.y*DMF), int(t.o.z*DMF), t.id, t.yaw, -1);
             }
         }
     }
@@ -341,7 +341,7 @@ struct collectclientmode : clientmode
         if(!t) return;
         int team = collectteambase(ci->team);
         if(t->team != team && (t->team > 0 || -t->team == team) && ci->state.tokens < TOKENLIMIT) ci->state.tokens++;
-        sendf(-1, 1, "ri4", N_TAKETOKEN, ci->clientnum, id, ci->state.tokens);  
+        sendf(-1, MSG_CHANNEL,"ri4", N_TAKETOKEN, ci->clientnum, id, ci->state.tokens);  
     }
 
     void update()
@@ -358,7 +358,7 @@ struct collectclientmode : clientmode
             }
         }
         if(resets.length())
-            sendf(-1, 1, "rivi", N_EXPIRETOKENS, resets.length(), resets.getbuf(), -1);
+            sendf(-1, MSG_CHANNEL,"rivi", N_EXPIRETOKENS, resets.length(), resets.getbuf(), -1);
     }
 
     void initclient(clientinfo *ci, packetbuf &p, bool connecting)

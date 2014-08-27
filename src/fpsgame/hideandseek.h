@@ -198,18 +198,18 @@ struct hideandseekclientmode : clientmode
             if (!actor) {
                 if (remaining > 0) {
                     defformatstring(msg)("%s suicided! %d Hiders remaining!", target->name, remaining);
-                    sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
+                    sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
                 } else {
                     defformatstring(msg)("%s suicided! All Hiders eliminated!", target->name);
-                    sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
+                    sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
                 }
             } else {
                 if (remaining > 0) {
                     defformatstring(msg)("%s killed %s! %d Hiders remaining!", actor->name, target->name, remaining);
-                    sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
+                    sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
                 } else {
                     defformatstring(msg)("%s killed %s! All Hiders eliminated!", actor->name, target->name);
-                    sendf(-1, 1, "ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
+                    sendf(-1, MSG_CHANNEL,"ri3s ", N_HUDANNOUNCE, 3000, E_ZOOM_OUT, msg);
                 }
             }
         }
@@ -221,13 +221,13 @@ struct hideandseekclientmode : clientmode
 
     void setseeker(clientinfo *ci) {
         copystring(ci->team, TEAM_SEEK, MAXTEAMLEN+1);
-        sendf(-1, 1, "riisi", N_SETTEAM, ci->clientnum, ci->team, 1);
+        sendf(-1, MSG_CHANNEL,"riisi", N_SETTEAM, ci->clientnum, ci->team, 1);
         seekersinfos.add(new seekersinfo(ci->clientnum, false));
     }
 
     void sethider(clientinfo *ci) {
         copystring(ci->team, TEAM_HIDE, MAXTEAMLEN+1);
-        sendf(-1, 1, "riisi", N_SETTEAM, ci->clientnum, ci->team, 1);
+        sendf(-1, MSG_CHANNEL,"riisi", N_SETTEAM, ci->clientnum, ci->team, 1);
     }
 
     vector<clientinfo*> getactiveplayers() {
@@ -263,7 +263,7 @@ struct hideandseekclientmode : clientmode
 
     void announceseekers(char* msg) {
         loopv(clients) if (isseeker(clients[i])) {
-            sendf(clients[i]->clientnum, 1, "ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_TOP, msg);
+            sendf(clients[i]->clientnum, MSG_CHANNEL, "ri3s ", N_HUDANNOUNCE, 1000, E_STATIC_TOP, msg);
         }
     }
 

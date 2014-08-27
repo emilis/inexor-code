@@ -237,7 +237,7 @@ namespace entities
             putint(p, d->clientnum);
             putint(p, tp);
             putint(p, td);
-            sendclientpacket(p.finalize(), 0);
+            sendclientpacket(p.finalize(), POS_CHANNEL);
             flushclient();
         }
     }
@@ -262,7 +262,7 @@ namespace entities
             putint(p, N_JUMPPAD);
             putint(p, d->clientnum);
             putint(p, jp);
-            sendclientpacket(p.finalize(), 0);
+            sendclientpacket(p.finalize(), POS_CHANNEL);
             flushclient();
         }
     }

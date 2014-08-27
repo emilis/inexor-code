@@ -232,8 +232,8 @@ enum
 };
 
 // network messages codes, c2s, c2c, s2c
-
-enum { PRIV_NONE = 0, PRIV_MASTER, PRIV_AUTH, PRIV_ADMIN };
+enum { POS_CHANNEL = 0, MSG_CHANNEL, FILE_CHANNEL }; //enet channels: can receive data in "parallel" (positions, messages, file-transfer)
+enum { PRIV_NONE = 0, PRIV_MASTER, PRIV_AUTH, PRIV_ADMIN }; //privileges
 
 enum
 {
