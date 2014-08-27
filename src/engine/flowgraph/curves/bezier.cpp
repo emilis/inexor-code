@@ -28,7 +28,7 @@ CBezierCurve::~CBezierCurve() {
 /**
 * Try to add parameter point to curve
 */
-void CBezierCurve::AddParamPoint(SPoint point) 
+void CBezierCurve::AddParamPoint(vec point) 
 {
 	// check if parameter point limit was reached or not
 	if(m_ParameterPoints.size() < m_uiParamLimit) {
@@ -42,16 +42,22 @@ void CBezierCurve::AddParamPoint(float x, float y, float z)
 	// check if parameter point limit was reached or not
 	if(m_ParameterPoints.size() < m_uiParamLimit) 
 	{
-		// add point manually
-		SPoint point;
-		point.x = x;
-		point.y = y;
-		point.z = z;
 		// push back (= add) parameter point
-		m_ParameterPoints.push_back( point);
+		m_ParameterPoints.push_back( vec(x,y,z));
 	}
 }
 
+/*
+* Reset both input and output vector of this curve
+*
+*/
+void CBezierCurve::ClearPoints(void) 
+{
+	// clear input buffer
+	m_ParameterPoints.clear();
+	// clear output buffer
+	m_ComputedPoints.clear();
+}
 
 // binomial coefficient for bernstein polynom
 unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
@@ -65,6 +71,35 @@ unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 	return r;
 }
 
+/**
+* Generate random curve
+*/
+void CBezierCurve::GenerateRandomCurve(void) 
+{
+	// Initialise random number generator
+	srand((unsigned)time(NULL) + SDL_GetTicks() );
+
+	// Generate at most 20 points with random positions
+	for(int i=0; i<30;  i++) 
+	{
+		vec point;
+		
+		// Generate positions
+		point.x = rand() % 512 - rand() % 512 + 512;
+		point.y = rand() % 512 - rand() % 512 + 512;
+		point.z = rand() % 512 - rand() % 512 + 512;
+
+		// Debug messages
+		#define BEZ_CURVE_TEST
+		#ifdef BEZ_CURVE_TEST
+			conoutf(CON_DEBUG, "%f %f %f", point.x, point.y, point.z);
+		#endif
+
+		// Add point
+		m_ParameterPoints.push_back(point);
+	}
+}
+
 
 /**
 * Calculate (Method 1)
@@ -75,7 +110,7 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 	float fStep = 1.0f / m_fCalcPrecision;
 
 	// debug messages
-	#define CURVE_RENDERER_DEBUG_MODE
+	//#define CURVE_RENDERER_DEBUG_MODE
 	#ifdef CURVE_RENDERER_DEBUG_MODE
 		conoutf(CON_DEBUG, "Precision: %f", fStep);
 	#endif
@@ -87,7 +122,7 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 	for( float fPos=0.0f;  fPos <= 1.0f;  fPos+=fStep) 
 	{
 		// computed point
-		SPoint finished_point;
+		vec finished_point;
 		finished_point.x = 0.0f;
 		finished_point.y = 0.0f;
 		finished_point.z = 0.0f;

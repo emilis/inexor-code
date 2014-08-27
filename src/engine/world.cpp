@@ -574,7 +574,7 @@ VAR(showentradius, 0, 1, 1);
 void renderentring(const extentity &e, float radius, int axis)
 {
     if(radius <= 0) return;
-    glBegin(GL_LINE_LOOP);
+    /*glBegin(GL_LINE_LOOP);
     loopi(15)
     {
         vec p(e.o);
@@ -584,6 +584,7 @@ void renderentring(const extentity &e, float radius, int axis)
         glVertex3fv(p.v);
     }
     glEnd();
+	*/
 }
 
 void renderentsphere(const extentity &e, float radius)

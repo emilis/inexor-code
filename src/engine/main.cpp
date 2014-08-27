@@ -1227,18 +1227,13 @@ int main(int argc, char **argv)
 	* Bezier curve renderer here
 	*/
 	CBezierCurve curve;
-	curve.AddParamPoint(512.0f, 600.0f, -600.0f);
-	curve.AddParamPoint(423.0, 300.0f, 400.0f);
-	curve.AddParamPoint(-512.0f, -530.0f, 612.0f);
-	curve.AddParamPoint(412.0f, 1000.0f, -612.0f);
-	curve.AddParamPoint(-532.0f, -530.0f, 512.0f);
-	curve.AddParamPoint(-302.0f, 200.0f, -612.0f);
-	curve.AddParamPoint(-112.0f, -530.0f, 512.0f);
-
+	// randomly fill with parameter points
+	curve.GenerateRandomCurve();
 
 	/**
 	* Calculate points
 	*/
+	curve.SetPrecision(50.0f); // too high?
 	curve.CalculateCurve_BernsteinPolynom();
 
 	/**
@@ -1277,7 +1272,8 @@ int main(int argc, char **argv)
         if(frames) updatefpshistory(elapsedtime);
         frames++;
 
-        // miscellaneous general game effects
+		/***************************************************/
+		// miscellaneous general game effects
         recomputecamera();
         updateparticles();
         updatesounds();
@@ -1287,6 +1283,18 @@ int main(int argc, char **argv)
 		*/
 		curve_renderer.RenderCurve();
 
+		/**
+		* Regenerate curve
+		*/
+		
+		if(SDL_GetTicks() % 2000 < 40) 
+		{
+			conoutf(CON_DEBUG, "Curve regenerated");
+			curve.ClearPoints();
+			curve.GenerateRandomCurve();
+			curve.CalculateCurve_BernsteinPolynom();
+		}
+		
         if(minimized) continue;
 
         inbetweenframes = false;

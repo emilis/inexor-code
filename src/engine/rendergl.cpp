@@ -1009,6 +1009,14 @@ void recomputecamera()
         }
     }
 
+	// Debugging messages
+	//#define HANNI_CAMERA_POSITION_DEBUG_TEST
+	#ifdef HANNI_CAMERA_POSITION_DEBUG_TEST
+	if(SDL_GetTicks() % 3000 < 10) {
+		conoutf("Current camera position: %f %f %f", camera1->o.x, camera1->o.y, camera1->o.z);
+	}
+	#endif
+
     setviewcell(camera1->o);
 }
 

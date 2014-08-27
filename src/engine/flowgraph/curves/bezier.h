@@ -50,18 +50,22 @@
 #include <deque>
 #include <iterator>
 
+/**
+* Include Sauerbratens Engine
+*/
 
 /**
 * Maybe we could use Sauerbratens vector/point classes here
 * Replace it if you want to...
 */
-struct SPoint 
+/*struct SPoint 
 {
 	// just simple coordinates
 	float x;
 	float y;
 	float z;
 };
+*/
 
 
 /**
@@ -79,15 +83,27 @@ class CBezierCurve
 	/**
 	* A vector of parameter points which will be computed to a curve
 	*/
-	std::vector<SPoint> m_ParameterPoints;
-	std::vector<SPoint> m_ComputedPoints;
+	std::vector<vec> m_ParameterPoints;
+	std::vector<vec> m_ComputedPoints;
 
 	/**
 	* Adding parameter points
 	* As soon as we add points, the curve is NOT computed (again)
 	*/
 	void AddParamPoint(float x, float y, float z);
-	void AddParamPoint(SPoint point);
+	void AddParamPoint(vec point);
+
+	/**
+	* Add random curve
+	*/
+	void GenerateRandomCurve(void);
+
+	/**
+	* Clear parameter input and output buffer
+	*
+	*/
+	void ClearPoints(void);
+
 
 	/**
 	* Set Limits
@@ -115,7 +131,7 @@ class CBezierCurve
 	/**
 	* Get finished curve data
 	*/
-	SPoint GetCurvePos(float interpolation_value);
+	vec GetCurvePos(float interpolation_value);
 
 
 

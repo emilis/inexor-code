@@ -255,11 +255,14 @@ namespace game
 		   EDITMODE = SCRIPTING MODE!
 		*/
 
+		//#define HANNI_PARTICLE_DEBUG_MODE
+		#ifdef HANNI_PARTICLE_DEBUG_MODE
 		if(editmode) 
 		{
 			vec text_position(512.0f,512.0f,512.0f);
 			particle_text(text_position, "HELLOWORLD", PART_TEXT, 1, 0xFF00B2, 10.0f);
 		}
+		#endif
 
 		/*******************************************************************************************/
 
