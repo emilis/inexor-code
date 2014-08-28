@@ -956,7 +956,10 @@ extern CBezierCurve camera_position;
 extern CCurveRenderer curve_renderer;
 
 
-
+/**
+* Test fly cam!
+*/
+VARP(flycamtest, 0, 0, 1);
 
 void recomputecamera()
 {
@@ -1020,29 +1023,19 @@ void recomputecamera()
         }
     }
 
-
-	/**
-	* Set camera position
-	float fParam = SDL_GetTicks() % 4000 / 4000.0f;
-	//camera1->o = camera_position.CalculatePointFromFloat( fParam );
-	
-	int current_point_index = camera_position.GetPointIndexFromFloat(fParam);
-	int next_point_index = current_point_index + 1;
-
-	vec current_pos = camera_position.GetComputedPointIndexed(current_point_index);
-	vec next_pos = camera_position.GetComputedPointIndexed(next_point_index);
-
-	vec current_pos = camera_position.CalculatePointFromFloat(fParam);
-	vec next_pos = camera_position.CalculatePointFromFloat(fParam + 0.01f);
-
-	float yaw, pitch;
-	// x.sub(y).... no overloaded operators? you kidding?
-	vectoyawpitch( next_pos.sub(current_pos), yaw, pitch);
-	
-	camera1->o = current_pos;
-	camera1->yaw = yaw;
-	camera1->pitch = pitch;
-	*/
+	if(flycamtest)
+	{
+		float fParam = SDL_GetTicks() % 4000 / 4000.0f;
+		int current_point_index = camera_position.GetPointIndexFromFloat(fParam);
+		int next_point_index = current_point_index + 1;
+		vec current_pos = camera_position.GetComputedPointIndexed(current_point_index);
+		vec next_pos = camera_position.GetComputedPointIndexed(next_point_index);
+		float yaw, pitch;
+		vectoyawpitch( next_pos.sub(current_pos), yaw, pitch);
+		camera1->o = current_pos;
+		camera1->yaw = yaw;
+		camera1->pitch = pitch;
+	}	
 	
 	
 	//#define HANNI_BEZ_INDEX_CACHE_TEST
