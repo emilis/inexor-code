@@ -1,5 +1,5 @@
 /**
-* A bézier curve (named after french mathematician Pierre Étienne Bézier) is a parametric curve
+* A bï¿½zier curve (named after french mathematician Pierre ï¿½tienne Bï¿½zier) is a parametric curve
 * whose only purpose is to look nice, soft and elegant.
 * Sometimes it is not easy to create elegant and flexible objects with mathematics.
 * Bezier curves are FUNDAMENTAL curves and very essential in computer graphics and image processing
@@ -29,10 +29,10 @@
 /**
 * In honor of:
 *
-*	Pierre Étienne BÉZIER   (September 1, 1910 – November 25, 1999), French mathematician and engineer at RENAULT
+*	Pierre ï¿½tienne Bï¿½ZIER   (September 1, 1910 ï¿½ November 25, 1999), French mathematician and engineer at RENAULT
 *   Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
-*	Sergei Natanovich BERNSTEIN   (March 5, 1880 – October 26, 1968), Russian mathematician.
-*   Charles HERMITE   (December 24, 1822 – January 14, 1901), French mathematician
+*	Sergei Natanovich BERNSTEIN   (March 5, 1880 ï¿½ October 26, 1968), Russian mathematician.
+*   Charles HERMITE   (December 24, 1822 ï¿½ January 14, 1901), French mathematician
 */
 
 
@@ -208,5 +208,10 @@ class CBezierCurve
 
 };
 
+
+/**
+* Make curve global
+*/
+extern CBezierCurve dynamic_curve;
 
 #endif /* #ifndef ENGINE_BEZIER_CURVE_H */

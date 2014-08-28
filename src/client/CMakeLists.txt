@@ -54,6 +54,9 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/glare
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/blob
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/osd
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/flowgraph/flowgraph
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/flowgraph/curves/bezier
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/flowgraph/curves/curverenderer
 
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ai
     ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/client       

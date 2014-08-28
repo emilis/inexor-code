@@ -1012,14 +1012,6 @@ VAR(numcpus, 1, 1, 16);
 
 
 
-/**
-* Make curve global
-*/
-CBezierCurve dynamic_curve;
-/**
-* Global curve renderer
-*/
-CCurveRenderer curve_renderer;
 
 
 // FIXME: WTF? - main is in macutils.mm?
@@ -1277,7 +1269,7 @@ int main(int argc, char **argv)
 		*/
 		vector<extentity*> curves = entities::getents();
 
-		// Vollständig bereinigen!
+		// Vollstï¿½ndig bereinigen!
 		dynamic_curve.ClearAllPoints();
 
 		// If vector is valid

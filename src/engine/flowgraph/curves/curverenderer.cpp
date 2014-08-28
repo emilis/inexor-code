@@ -94,3 +94,8 @@ void CCurveRenderer::RenderParameterPoints(void)
 		particle_text( m_pCurve->GetParameterPointIndexed(i), "H", PART_TEXT, 1, 0x00FF19, 10.0f);
 	}
 }
+
+/**
+* Global curve renderer
+*/
+CCurveRenderer curve_renderer;

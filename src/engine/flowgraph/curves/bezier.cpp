@@ -296,3 +296,8 @@ void CBezierCurve::SetPrecision(float precision) {
 bool CBezierCurve::IsCurveComputed(void) {
 	return m_bComputed;
 }
+
+/**
+* Make curve global
+*/
+CBezierCurve dynamic_curve;

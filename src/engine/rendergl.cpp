@@ -949,14 +949,6 @@ void mousemove(int dx, int dy)
 }
 
 /**
-* External linkage to camera position and other curves
-*/
-extern CBezierCurve curve;
-extern CBezierCurve camera_position;
-extern CCurveRenderer curve_renderer;
-
-
-/**
 * Test fly cam!
 */
 VARP(flycamtest, 0, 0, 1);
@@ -1026,10 +1018,10 @@ void recomputecamera()
 	if(flycamtest)
 	{
 		float fParam = SDL_GetTicks() % 4000 / 4000.0f;
-		int current_point_index = camera_position.GetPointIndexFromFloat(fParam);
+		int current_point_index = dynamic_curve.GetPointIndexFromFloat(fParam);
 		int next_point_index = current_point_index + 1;
-		vec current_pos = camera_position.GetComputedPointIndexed(current_point_index);
-		vec next_pos = camera_position.GetComputedPointIndexed(next_point_index);
+		vec current_pos = dynamic_curve.GetComputedPointIndexed(current_point_index);
+		vec next_pos = dynamic_curve.GetComputedPointIndexed(next_point_index);
 		float yaw, pitch;
 		vectoyawpitch( next_pos.sub(current_pos), yaw, pitch);
 		camera1->o = current_pos;

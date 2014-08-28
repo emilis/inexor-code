@@ -50,5 +50,9 @@ class CCurveRenderer {
 	CBezierCurve* m_pCurve;
 };
 
+/**
+* Global curve renderer
+*/
+extern CCurveRenderer curve_renderer;
 
 #endif /* #ifndef ENGINE_BEZIER_CURVE_RENDERER_H */
