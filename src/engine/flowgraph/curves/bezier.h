@@ -28,8 +28,11 @@
 
 /**
 * In honor of:
-*	Pierre Étienne Bézier (September 1, 1910 – November 25, 1999), Rrench mathematician and engineer at RENAULT.
-*	Sergei Natanovich Bernstein (March 5, 1880 – October 26, 1968), Russian mathematician.
+*
+*	Pierre Étienne BÉZIER   (September 1, 1910 – November 25, 1999), French mathematician and engineer at RENAULT
+*   Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
+*	Sergei Natanovich BERNSTEIN   (March 5, 1880 – October 26, 1968), Russian mathematician.
+*   Charles HERMITE   (December 24, 1822 – January 14, 1901), French mathematician
 */
 
 
@@ -52,6 +55,18 @@
 
 
 /**
+* We need an own structure for weight as well
+*/
+struct SPoint 
+{
+	// the point's position
+	vec pos;
+	// the weight of this point
+	float weight;
+};
+
+
+/**
 * A class for bezier curves
 */
 class CBezierCurve 
@@ -66,7 +81,7 @@ class CBezierCurve
 	/**
 	* A vector of parameter points which will be computed to a curve
 	*/
-	std::vector<vec> m_ParameterPoints;
+	std::vector<SPoint> m_ParameterPoints;
 	std::vector<vec> m_ComputedPoints;
 
 	/**
@@ -80,19 +95,24 @@ class CBezierCurve
 	* Adding parameter points
 	* As soon as we add points, the curve is NOT computed (again)
 	*/
-	void AddParamPoint(float x, float y, float z);
+	// In order to scale the curve to the middle correctly, use Sauerbraten's map scale
+	#define SAUERBRATEN_STANDARD_MAP_SIZE 512.0f
+	// Add point methods
+	void AddParamPoint(float x, float y, float z, float weight = SAUERBRATEN_STANDARD_MAP_SIZE);
 	void AddParamPoint(vec point);
 
 	/**
 	* Add random curve
 	*/
-	void GenerateRandomCurve(unsigned int maxparameterpoints);
+	void GenerateRandomCurve(unsigned int maxparameterpoints, bool autocalculate = true);
 
 	/**
 	* Clear parameter input and output buffer
 	*
 	*/
-	void ClearPoints(void);
+	void ClearAllPoints(void);
+	void ClearParameterPoints(void);
+	void ClearComputedPoints(void);
 
 
 	/**
@@ -118,10 +138,24 @@ class CBezierCurve
 	void CalculateCurve_BernsteinPolynom(void);
 	void CalculateCurve_DeCasteljauRecursive(void);
 
+
 	/**
 	* Get a point
+	*
+	*	! ## ## IMPORTANT WARNING ## ## !
+	*
+	* THIS POINT WILL BE COMPUTED IN REAL TIME! 
+	* IT IS REALLY SLOW. SEE MORE DETAILS IN bezier.cpp
+	*
 	*/
 	vec CalculatePointFromFloat(float curveposition);
+
+	
+	/**
+	* Get a point from the cache according to the progress (float)
+	*/
+	unsigned int GetPointIndexFromFloat(float curveposition);
+
 
 	/**
 	* Get finished curve data
@@ -139,9 +173,17 @@ class CBezierCurve
 	vec GetParameterPointIndexed(unsigned int index);
 
 	/**
+	* Get access to m_bComputed [Read only!]
+	*/
+	bool IsCurveComputed(void);
+
+	/**
 	* We will add some get/set functions so we cann keep this private
 	*/
 	protected:
+
+	// bernstein position
+	float bernsteinposition(float val, int i, float position, int elementcount, float weight);
 	
 	// binomial coefficient for bernstein polynom
 	unsigned int binomialCoef(unsigned int n, const unsigned int k);

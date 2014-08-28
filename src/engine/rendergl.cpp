@@ -2,6 +2,7 @@
 
 #include "engine.h"
 
+
 bool hasVBO = false, hasDRE = false, hasOQ = false, hasTR = false, hasFBO = false, hasDS = false, hasTF = false, hasBE = false, hasBC = false, hasCM = false, hasNP2 = false, hasTC = false, hasS3TC = false, hasFXT1 = false, hasTE = false, hasMT = false, hasD3 = false, hasAF = false, hasVP2 = false, hasVP3 = false, hasPP = false, hasMDA = false, hasTE3 = false, hasTE4 = false, hasVP = false, hasFP = false, hasGLSL = false, hasGM = false, hasNVFB = false, hasSGIDT = false, hasSGISH = false, hasDT = false, hasSH = false, hasNVPCF = false, hasRN = false, hasPBO = false, hasFBB = false, hasUBO = false, hasBUE = false, hasMBR = false, hasFC = false, hasTEX = false;
 int hasstencil = 0;
 
@@ -947,6 +948,16 @@ void mousemove(int dx, int dy)
     }
 }
 
+/**
+* External linkage to camera position and other curves
+*/
+extern CBezierCurve curve;
+extern CBezierCurve camera_position;
+extern CCurveRenderer curve_renderer;
+
+
+
+
 void recomputecamera()
 {
     game::setupcamera();
@@ -1009,14 +1020,44 @@ void recomputecamera()
         }
     }
 
+
+	/**
+	* Set camera position
+	float fParam = SDL_GetTicks() % 4000 / 4000.0f;
+	//camera1->o = camera_position.CalculatePointFromFloat( fParam );
+	
+	int current_point_index = camera_position.GetPointIndexFromFloat(fParam);
+	int next_point_index = current_point_index + 1;
+
+	vec current_pos = camera_position.GetComputedPointIndexed(current_point_index);
+	vec next_pos = camera_position.GetComputedPointIndexed(next_point_index);
+
+	vec current_pos = camera_position.CalculatePointFromFloat(fParam);
+	vec next_pos = camera_position.CalculatePointFromFloat(fParam + 0.01f);
+
+	float yaw, pitch;
+	// x.sub(y).... no overloaded operators? you kidding?
+	vectoyawpitch( next_pos.sub(current_pos), yaw, pitch);
+	
+	camera1->o = current_pos;
+	camera1->yaw = yaw;
+	camera1->pitch = pitch;
+	*/
+	
+	
+	//#define HANNI_BEZ_INDEX_CACHE_TEST
+	#ifdef HANNI_BEZ_INDEX_CACHE_TEST
+	conoutf(CON_DEBUG, "%f // %d/%d", fParam, camera_position.GetPointIndexFromFloat(fParam), camera_position.m_ComputedPoints.size());
+	#endif
+
 	// Debugging messages
 	//#define HANNI_CAMERA_POSITION_DEBUG_TEST
 	#ifdef HANNI_CAMERA_POSITION_DEBUG_TEST
-	if(SDL_GetTicks() % 3000 < 10) {
+	if(SDL_GetTicks() % 500 < 10) {
 		conoutf("Current camera position: %f %f %f", camera1->o.x, camera1->o.y, camera1->o.z);
 	}
 	#endif
-
+	
     setviewcell(camera1->o);
 }
 
@@ -2005,12 +2046,6 @@ void gl_drawhud(int w, int h);
 
 int xtraverts, xtravertsva;
 
-/**
-* Render main frame
-*/
-extern CBezierCurve curve;
-extern CCurveRenderer curve_renderer;
-
 
 
 void gl_drawframe(int w, int h)
@@ -2091,12 +2126,12 @@ void gl_drawframe(int w, int h)
     if(!limitsky()) drawskybox(farplane, false);
 
     renderdecals(true);
-
+	
 	/**
-	* Render parameter points (using particle_text) here
+	* Render curve
 	*/
-	// render curve parameters as well
-	curve_renderer.RenderParameterPoints();
+	curve_renderer.RenderCurve();
+
 
 
     rendermapmodels();
@@ -2141,21 +2176,7 @@ void gl_drawframe(int w, int h)
     renderpostfx();
 
     defaultshader->set();
-
-
-	/**
-	* Render curve
-	*/
-	curve_renderer.RenderCurve();
-
-	// render current point
-	float bezier_pos_parameter = 0.33f;
-	// feed output position with float val (range: 0.0f to 1.0f);
-	vec custom_bez_point = curve.CalculatePointFromFloat(bezier_pos_parameter);
 	
-	// render big point at current position
-	curve_renderer.RenderPoint(custom_bez_point);
-
 
     g3d_render();
 

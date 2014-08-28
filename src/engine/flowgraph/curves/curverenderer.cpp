@@ -35,12 +35,18 @@ void CCurveRenderer::SetCurve(CBezierCurve *curve)
 */
 void CCurveRenderer::RenderCurve(void) 
 {
+	// abort if curve is not computed yet
+	if(m_pCurve->IsCurveComputed() == false) return;
+
 	glPushMatrix();
 	// begin render process
 	glBegin(GL_LINES);
 	
 	// Set color to red
 	glColor3f(1.0f, 0.0f, 0.0f);
+
+	// Set line thickness
+	glLineWidth(15.0f);
 
 	// loop through computed points and render them	
 	for(unsigned int i=0; i<m_pCurve->m_ComputedPoints.size()   /*!!!*/ -1 ; i++) 

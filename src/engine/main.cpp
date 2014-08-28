@@ -1012,15 +1012,14 @@ VAR(numcpus, 1, 1, 16);
 
 
 
-
-
 /**
 * Make curve global
 */
-CBezierCurve curve;
+CBezierCurve dynamic_curve;
+/**
+* Global curve renderer
+*/
 CCurveRenderer curve_renderer;
-
-
 
 
 // FIXME: WTF? - main is in macutils.mm?
@@ -1236,24 +1235,14 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
-	/**
-	* Bezier curve renderer here
-	*/
-	// randomly fill with parameter points
-	curve.GenerateRandomCurve((unsigned)5);
 
-	/**
-	* Calculate points
-	*/
-	curve.SetPrecision(50.0f); // too high?
-	curve.CalculateCurve_BernsteinPolynom();
-
-	/**
-	* Initialise curve renderer
-	*/
-	curve_renderer.SetCurve( &curve);
+	// Set curve precision
+	dynamic_curve.SetPrecision(100.0f);
+	// initialise curve renderer
+	curve_renderer.SetCurve( &dynamic_curve);
 
 
+	
     for(;;)
     {
         static int frames = 0;
@@ -1283,25 +1272,34 @@ int main(int argc, char **argv)
         if(frames) updatefpshistory(elapsedtime);
         frames++;
 
-		/***************************************************/
+		/**
+		* Prepare dynamic renderin of bezier curves
+		*/
+		vector<extentity*> curves = entities::getents();
+
+		// Vollständig bereinigen!
+		dynamic_curve.ClearAllPoints();
+
+		// If vector is valid
+		if(curves.ulen > 0) 
+		{
+			for(int i=0; i<curves.ulen; i++)
+			{
+				if(47 == curves[i]->type) 
+				{
+					// Add this as parameter point	
+					dynamic_curve.AddParamPoint(curves[i]->o);
+				}
+			}
+		}
+		// Dynamic rendering
+		dynamic_curve.CalculateCurve_BernsteinPolynom();
+
+
 		// miscellaneous general game effects
         recomputecamera();
-        updateparticles(); // no
+        updateparticles();
         updatesounds();
-		
-		/**
-		* Regenerate curve
-		*/
-		#define BEZIER_CURVE_RESET_INTERVAL 4000 // every 7 seconds
-
-		if(SDL_GetTicks() % BEZIER_CURVE_RESET_INTERVAL < 40) 
-		{
-			//conoutf(CON_DEBUG, "Curve regenerated");
-			curve.ClearPoints();
-			curve.GenerateRandomCurve((unsigned)20);
-			curve.SetPrecision(100);
-			curve.CalculateCurve_BernsteinPolynom();
-		}
 		
         if(minimized) continue;
 

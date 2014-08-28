@@ -862,13 +862,19 @@ namespace entities
             "start", "finish", "checkpoint",
             "gravity", "friction", "jump", "speed",
 			
+			/**
+			* Bezierkurven-Codeblock
+			*/
+			"curve",
+
+						
 			/************************************************/
 			/* Flowchart-Codeblock
 			*/
-			"mainstart" // Start des Hauptprogramms, welches beim Laden der Map gestartet wird
-			"event" // Ereignis-Trigger
-			"timer" // Timer
-			"code" // Codeblock
+			"mainstart", // Start des Hauptprogramms, welches beim Laden der Map gestartet wird
+			"event", // Ereignis-Trigger
+			"timer", // Timer
+			"code", // Codeblock
 			/************************************************/
 
 			/* Two empty strings seem to end this list (?)
