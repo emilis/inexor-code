@@ -248,7 +248,7 @@ namespace game
                 g.pushlist();
                 g.strut(6);
                 g.text("acc", fgcolor);
-                loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, o->totaldamage/max(o->totalshots, 1)));
+                loopscoregroup(o, g.textf("%d%%", 0xFFFFDD, NULL, (o->totaldamage*100)/max(o->totalshots, 1)));
                 g.poplist();
             }
 
