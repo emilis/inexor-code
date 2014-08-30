@@ -1079,10 +1079,25 @@ namespace server
         demotmp->read(d.data, len);
         DELETEP(demotmp);
     }
-        
-    void enddemorecord()
+
+	//writes the info of the played game at the end of the demo, followed by the size of the footer.
+	//todo signalize readdemo end of normal part
+    void writedemofooter()
+	{
+		const char *map = game::getclientmap(), *name = strrchr(map, '/');
+		gameinfo gi;
+		int size = sizeof(gi.map);
+		copystring(gi.map, name ? name+1 : map);
+		demorecord->write(gi.map, sizeof(gi.map));
+		lilswap(&size, 1);
+		demorecord->write(&size, 1);
+	}
+    
+	void enddemorecord()
     {
         if(!demorecord) return;
+
+		writedemofooter();
 
         DELETEP(demorecord);
 
@@ -1201,6 +1216,25 @@ namespace server
 
         loopv(clients) sendwelcome(clients[i]);
     }
+	void getdemofooter() //test
+	{
+		if(!demoplayback) return;
+		int size;
+		stream::offset oldpos = demoplayback->tell();
+		demoplayback->seek(- int(sizeof(size)), SEEK_END);
+        if(demoplayback->read(&size, sizeof(size))!=sizeof(size))
+        {
+           conoutf("No valid info found");
+            return;
+        }
+        lilswap(&size, 1);
+		demoplayback->seek(-size, SEEK_CUR);
+		char buf[5000];
+		demoplayback->read(buf, size);
+		conoutf("buf = %s, size %d", buf, size);
+		demoplayback->seek(oldpos, SEEK_SET);
+	}
+	COMMAND(getdemofooter, "");
 
     void setupdemoplayback()
     {
