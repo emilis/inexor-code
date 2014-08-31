@@ -26,6 +26,7 @@
 *  5) Can we calculate the required precision of a curve?
 */
 
+
 /**
 * In honor of:
 *
@@ -179,6 +180,7 @@ class CBezierCurve
 	*/
 	vec CalculatePointFromFloat(float curveposition);
 
+
 	/** ----------------------------- CAHCED CALCULATIONS ----------------------------- **/
 
 	/**
@@ -206,7 +208,6 @@ class CBezierCurve
 	* Get access to m_bComputed [Read only!]
 	*/
 	bool IsCurveComputed(void);
-
 
 
 	/**
@@ -237,7 +238,6 @@ class CBezierCurve
 	* Is the curve computed or not?
 	*/
 	bool m_bComputed;
-
 };
 
 

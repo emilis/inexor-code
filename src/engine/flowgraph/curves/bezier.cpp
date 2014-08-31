@@ -26,17 +26,17 @@ CBezierCurve::CBezierCurve()
 	// curve not computed in the beginning
 	m_bComputed = false;
 	// set default precision
-	m_fCalcPrecision = 40.0f; // 1.0f up to 20.0f ?
+	m_fCalcPrecision = 100.0f; // 1.0f up to 20.0f ?
 	// set parameter point limit
 	m_uiParamLimit = BEZIER_CURVE_PARAMETER_POINT_LIMIT;
 }
+
 
 /**
 * Destructor
 */
 CBezierCurve::~CBezierCurve() 
 {
-	// nothing to destruct (yet)
 }
 
 /**

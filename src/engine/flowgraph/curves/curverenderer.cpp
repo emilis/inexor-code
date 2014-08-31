@@ -82,6 +82,7 @@ void CCurveRenderer::RenderPoint(vec point)
 	glPopMatrix();
 }
 
+
 /**
 * Render parameter points
 */

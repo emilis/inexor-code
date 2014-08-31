@@ -25,6 +25,11 @@
 * Include curve renderer
 */
 #include "flowgraph/curves/curverenderer.h"
+/**
+* Include benchmark system
+*/
+#include "flowgraph/tools/benchmark.h"
+
 
 
 // GL_ARB_multitexture
