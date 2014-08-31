@@ -159,7 +159,7 @@ class CNodeTimer : public CNode
 	void node_input(void) 
 	{
 		// run node's child nodes
-		for(int i=0; i<m_pChilds.size(); i++) 
+		for(unsigned int i=0; i<m_pChilds.size(); i++) 
 		{
 			/**
 			* Call child function which will be implemented

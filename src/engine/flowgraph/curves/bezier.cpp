@@ -34,21 +34,23 @@ CBezierCurve::CBezierCurve()
 /**
 * Destructor
 */
-CBezierCurve::~CBezierCurve() {
+CBezierCurve::~CBezierCurve() 
+{
 	// nothing to destruct (yet)
 }
 
 /**
 * Try to add parameter point to curve
 */
-void CBezierCurve::AddParamPoint(vec point) 
+void CBezierCurve::AddParamPoint(vec point, float weight) 
 {
 	// check if parameter point limit was reached or not
 	if(m_ParameterPoints.size() < m_uiParamLimit) 
 	{
 		SPoint p;
 		p.pos = point;
-		p.weight = 1.0f;
+		// apply weight
+		p.weight = weight;
 
 		// push back (= add) parameter point
 		m_ParameterPoints.push_back( p );
@@ -65,6 +67,7 @@ void CBezierCurve::AddParamPoint(float x, float y, float z, float weight)
 	{
 		SPoint p;
 		p.pos = vec(x,y,z);
+		// apply weight
 		p.weight = weight;
 
 		// push back (= add) parameter point
@@ -86,14 +89,18 @@ void CBezierCurve::ClearAllPoints(void)
 /**
 * Clear only computed points vector
 */
-void CBezierCurve::ClearComputedPoints(void) {
+void CBezierCurve::ClearComputedPoints(void) 
+{
+	// clear computed points
 	m_ComputedPoints.clear();
 }
 
 /**
 * Clear parameter points vector
 */
-void CBezierCurve::ClearParameterPoints(void) {
+void CBezierCurve::ClearParameterPoints(void) 
+{
+	// clear parameter points
 	m_ParameterPoints.clear();
 }
 
@@ -115,7 +122,7 @@ unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 /**
 * Generate random curve
 */
-void CBezierCurve::GenerateRandomCurve(unsigned int maxparameterpoints, bool autocalculate ) 
+void CBezierCurve::GenerateRandomCurve(unsigned int maxparameterpoints, bool autocalculate) 
 {
 	// break if too many parameter were passed
 	if(maxparameterpoints > m_uiParamLimit) return;
@@ -133,7 +140,7 @@ void CBezierCurve::GenerateRandomCurve(unsigned int maxparameterpoints, bool aut
 		p.pos.z = rand() % 1024 - rand() % 1024 + 1024;
 
 		// Generate random weight
-		p.weight = 512.0f;
+		p.weight = 1.0f;
 
 		// Add point
 		m_ParameterPoints.push_back( p );
@@ -185,11 +192,11 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 }
 
 
+/**
+* Bernstein polynom
+*/
 float CBezierCurve::bernsteinposition(float value, int currentelement, float position, int elementcount, float weight)
 {
-	/**
-	* Bernstein polynom
-	*/
 	// avoid crash
 	if(position >= 1.0f) position= 0.999f;
 	/**

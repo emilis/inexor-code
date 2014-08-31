@@ -2115,6 +2115,8 @@ void gl_drawframe(int w, int h)
 	/**
 	* Render curve
 	*/
+	lineshader->set();
+	// render
 	curve_renderer.RenderCurve();
 
 

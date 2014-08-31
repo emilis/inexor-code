@@ -1,5 +1,5 @@
 /**
-* A b�zier curve (named after french mathematician Pierre �tienne B�zier) is a parametric curve
+* A bezier curve (named after french mathematician Pierre Etienne Bezier) is a parametric curve
 * whose only purpose is to look nice, soft and elegant.
 * Sometimes it is not easy to create elegant and flexible objects with mathematics.
 * Bezier curves are FUNDAMENTAL curves and very essential in computer graphics and image processing
@@ -29,10 +29,10 @@
 /**
 * In honor of:
 *
-*	Pierre �tienne B�ZIER   (September 1, 1910 � November 25, 1999), French mathematician and engineer at RENAULT
+*	Pierre etienne BE0IER   (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
 *   Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
-*	Sergei Natanovich BERNSTEIN   (March 5, 1880 � October 26, 1968), Russian mathematician.
-*   Charles HERMITE   (December 24, 1822 � January 14, 1901), French mathematician
+*	Sergei Natanovich BERNSTEIN   (March 5, 1880 - October 26, 1968), Russian mathematician.
+*   Charles HERMITE   (December 24, 1822 - January 14, 1901), French mathematician
 */
 
 
@@ -61,114 +61,144 @@ struct SPoint
 {
 	// the point's position
 	vec pos;
-	// the weight of this point
+	// the parameter weight of this point
 	float weight;
 };
 
 
 /**
-* A class for bezier curves
+* A simple class interface 
+* for bezier curve progressing
 */
 class CBezierCurve 
 {
 	public:
 
-	// constructor
+	// constructor: class initialisation
 	CBezierCurve();
 	// destructor
 	~CBezierCurve();
-
-	/**
-	* A vector of parameter points which will be computed to a curve
-	*/
+	
+	// A vector of parameter points which will be computed to a curve
 	std::vector<SPoint> m_ParameterPoints;
+
+	// A vector for storing the computed points
 	std::vector<vec> m_ComputedPoints;
 
+
 	/**
-	* TODO: Store a map of "current points"
+	* Method for adding parameter points
+	* Parameters: 
+	*	float x		the x position of the point which will be added
+	*	float y		the y position of the point which will be added
+	*	float z		the z position of the point which will be added
+	*	weight		the mathematic importance coefficient of this parameter
 	*/
-	//std::map<char*, vec> m_NamedPoints;
-
-	vec m_CurrentPoint;
+	void AddParamPoint(float x, float y, float z, float weight = 1.0f);
 
 	/**
-	* Adding parameter points
-	* As soon as we add points, the curve is NOT computed (again)
+	* Overlaoded Sauerbraten vector method
+	*	vec point	a sauerbraten vector which specifies the position
+	*	weight		the mathematic importance coefficient of this parameter
 	*/
-	// In order to scale the curve to the middle correctly, use Sauerbraten's map scale
-	#define SAUERBRATEN_STANDARD_MAP_SIZE 512.0f
-	// Add point methods
-	void AddParamPoint(float x, float y, float z, float weight = SAUERBRATEN_STANDARD_MAP_SIZE);
-	void AddParamPoint(vec point);
+	void AddParamPoint(vec point, float weight = 1.0f);
 
 	/**
-	* Add random curve
+	* Randomly generate example curve
+	*	unsigned int maxparameterpoints		the amount of parameter points which will be created 
+	*	bool autocalculate					should the engine automaticly generate the curve?
+	*
+	* TODO:
+	*	-define a bounding box in which the curve will be generated
+	*	-add more parameter specifications
 	*/
 	void GenerateRandomCurve(unsigned int maxparameterpoints, bool autocalculate = true);
 
+
+
 	/**
-	* Clear parameter input and output buffer
-	*
+	* Clear both input and output points
+	* no parameters specified
 	*/
 	void ClearAllPoints(void);
+
+	/**
+	* Clear only parameter points
+	* computed points will remain in m_ComputedPoints
+	*/ 
 	void ClearParameterPoints(void);
+
+	/**
+	* Clear only computed points
+	* parameter points will remain in m_ParameterPoints
+	*/
 	void ClearComputedPoints(void);
+
 
 
 	/**
 	* Set Limits
-	* "Because of the limitations of factorial calculations, the code could only calculates 
-	*  curves up to 32 points. More complicated structures are generally represented by a 
-	* combination of these curves"
-	*   -Tolga Birdal, codeproject.org
+	*	unsigned int limit		the maximum amount of parameter points that can be passed to the function
+	*
+	*	"Because of the limitations of factorial calculations, the code could only calculates 
+	*	curves up to 32 points. More complicated structures are generally represented by a 
+	*	combination of these curves"
+	*
+	*		-Tolga Birdal, codeproject.org
 	*/
 	void SetParamPointLimit(unsigned int limit);
 
 	/**
 	* Set Curve precision
-	* Increasing this value increases precision
-	* calculation example:
-	* prec = 10.0f / precision;
+	*	float precision		the final precision of the computed curve
+	*	Increasing this value increases precision, because the computation steps
+	*	will be generated with 10.0f / precision
 	*/
 	void SetPrecision(float precision);
 
+
+
 	/**
-	* Calculate curve
+	* Calculate curve with BERNSTEIN polynoms
 	*/
 	void CalculateCurve_BernsteinPolynom(void);
+
+	/**
+	* Calculate curve via recursive DE CASTELJAU algorithm
+	*/
 	void CalculateCurve_DeCasteljauRecursive(void);
 
 
+	/** ----------------------------- REAL TIME CALCULATIONS ----------------------------- **/
+	/** THESE CALCULATIONS MAY BE SLOWER IF FREQUENTLY USED. USE CACHING INSTEAD!**/
+
 	/**
-	* Get a point
-	*
-	*	! ## ## IMPORTANT WARNING ## ## !
-	*
-	* THIS POINT WILL BE COMPUTED IN REAL TIME! 
-	* IT IS REALLY SLOW. SEE MORE DETAILS IN bezier.cpp
-	*
+	* Get a point from the parameter points.
+	* This point will be rendered in realtime
+	* This could be very slow if you repeat.
 	*/
 	vec CalculatePointFromFloat(float curveposition);
 
-	
+	/** ----------------------------- CAHCED CALCULATIONS ----------------------------- **/
+
 	/**
-	* Get a point from the cache according to the progress (float)
+	* Get the index of the point which is represented by the curve
+	* if parameter curveposition is passed to it.
 	*/
 	unsigned int GetPointIndexFromFloat(float curveposition);
 
-
 	/**
-	* Get finished curve data
+	* Get a curve point at parameter interpolation_value
 	*/
-	vec GetCurvePos(float interpolation_value);
+	vec GetCurvePos(float curveposition);
 
 	/**
-	* Get point number # from computed curve
+	* Get a point with a certain number from the generated curve
 	*/
 	vec GetComputedPointIndexed(unsigned int index);
 
 	/**
-	* Get Parameter point number # from this curve
+	* Get a parameter point that is point number index of this curve
 	*/
 	vec GetParameterPointIndexed(unsigned int index);
 
@@ -176,6 +206,8 @@ class CBezierCurve
 	* Get access to m_bComputed [Read only!]
 	*/
 	bool IsCurveComputed(void);
+
+
 
 	/**
 	* We will add some get/set functions so we cann keep this private
