@@ -43,7 +43,7 @@ void CCurveRenderer::RenderCurve(void)
 	glBegin(GL_LINES);
 	
 	// Set color to red
-	glColor3f(1.0f, 0.0f, 0.0f);
+	glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
 
 	// Set line thickness
 	glLineWidth(15.0f);
