@@ -614,6 +614,11 @@ namespace game
     {
         return showmodeinfo && m_valid(gamemode) ? gamemodes[gamemode - STARTGAMEMODE].info : NULL;
     }
+	
+	const char *getclientmode()
+    {
+        return server::modename(gamemode, NULL);
+    }
 
     void physicstrigger(physent *d, bool local, int floorlevel, int waterlevel, int material)
     {
