@@ -74,10 +74,8 @@ void CBenchmark::ResetTick(char* name)
 */
 unsigned long CBenchmark::GetTime(char* name) 
 {
-	// is this timer ticking?
-	if(!m_Time[name].ticking) return 0;
 	/**
 	* Calculate time which passed and return it!
 	*/
-	return m_Time[name].GetTime();
+	return m_Time[name].end - m_Time[name].start;
 }

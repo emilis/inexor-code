@@ -42,9 +42,9 @@ class CBenchmark
 		bool ticking;
 
 		// Calculate time
-		unsigned long GetTime() {
+		/*unsigned long GetTime() {
 			return end - start;
-		}
+		}*/
 	};
 
 	/**

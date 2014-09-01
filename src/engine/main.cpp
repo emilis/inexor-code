@@ -905,7 +905,7 @@ void limitfps(int &millis, int curmillis)
 #if defined(WIN32) && !defined(_DEBUG) && !defined(__GNUC__)
 void stackdumper(unsigned int type, EXCEPTION_POINTERS *ep)
 {
-    if(!ep) fatal("unknown type");
+    /*if(!ep) fatal("unknown type");
     EXCEPTION_RECORD *er = ep->ExceptionRecord;
     CONTEXT *context = ep->ContextRecord;
     string out, t;
@@ -942,6 +942,7 @@ void stackdumper(unsigned int type, EXCEPTION_POINTERS *ep)
         }
     }
     fatal(out);
+	*/
 }
 #endif
 
@@ -1011,7 +1012,7 @@ int getclockmillis()
 VAR(numcpus, 1, 1, 16);
 
 
-
+#include "flowgraph/tools/benchmark.h"
 /**
 * Benchmark system
 */
@@ -1286,7 +1287,7 @@ int main(int argc, char **argv)
 		/**
 		* Prepare dynamic renderin of bezier curves
 		*/
-		//#define BEZIER_CURVE_RENDERING
+		/*#define BEZIER_CURVE_RENDERING
 		#ifdef BEZIER_CURVE_RENDERING
 		vector<extentity*> curves = entities::getents();
 
@@ -1308,8 +1309,43 @@ int main(int argc, char **argv)
 		// Dynamic rendering
 		dynamic_curve.CalculateCurve_BernsteinPolynom();
 		#endif
-
+		*/
 		
+		static bool bAlreadyDone = false;
+
+		// Generate random curve
+		dynamic_curve.SetParamPointLimit(20);
+		dynamic_curve.GenerateRandomCurve(20, true);
+
+		if( ! bAlreadyDone) 
+		{
+			// Compute curve 1000 times using bernstein
+			unsigned long beg1 = SDL_GetTicks();
+
+			for(int alter=0;  alter<100;  ) 
+			{
+				alter = alter - 1 + 2; // I have to do his, trust me
+				dynamic_curve.ClearComputedPoints();
+				dynamic_curve.CalculateCurve_BernsteinPolynom();
+			}
+			conoutf(CON_DEBUG, "Computing using Bernstein polynom algorithm took %d milliseconds", SDL_GetTicks() - beg1);
+
+
+			unsigned long beg2 = SDL_GetTicks();
+			// Compute curve 1000 times using decasteljau
+			for(int i =0; i<100; ) 
+			{
+				i = i - 1 + 2; // I have to do his, trust me
+				dynamic_curve.ClearComputedPoints();
+				dynamic_curve.CalculateCurve_DeCasteljauRecursive();
+			}
+			conoutf(CON_DEBUG, "Computing using deCasteljau algorithm took %d milliseconds", SDL_GetTicks() - beg2);
+
+			// we're done!
+			bAlreadyDone = true;
+		}
+
+
 		// miscellaneous general game effects
         recomputecamera();
 		
