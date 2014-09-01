@@ -621,25 +621,6 @@ struct fpsstate
     }
 };
 
-//a more compact "fpsent"
-//usefull for playerinfo without the need for actual engine-data e.g. to save infos about the match in a demo or for extended serverbrowser-data
-struct playerinfo {
-	string name, team; //tag  not required, it will overwrite team if necessary
-	int clientnum, privilege, playermodel, state,
-		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
-	
-	playerinfo() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
-	{
-		name[0] = team[0] = '\0';
-	}
-};
-//a container of the compact data of a game, purpose see playerinfo
-struct gameinfo
-{
-	string map, mode, info;
-	hashset<teaminfo> teaminfos;
-	vector<playerinfo *> players; 
-};
 //A player in the 3D world:
 //all of its states, its statistics, position ..
 struct fpsent : dynent, fpsstate
@@ -720,6 +701,19 @@ struct fpsent : dynent, fpsstate
 
 };
 
+//a more compact "fpsent"
+//usefull for playerinfo without the need for actual engine-data e.g. to save infos about the match in a demo or for extended serverbrowser-data
+struct playerinfo {
+	string name, team; //tag  not required, it will overwrite team if necessary
+	int clientnum, privilege, playermodel, state, //basic states
+		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
+	
+	playerinfo() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
+	{
+		name[0] = team[0] = '\0';
+	}
+};
+
 struct teamscore
 {
     const char *team;
@@ -748,6 +742,15 @@ struct teaminfo
 
 static inline uint hthash(const teaminfo &t) { return hthash(t.team); }
 static inline bool htcmp(const char *team, const teaminfo &t) { return !strcmp(team, t.team); }
+
+
+//a container of the compact data of a game, purpose see playerinfo
+struct gameinfo
+{
+	string map, mode, info;
+	hashset<teaminfo> teams;
+	vector<playerinfo> players; 
+};
 
 namespace entities
 {
