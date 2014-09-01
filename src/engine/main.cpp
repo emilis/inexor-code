@@ -1240,72 +1240,47 @@ int main(int argc, char **argv)
 	
     for(;;)
     {
-		benchmarking.StartTick("getclockmillis");
         static int frames = 0;
         int millis = getclockmillis();
-		benchmarking.StopTick("getclockmillis");
 
 
-        benchmarking.StartTick("limitfps");
 		limitfps(millis, totalmillis);
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
-        benchmarking.StopTick("limitfps");
         
 
-		benchmarking.StartTick("scaletime");
 		int scaledtime = game::scaletime(elapsedtime) + timeerr;
 		curtime = scaledtime/100;
         timeerr = scaledtime%100;
-		benchmarking.StopTick("scaletime");
         
 
-		benchmarking.StartTick("multiplayer");
 		if(!multiplayer(false) && curtime>200) curtime = 200;
-		benchmarking.StopTick("multiplayer");
         
 
-		benchmarking.StartTick("updatetime");
 		if(game::ispaused()) curtime = 0;
 		lastmillis += curtime;
         totalmillis = millis;
         updatetime();
-		benchmarking.StopTick("updatetime");
 
 
-		benchmarking.StartTick("checkinput");
         checkinput();
-		benchmarking.StopTick("checkinput");
         
 		
-		benchmarking.StartTick("menuprocess");
 		menuprocess();
-		benchmarking.StopTick("menuprocess");
         
-		benchmarking.StartTick("tryedit");
 		tryedit();
-		benchmarking.StopTick("tryedit");
 		
 
-		benchmarking.StartTick("updateworld");
         if(lastmillis) game::updateworld();
-		benchmarking.StopTick("updateworld");
 
 
-		benchmarking.StartTick("checksleep");
         checksleep(lastmillis);
-		benchmarking.StopTick("checksleep");
 
-		benchmarking.StartTick("serverslice");
         serverslice(false, 0);
-		benchmarking.StopTick("serverslice");
 
 
-		benchmarking.StartTick("updatefpshistory");
         if(frames) updatefpshistory(elapsedtime);
         frames++;
-		benchmarking.StopTick("updatefpshistory");
-
 
 
 		/**
@@ -1315,7 +1290,7 @@ int main(int argc, char **argv)
 		#ifdef BEZIER_CURVE_RENDERING
 		vector<extentity*> curves = entities::getents();
 
-		// Vollst�ndig bereinigen!
+		// Vollständig bereinigen!
 		dynamic_curve.ClearAllPoints();
 
 		// If vector is valid
@@ -1335,39 +1310,27 @@ int main(int argc, char **argv)
 		#endif
 
 		
-		benchmarking.StartTick("recomputecamera");
 		// miscellaneous general game effects
         recomputecamera();
-		benchmarking.StopTick("recomputecamera");
 		
 
-		benchmarking.StartTick("updateparticles");
         updateparticles();
-		benchmarking.StopTick("updateparticles");
         
 		
-		benchmarking.StartTick("updatesounds");
 		updatesounds();
-		benchmarking.StopTick("updatesounds");
 		
 
 		if(minimized) continue;
         inbetweenframes = false;
         if(mainmenu) 
 		{ 
-			benchmarking.StartTick("gl_drawmainmenu");
 			gl_drawmainmenu(screen->w, screen->h);
-			benchmarking.StopTick("gl_drawmainmenu");
 		}
 		else {
-			benchmarking.StartTick("gl_drawmainmenu");
 			gl_drawframe(screen->w, screen->h);
-			benchmarking.StopTick("gl_drawmainmenu");
 		}
 
-		benchmarking.StartTick("swapbuffers");
         swapbuffers();
-		benchmarking.StopTick("swapbuffers");
         
 		renderedframe = inbetweenframes = true;
     }

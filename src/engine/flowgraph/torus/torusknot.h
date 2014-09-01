@@ -34,13 +34,20 @@ class CTorusKnot
 	// destructor
 	~CTorusKnot();
 
+	/**
+	* A standard vector which contains the computed points
+	*/
 	std::vector<vec> m_ComputedPoints;
 
 	// Generate knot
 	void GenerateTorusKnot(float p, float q, float distance, float height, vec pos, float precision = 10.0f);
 
 	// Render knot
-	void RenderTorusKnot();
+	void RenderTorusKnot(void);
 };
+
+// Declaration
+extern CTorusKnot torus_knoten;
+
 
 #endif /* #ifdef ENGINE_TORUS_KNOTS_H */

@@ -30,10 +30,11 @@
 /**
 * In honor of:
 *
-*	Pierre etienne BE0IER   (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
+*	Pierre etienne BEZIER   (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
 *   Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
-*	Sergei Natanovich BERNSTEIN   (March 5, 1880 - October 26, 1968), Russian mathematician.
+*	Sergei Natanovich BERNSTEIN   (March 5, 1880 - October 26, 1968), Russian mathematician
 *   Charles HERMITE   (December 24, 1822 - January 14, 1901), French mathematician
+*   Leonardo FIBONACCI  (~1170, ~1240), Italian mathematician
 */
 
 
@@ -215,9 +216,12 @@ class CBezierCurve
 	*/
 	protected:
 
-	// bernstein position
+	// Bernstein position
 	float bernsteinposition(float val, int i, float position, int elementcount, float weight);
 	
+	// de Casteljau algorithm
+	vec decasteljau(int index, int nextindex, float t0);
+
 	// binomial coefficient for bernstein polynom
 	unsigned int binomialCoef(unsigned int n, const unsigned int k);
 

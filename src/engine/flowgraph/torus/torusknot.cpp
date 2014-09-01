@@ -52,3 +52,11 @@ void CTorusKnot::GenerateTorusKnot(float p, float q, float distance, float heigh
 		m_ComputedPoints.push_back( output );
 	}
 }
+
+
+/**
+* Render torus knot
+*/
+void CTorusKnot::RenderTorusKnot(void) 
+{
+}
