@@ -878,7 +878,7 @@ namespace game
 	};
 	vector<contentpack *> contentpacks;
 
-	SVARP(allowedfileext, ".cfg .jpg .ogz .png .tex");
+	SVARP(allowedfileext, ".cfg .iqm .jpg .md2 .md3 .md5mesh .md5anim .mp3 .obr .ogg .ogz .png .wav");
 	VARP(allowfilereplacement, 0, 1, 1); //whether a downloadable modified file will be downloaded or skipped	
 
 	bool hasextension(const char *name, const char *extensions)
@@ -896,14 +896,14 @@ namespace game
 		loopv(exts) {
 			int exlen = strlen(exts[i]);  
 			int nlen = strlen(name); 
-			if(name[nlen-exlen] && !strcmp(&name[nlen-exlen], exts[i])) return true;
+			if( nlen-exlen > 0 && !strcmp(&name[nlen-exlen], exts[i])) return true;
 		}
 		return false;
 	}
 
-	/**
-	* returns the crc-checksum of the file "name" or 0 if file not found
-	**/
+	///
+	// returns the crc-checksum of the file "name" or 0 if file not found
+	///
 	uint getfilecrc(const char *name)
 	{
 		stream *f = openfile(name, "rb");
@@ -929,16 +929,19 @@ namespace game
 		}
 		return true;
 	}
+
 	contentpack *getcontentpack(int pack)
 	{
 		if(!contentpacks.inrange(pack) || !contentpacks[pack]) return NULL;
 		return contentpacks[pack];
 	}
+	
 	contentpack::file *getpackfile(contentpack *p, int file)
 	{
 		if(!p || !p->files.inrange(file) || !p->files[file]) return NULL;
 		return p->files[file];
 	}
+	
 	contentpack::file *getpackfile(int pack, int file)
 	{
 		contentpack *p = getcontentpack(pack);
