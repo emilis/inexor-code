@@ -3369,6 +3369,17 @@ namespace server
                 if(isdedicatedserver() && cq) logoutf("%s <%s>: %s", colorname(cq), cq->team, text);
                 break;
             }
+			case N_PRIVMSG: //server receives private messages in the format "receivercn, text" and sends it to the receiver with "sendercn, text"
+            {
+				int tcn = getint(p);
+                getstring(text, p);
+				clientinfo *rec = getinfo(tcn); //private message receiver
+				if(!ci || !cq || !rec || rec == cq || rec->state.aitype != AI_NONE) break;
+
+				sendf(rec->clientnum, MSG_CHANNEL, "riis", N_PRIVMSG, cq->clientnum, text);
+               // if(isdedicatedserver()) logoutf("%s <to %s>: %s", colorname(cq), colorname(rec), text); //yes ? no? comments
+                break;
+            }
 
             case N_SWITCHNAME:
             {
