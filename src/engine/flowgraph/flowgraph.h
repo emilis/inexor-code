@@ -69,56 +69,24 @@
 struct SNode;
 
 
-/*
-* A built-in structure for the node's position
-*/
-struct SPosition 
-{
-	// standard coordinates
-	float x;
-	float y;
-	float z;
-
-	// position constructor
-	SPosition() {
-		// set all coordinates to 0
-		x = y = z = 0;
-	}
-};
-
 class CCondition;
 
 /**
 * A basic node implementation
 */
-class CNode {
-	
+class CNode 
+{	
 	public:
 
-	/** 
-	* Constructor
-	*/
-	CNode() {
-		// construct here...
-	}
-	/** 
-	* Destructor
-	*/
-	~CNode() {
-		// destruct here...
-	}
-
+	//Constructor
+	CNode();
+	// Destructor
+	~CNode();
 
 	/**
-	* The node's position
+	* the node's position
 	*/
-	SPosition m_Position;
-
-	/*
-	* Nodes can be commented
-	* Comments will be displayed below the note
-	*/
-	std::string m_NodeComment;
+	vec m_vPos;
 
 	/*
 	* Is this node active or not?
@@ -126,6 +94,14 @@ class CNode {
 	*/
 	bool m_bActive;
 
+	/*
+	* Nodes can be commented
+	*  (Comments will be displayed below the note)
+	*/
+	std::string m_NodeComment;
+
+	
+	
 	/**
 	* The parents of this node.
 	* pointers
@@ -138,13 +114,15 @@ class CNode {
 	*/
 	std::vector<CNode* > m_pChilds;
 
+
+
 	/**
 	* Virtual function which will be called once this node is active
 	* Nodes do not have parameters: anything that is needed in the node
 	* can be changed before node_input is called
 	*/
 	virtual void node_input(void) = 0;
-	// virtual void node_output(void) = 0;
+	virtual void node_output(void) = 0;
 
 };
 

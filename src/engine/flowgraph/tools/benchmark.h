@@ -1,86 +1,203 @@
 /**
-* Benchmark system-
-* This system can be used to measure the amount of time which is required
-* to run certain operations
-*
-* Just create an instance of this class and use StopBenchmark("NAME");
-* use StopBenchmark("NAME"); to stop process ticking
-* use GetTime("NAME");
+* New and improved benchmark system
+* This is system is capable to create a tree structure
+* 
 */
 
 /**
-* Include guards protects the file from being included twice
+* Include guard protects this file from being included twice
 */
-#ifndef ENGINE_BENCHMARK_H
-#define ENGINE_BENCHMARK_H
+#ifndef ENGINE_BENCHMARKING_H
+#define ENGINE_BENCHMARKING_H
 
 /**
-* Include the most common standard libraries
+* C++ standard libraries header files
 */
-#include <string>
 #include <map>
-#include <vector>
-#include <list>
 #include <deque>
-#include <iterator>
+#include <iostream>
+#include <vector>
+#include <Windows.h>
 
 
 /**
-* Simple class implementation for benchmarking
+* time will be measured in microseconds
+* 1000 microseconds are 1 milisecond
+* 1000 miliseconds are 1 second
+* 1 seconds consists of 1 million microseconds
 */
-class CBenchmark 
-{	
-	private: // classes are automaticly private but...
 
-	struct timestruct 
-	{
-		// begin and end in miliseconds
-		unsigned long start;
-		unsigned long end;
 
-		// is this benchmark timer ticking or not?
-		bool ticking;
-
-		// Calculate time
-		/*unsigned long GetTime() {
-			return end - start;
-		}*/
-	};
+/**
+* A structure to store time interval
+* a time intervals begins with time A
+* and ends with time B. The duration is
+* C = B - A (end - begin), all in microseconds (64bit int)
+*/
+struct SInterval 
+{
+	/**
+	* 64 bit integer for microseconds
+	*/
+	unsigned long long begin, end, duration;
 
 	/**
-	* A standard map (hashset) to access time
+	* Constructor sets all members to 0 (microseconds)
 	*/
-	std::map<char*, timestruct> m_Time;
+	SInterval();
+
+	/**
+	* Calculate how long a process took
+	*/
+	void calcduration(void);
+};
+
+
+/**
+* A structure for timer container nodes
+*/
+struct STimerNode 
+{
+	/**
+	* Constructor
+	*/
+	STimerNode();
+	
+	/**
+	* The name of this node
+	*/
+	char name[256];
+	/**
+	* is this timer active/ticking ?
+	*/
+	bool ticking;
+	
+	/**
+	* For summing up the time
+	*/
+	//bool summandapplied;
+
+	/**
+	* How many summands have been added?
+	*/
+	int summands;
+
+	/**
+	* this is the next leaf to sum up!
+	*/
+	//bool todo;
+
+	/**
+	* This deque stores the last durations
+	*/
+	//std::deque<SInterval> durations;
+	
+	SInterval dur;
+
+	/**
+	* The parent node
+	*/
+	STimerNode* parentnode;
+	/**
+	* sub nodes (childs)
+	*/
+	std::vector<STimerNode*> subnodes;
+};
+
+
+/**
+* A class for trees
+*/
+class CBenchmarking
+{
+	private:
+
+	/**
+	* Root of this tree
+	*/
+	STimerNode* root;
+
+	/**
+	* Node registration
+	*/
+	std::map<char*, STimerNode*> timeregister;
+
+	/**
+	* On Microsoft Windows:
+	*/
+	#ifdef WIN32
+	unsigned long long frequency;
+	#endif
+
+	/**
+	* A dummy variable for microseconds
+	* system. It should be faster to store it
+	* as a member variable
+	*/
+	unsigned long long time;
+	
+	/**
+	* the sum of all the time
+	*/
+	unsigned long long sum_time;
+
+	/**
+	* dump a certain node
+	*/
+	void delete_node(STimerNode* node);
+	
+	/**
+	* dump tree node
+	*/
+	void dumptreenode(STimerNode* node, unsigned int depth);
+
+	/**
+	* Recursive resolve
+	*/
+	void recursiveresolve(STimerNode* node);
+
+
 
 	public:
 
 	// constructor
-	CBenchmark();
+	CBenchmarking();
+
 	// destructor
-	~CBenchmark();
+	~CBenchmarking();
 
 	/**
-	* Start a benchmark ticker
+	* Begin time measuring
 	*/
-	void StartTick(char* name);
-	
-	/**
-	* Start a benchmark ticker
-	*/
-	void StopTick(char* name);
+	int begin(char* name, char* group = "root");
 
 	/**
-	* Stop benchmark ticker
+	* End measuring
 	*/
-	void ResetTick(char* name);
-	
+	int end(char* name);
+
 	/**
-	* Get the time which passed from end to start
+	* Get access to a process' duration
 	*/
-	unsigned long GetTime(char* name);
+	unsigned long long duration(char* name);
+
+	/**
+	* dump all nodes and free memory
+	*/
+	void deleteall(void);
+
+	/**
+	* dump whole tree
+	*/
+	void dumpall(void);
+
+	/**
+	* Calculate all times
+	*/
+	void compile(void);
+
 };
 
+extern CBenchmarking zeit;
 
-extern CBenchmark benchmarking;
-
-#endif /* #ifdef ENGINE_BENCHMARK_H */
+#endif /* #ifdef ENGINE_BENCHMARKING_H*/

@@ -44,7 +44,6 @@
 #ifndef ENGINE_BEZIER_CURVE_H
 #define ENGINE_BEZIER_CURVE_H
 
-
 /**
 * Include the most common standard libraries
 */

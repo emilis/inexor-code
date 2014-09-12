@@ -26,7 +26,7 @@
 */
 #include "flowgraph/curves/curverenderer.h"
 /**
-* Include benchmark system
+* Include advanced benchmarking
 */
 #include "flowgraph/tools/benchmark.h"
 

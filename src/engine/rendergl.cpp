@@ -1015,6 +1015,8 @@ void recomputecamera()
         }
     }
 
+	// #define HANNI_FLYCAM_TEST
+	#ifdef HANNI_FLYCAM_TEST
 	if(flycamtest)
 	{
 		float fParam = SDL_GetTicks() % 4000 / 4000.0f;
@@ -1028,7 +1030,7 @@ void recomputecamera()
 		camera1->yaw = yaw;
 		camera1->pitch = pitch;
 	}	
-	
+	#endif
 	
 	//#define HANNI_BEZ_INDEX_CACHE_TEST
 	#ifdef HANNI_BEZ_INDEX_CACHE_TEST
@@ -2120,7 +2122,6 @@ void gl_drawframe(int w, int h)
 	curve_renderer.RenderCurve();
 
 
-
     rendermapmodels();
     rendergame(true);
     if(!isthirdperson())
@@ -2403,6 +2404,12 @@ VAR(statrate, 1, 200, 1000);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
 
+/**
+* Show debug or not?
+*/
+VARP(showdebug, 0, 0, 1);
+
+
 void gl_drawhud(int w, int h)
 {
     if(forceaspect) w = int(ceil(h*forceaspect));
@@ -2581,6 +2588,20 @@ void gl_drawhud(int w, int h)
 
         rendertexturepanel(w, h);
     }
+
+
+	/**
+	* Render debug hud here
+	*/
+	if(showdebug) 
+	{
+		glPushMatrix();
+		glScalef(0.3f, 0.3f, 1.0f);
+
+
+		glPopMatrix();
+	}
+
     
     g3d_limitscale((2*limitgui - conh) / float(conh));
 
