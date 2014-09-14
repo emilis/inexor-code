@@ -1242,22 +1242,28 @@ int main(int argc, char **argv)
 		/**
 		* begin measuring
 		*/
-		zeit.begin("hanni", "root");
+		zeit.begin("body", "root");
+	
+		zeit.begin("arm", "body");
+		zeit.end("arm");
+		zeit.begin("arm22", "body");
+		zeit.end("arm22");
+		zeit.begin("arm33", "body");
+		zeit.end("arm33");
+		zeit.begin("arm44", "body");
+		zeit.end("arm44");
+		
+		zeit.begin("UNTER1", "arm44");
+		zeit.end("UNTER1");
+		zeit.begin("UNTER2", "arm44");
+		zeit.end("UNTER2");
 
-		zeit.begin("unter1", "hanni");
-		zeit.end("unter1");
-
-		zeit.begin("unter2", "hanni");
-		zeit.end("unter2");
-
-		zeit.begin("unter3", "hanni");
-		zeit.end("unter3");
-
-		zeit.begin("unter3", "hanni");
-		zeit.end("unter3");
-
-		zeit.end("hanni");
-
+		zeit.begin("arm55", "body");
+		zeit.end("arm55");
+		zeit.begin("arm66", "body");
+		zeit.end("arm66");
+				
+		zeit.end("body");
 
 
         static int frames = 0;

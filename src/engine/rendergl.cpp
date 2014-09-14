@@ -2628,8 +2628,7 @@ void gl_drawhud(int w, int h)
 
 		// RENDER
 		render_subchart(zeit.getroot(), 0,   0, 0, 600, 400);
-		conoutf(CON_DEBUG, "-------------------------------------");
-
+		
 		glEnd();
 		// End rendering
 		glDisable(GL_TEXTURE_2D);
@@ -2642,20 +2641,33 @@ void gl_drawhud(int w, int h)
 /**
 * Render triangle
 */
-void RenderTriangle(float x, float y, float width, float height)
+void RenderTriangle(float x, float y, float width, float height,  int depth)
 {
-	// Set triangle color
-	glColor3f(colors[depth][0], colors[depth][1], colors[depth][2]);
+	const float colors[][3] = 
+	{
+		{255.0f,0.0f,0.0f},
+		{255.0f,255.0f,0.0f},
+		{255.0f,0.0f,255.0f},
+		{0.0f,255.0f,0.0f},
+		{0.0f,255.0f,255.0f},
+		{0.0f,0.0f,255.0f},
+		{100.0f,0.0f,255.0f},
+		{0.0f,100.0f,255.0f},
+		{0.0f,0.0f,100.0f},
+		{0.0f,255.0f,100.0f},
+		{255.0f,100.0f,255.0f},
+	};
+	
+	int index = depth % sizeof(colors);
 
-	/**
-	* horizontal rendering
-	*/ 
+	//glColor3f(255.0f, 0.0f, 0.0f);
+	glColor3f(colors[index][0], colors[index][1], colors[index][2]);
+
 	glVertex2f(x, y);
 	glVertex2f(x, y+height);
 	glVertex2f(x + width, y);
 	glVertex2f(x + width, y+height);
 }
-
 
 
 
@@ -2701,15 +2713,8 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 		unsigned int subnodesize = parent->subnodes.size();
 		// Avoid division by zero!
 		if(subnodesize == 0) subnodesize = 1;
-		
 
-		/**
-		*   |   |     |         |      |
-		*   |   |     |         |      |
-		*   |   |     |         |      |
-		*   |   |     |         |      |
-		*   |   |     |         |      |
-		*/
+
 		if(horizontal)
 		{
 			// Calculate width
@@ -2721,31 +2726,18 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			RenderTriangle(/*left*/woffset, top, newleft, top+height);
+			RenderTriangle(woffset, top, newleft, top+height, i);
+
 
 			// add offset
 			woffset += newleft;
 
-			// Position debug
-			conoutf(CON_DEBUG, "name: %s left: %f top: %f width: %f height: %f  offset: %f", subn->name,    left,     top,  newleft,  top+height, woffset);
-
-
 			if(subn->subnodes.size() != 0)
 			{
 				// Call next sub node
-				render_subchart(subn, nextdepth, woffset, top, newleft, height);
+				render_subchart(subn, nextdepth,   woffset, top, newleft, height);
 			}
 		}
-		/**
-		*___________________________________
-		* 
-		*___________________________________
-		*
-		*
-		*___________________________________
-		*
-		*___________________________________
-		*/
 		else 
 		{
 			// Simple weight system
@@ -2757,15 +2749,12 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			RenderTriangle(left, top, left+width, top+newheight);
+			RenderTriangle(left, /*newheight*/ hoffset, width, height, i);
+
 
 			// add offset
 			hoffset += newheight;
 			
-			// Position debug
-			conoutf(CON_DEBUG, "name: %s left: %f top: %f width: %f height: %f  offset: %f", subn->name,    left,     top,  width,  top+height, hoffset);
-
-
 			if(subn->subnodes.size() != 0)
 			{
 				// Call sub nodes
