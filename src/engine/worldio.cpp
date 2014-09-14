@@ -1,19 +1,13 @@
 // worldio.cpp: loading & saving of maps and savegames
 
 #include "engine.h"
-
-void cutogz(char *s) 
-{   
-    char *ogzp = strstr(s, ".ogz");
-    if(ogzp) *ogzp = '\0';
-}   
         
 void getmapfilenames(const char *fname, const char *cname, char *pakname, char *mapname, char *cfgname)
 {   
     if(!cname) cname = fname;
     string name;
     copystring(name, cname, 100);
-    cutogz(name);
+    cutextension(name, "ogz");
     char *slash = strpbrk(name, "/\\");
     if(slash)
     {
@@ -27,7 +21,7 @@ void getmapfilenames(const char *fname, const char *cname, char *pakname, char *
     }
     if(strpbrk(fname, "/\\")) copystring(mapname, fname);
     else formatstring(mapname)("base/%s", fname);
-    cutogz(mapname);
+    cutextension(mapname, "ogz");
 }   
 
 static void fixent(entity &e, int version)
