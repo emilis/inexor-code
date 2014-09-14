@@ -2409,6 +2409,13 @@ FVARP(conscale, 1e-3f, 0.33f, 1e3f);
 */
 VARP(showdebug, 0, 0, 1);
 
+/**
+* Pre define sub renderer
+*/
+// REMOVE THIS LATER ON!
+void render_subchart(STimerNode* parent, int depth, float top, float left, float width, float height);
+
+
 
 void gl_drawhud(int w, int h)
 {
@@ -2589,20 +2596,7 @@ void gl_drawhud(int w, int h)
         rendertexturepanel(w, h);
     }
 
-
-	/**
-	* Render debug hud here
-	*/
-	if(showdebug) 
-	{
-		glPushMatrix();
-		glScalef(0.3f, 0.3f, 1.0f);
-
-
-		glPopMatrix();
-	}
-
-    
+   
     g3d_limitscale((2*limitgui - conh) / float(conh));
 
     glPushMatrix();
@@ -2613,9 +2607,171 @@ void gl_drawhud(int w, int h)
     glPopMatrix();
 
     drawcrosshair(w, h);
-
+	
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
+
+	/* ----------------------------------------------------------------------------------------- */
+
+	/**
+	* Render debug hud here
+	*/
+	if(showdebug) 
+	{
+		// Start rendering
+		glPushMatrix();
+		//glScalef(0.3f, 0.3f, 1.0f);
+		notextureshader->set();				
+		glEnable(GL_TEXTURE_2D);
+		glLoadIdentity();
+		glBegin(GL_TRIANGLE_STRIP); // fastest, according to http://wiki.delphigl.com/index.php/glBegin
+
+		// RENDER
+		render_subchart(zeit.getroot(), 0,   0, 0, 600, 400);
+		conoutf(CON_DEBUG, "-------------------------------------");
+
+		glEnd();
+		// End rendering
+		glDisable(GL_TEXTURE_2D);
+		glPopMatrix();
+	}
 }
 
 
+
+/**
+* Render triangle
+*/
+void RenderTriangle(float x, float y, float width, float height)
+{
+	// Set triangle color
+	glColor3f(colors[depth][0], colors[depth][1], colors[depth][2]);
+
+	/**
+	* horizontal rendering
+	*/ 
+	glVertex2f(x, y);
+	glVertex2f(x, y+height);
+	glVertex2f(x + width, y);
+	glVertex2f(x + width, y+height);
+}
+
+
+
+
+/**
+* render sub chart
+* recursive function
+*/
+void render_subchart(STimerNode* parent, int depth,    float left, float top, float width, float height)
+{
+	// Should we render this horizontal or vertical?
+	// division rest (modulo) of depth decides about that
+	int horizontal = depth % 2;
+
+	/**	
+	* Rendering offset
+	*/
+	float woffset = 0.0f;
+	float hoffset = 0.0f;
+	
+	/**
+	* Render all sub nodes of this parent
+	*/
+	unsigned int cmp = parent->subnodes.size();
+
+	/**
+	* Render all sub nodes
+	*/
+	for(unsigned int i=0; i<cmp; i++)
+	{
+		// Copy subnode (for shorter name)
+		STimerNode* subn = parent->subnodes[i];
+
+		// Width and Height coefficients
+		float height_factor = 1.0f;
+		float width_factor = 1.0f;
+				
+		int nextdepth = depth + 1;
+
+		/**
+		* How many sub nodes do exist?
+		* use 1 / subnodes
+		*/
+		unsigned int subnodesize = parent->subnodes.size();
+		// Avoid division by zero!
+		if(subnodesize == 0) subnodesize = 1;
+		
+
+		/**
+		*   |   |     |         |      |
+		*   |   |     |         |      |
+		*   |   |     |         |      |
+		*   |   |     |         |      |
+		*   |   |     |         |      |
+		*/
+		if(horizontal)
+		{
+			// Calculate width
+			width_factor = 1.0f / subnodesize;
+
+			// Calculate new left
+			float newleft = width_factor * width;
+						
+			/**
+			* Render triangle
+			*/
+			RenderTriangle(/*left*/woffset, top, newleft, top+height);
+
+			// add offset
+			woffset += newleft;
+
+			// Position debug
+			conoutf(CON_DEBUG, "name: %s left: %f top: %f width: %f height: %f  offset: %f", subn->name,    left,     top,  newleft,  top+height, woffset);
+
+
+			if(subn->subnodes.size() != 0)
+			{
+				// Call next sub node
+				render_subchart(subn, nextdepth, woffset, top, newleft, height);
+			}
+		}
+		/**
+		*___________________________________
+		* 
+		*___________________________________
+		*
+		*
+		*___________________________________
+		*
+		*___________________________________
+		*/
+		else 
+		{
+			// Simple weight system
+			height_factor = 1.0f / subnodesize;
+			
+			// new height
+			float newheight = height_factor * height;
+
+			/**
+			* Render triangle
+			*/
+			RenderTriangle(left, top, left+width, top+newheight);
+
+			// add offset
+			hoffset += newheight;
+			
+			// Position debug
+			conoutf(CON_DEBUG, "name: %s left: %f top: %f width: %f height: %f  offset: %f", subn->name,    left,     top,  width,  top+height, hoffset);
+
+
+			if(subn->subnodes.size() != 0)
+			{
+				// Call sub nodes
+				render_subchart(subn, nextdepth,  hoffset, top, width, newheight);
+			}
+		}
+	}
+
+}

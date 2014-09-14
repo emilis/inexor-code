@@ -167,6 +167,11 @@ class CBenchmarking
 	~CBenchmarking();
 
 	/**
+	* Read only for root pointer
+	*/
+	STimerNode* getroot(void);
+
+	/**
 	* Begin time measuring
 	*/
 	int begin(char* name, char* group = "root");

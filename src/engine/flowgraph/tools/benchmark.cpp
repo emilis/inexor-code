@@ -229,7 +229,7 @@ void CBenchmarking::delete_node(STimerNode* node)
 		delete_node(node->subnodes[i]);
 	}
 	// free memory
-	delete[] node;
+	delete node;
 	node = nullptr;
 		
 	/* no memory should be left due to 
@@ -344,4 +344,12 @@ void CBenchmarking::compile(void)
 		}
 	}
 
+}
+
+/**
+* return root
+*/
+STimerNode* CBenchmarking::getroot(void)
+{
+	return root;
 }

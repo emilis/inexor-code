@@ -1242,7 +1242,23 @@ int main(int argc, char **argv)
 		/**
 		* begin measuring
 		*/
-		zeit.begin("hanni");
+		zeit.begin("hanni", "root");
+
+		zeit.begin("unter1", "hanni");
+		zeit.end("unter1");
+
+		zeit.begin("unter2", "hanni");
+		zeit.end("unter2");
+
+		zeit.begin("unter3", "hanni");
+		zeit.end("unter3");
+
+		zeit.begin("unter3", "hanni");
+		zeit.end("unter3");
+
+		zeit.end("hanni");
+
+
 
         static int frames = 0;
         int millis = getclockmillis();
@@ -1321,13 +1337,6 @@ int main(int argc, char **argv)
         swapbuffers();
         
 		renderedframe = inbetweenframes = true;
-
-		/**
-		* End measuring
-		*/
-		zeit.end("hanni");
-
-		//zeit.dumpall();
     }
     
     ASSERT(0);   
