@@ -154,7 +154,12 @@ struct font
 #define MINRESH 480
 
 extern font *curfont;
+extern float textscale;
 
+extern font *findfont(const char *name);
+extern void reloadfonts();
+
+static inline void setfont(font *f) { if(f) curfont = f; }
 // texture
 extern int hwtexsize, hwcubetexsize, hwmaxaniso, maxtexsize;
 

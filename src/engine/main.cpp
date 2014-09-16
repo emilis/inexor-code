@@ -13,6 +13,7 @@ void cleanup()
     if(screen) SDL_SetWindowGrab(screen, SDL_FALSE);
     cleargamma();
     freeocta(worldroot);
+    UI::cleanup();
     extern void clear_command(); clear_command();
     extern void clear_console(); clear_console();
     extern void clear_mdls();    clear_mdls();
@@ -1289,6 +1290,7 @@ int main(int argc, char **argv)
         updatetime();
 
         checkinput();
+        UI::update();
         menuprocess();
         tryedit();
 

@@ -9,7 +9,7 @@ static int fontdeftex = 0;
 font *curfont = NULL;
 int curfonttex = 0;
 
-void newfont(char *name, char *tex, int *defaultw, int *defaulth)
+void newfont(char *name, char *tex, int *defaultw, int *defaulth, int *scale)
 {
     font *f = &fonts[name];
     if(!f->name) f->name = newstring(name);
@@ -19,10 +19,30 @@ void newfont(char *name, char *tex, int *defaultw, int *defaulth)
     f->charoffset = '!';
     f->defaultw = *defaultw;
     f->defaulth = *defaulth;
-    f->scale = f->defaulth;
+    f->scale = *scale > 0 ? *scale : f->defaulth;
+    f->bordermin = 0.49f;
+    f->bordermax = 0.5f;
+    f->outlinemin = -1;
+    f->outlinemax = 0;
 
     fontdef = f;
     fontdeftex = 0;
+}
+
+void fontborder(float *bordermin, float *bordermax)
+{
+    if(!fontdef) return;
+
+    fontdef->bordermin = *bordermin;
+    fontdef->bordermax = max(*bordermax, *bordermin+0.01f);
+}
+
+void fontoutline(float *outlinemin, float *outlinemax)
+{
+    if(!fontdef) return;
+
+    fontdef->outlinemin = min(*outlinemin, *outlinemax-0.01f);
+    fontdef->outlinemax = *outlinemax;
 }
 
 void fontoffset(char *c)
@@ -49,7 +69,7 @@ void fonttex(char *s)
     fontdef->texs.add(t);
 }
 
-void fontchar(int *x, int *y, int *w, int *h, int *offsetx, int *offsety, int *advance)
+void fontchar(float *x, float *y, float *w, float *h, float *offsetx, float *offsety, float *advance)
 {
     if(!fontdef) return;
 
@@ -70,15 +90,18 @@ void fontskip(int *n)
     loopi(max(*n, 1))
     {
         font::charinfo &c = fontdef->chars.add();
-        c.x = c.y = c.w = c.h = c.offsetx = c.offsety = c.advance = c.tex = 0;
+        c.x = c.y = c.w = c.h = c.offsetx = c.offsety = c.advance = 0;
+        c.tex = 0;
     }
 }
 
-COMMANDN(font, newfont, "ssii");
+COMMANDN(font, newfont, "ssiii");
+COMMAND(fontborder, "ff");
+COMMAND(fontoutline, "ff");
 COMMAND(fontoffset, "s");
 COMMAND(fontscale, "i");
 COMMAND(fonttex, "s");
-COMMAND(fontchar, "iiiiiii");
+COMMAND(fontchar, "fffffff");
 COMMAND(fontskip, "i");
 
 void fontalias(const char *dst, const char *src)
@@ -93,12 +116,21 @@ void fontalias(const char *dst, const char *src)
     d->defaultw = s->defaultw;
     d->defaulth = s->defaulth;
     d->scale = s->scale;
+    d->bordermin = s->bordermin;
+    d->bordermax = s->bordermax;
+    d->outlinemin = s->outlinemin;
+    d->outlinemax = s->outlinemax;
 
     fontdef = d;
     fontdeftex = d->texs.length()-1;
 }
 
 COMMAND(fontalias, "ss");
+
+font *findfont(const char *name)
+{
+    return fonts.access(name);
+}
 
 bool setfont(const char *name)
 {
@@ -169,6 +201,7 @@ void draw_textf(const char *fstr, int left, int top, ...)
     draw_text(str, left, top);
 }
 
+float textscale = 1;
 static float draw_char(Texture *&tex, int c, float x, float y, float scale)
 {
     font::charinfo &info = curfont->chars[c-curfont->charoffset];
@@ -178,6 +211,10 @@ static float draw_char(Texture *&tex, int c, float x, float y, float scale)
         tex = curfont->texs[info.tex];
         glBindTexture(GL_TEXTURE_2D, tex->id);
     }
+
+    x *= textscale;
+    y *= textscale;
+    scale *= textscale;
 
     float x1 = x + scale*info.offsetx,
           y1 = y + scale*info.offsety,
@@ -240,7 +277,7 @@ static void text_color(char c, char *stack, int size, int &sp, bvec color, int a
         {\
             float cw = scale*curfont->chars[c-curfont->charoffset].advance;\
             if(cw <= 0) continue;\
-            if(maxwidth != -1)\
+            if(maxwidth >= 0)\
             {\
                 int j = i;\
                 float w = cw;\
@@ -248,17 +285,15 @@ static void text_color(char c, char *stack, int size, int &sp, bvec color, int a
                 {\
                     int c = uchar(str[i+1]);\
                     if(c=='\f') { if(str[i+2]) i++; continue; }\
-                    if(i-j > 16) break;\
                     if(!curfont->chars.inrange(c-curfont->charoffset)) break;\
                     float cw = scale*curfont->chars[c-curfont->charoffset].advance;\
                     if(cw <= 0 || w + cw > maxwidth) break;\
                     w += cw;\
                 }\
-                if(x + w > maxwidth && j!=0) { TEXTLINE(j-1) x = 0; y += FONTH; }\
+                if(x + w > maxwidth && x > 0) { (void)j; TEXTLINE(j-1) x = 0; y += FONTH; }\
                 TEXTWORD\
             }\
-            else\
-            { TEXTCHAR(i) }\
+            else { TEXTCHAR(i) }\
         }\
     }
 
@@ -341,7 +376,7 @@ void draw_text(const char *str, int left, int top, int r, int g, int b, int a, i
     #define TEXTCHAR(idx) draw_char(tex, c, left+x, top+y, scale); x += cw;
     #define TEXTWORD TEXTWORDSKELETON
     char colorstack[10];
-    colorstack[0] = 'c'; //indicate user color
+    colorstack[0] = '\0'; //indicate user color
     bvec color(r, g, b);
     int colorpos = 0;
     float cx = -FONTW, cy = 0;
@@ -361,7 +396,7 @@ void draw_text(const char *str, int left, int top, int r, int g, int b, int a, i
     if(cursor >= 0 && (totalmillis/250)&1)
     {
         glColor4ub(r, g, b, a);
-        if(maxwidth != -1 && cx >= maxwidth) { cx = 0; cy += FONTH; }
+        if(maxwidth >= 0 && cx >= maxwidth && cx > 0) { cx = 0; cy += FONTH; }
         draw_char(tex, '_', left+cx, top+cy, scale);
         xtraverts += varray::end();
     }
