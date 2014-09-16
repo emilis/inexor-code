@@ -228,7 +228,6 @@ extern bool modifyoctaent(int flags, int id);
 
 // main
 extern void fatal(const char *s, ...) PRINTFARGS(1, 2);
-extern void keyrepeat(bool on);
 
 // rendertext
 extern bool setfont(const char *name);
