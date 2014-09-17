@@ -2078,6 +2078,56 @@ void executeret(const char *p, tagval &result)
     if(int(code[0]) >= 0x100) code.disown();
 }
 
+void executeret(ident *id, tagval *args, int numargs, bool lookup, tagval &result)
+{
+    result.setnull();
+    ++rundepth;
+    tagval *prevret = commandret;
+    commandret = &result;
+    if(rundepth > MAXRUNDEPTH) debugcode("exceeded recursion limit");
+    else if(id) switch(id->type)
+    {
+        default:
+            if(!id->fun) break;
+            // fall-through
+        case ID_COMMAND:
+            if(numargs < id->numargs)
+            {
+                tagval buf[MAXARGS];
+                memcpy(buf, args, numargs*sizeof(tagval));
+                callcommand(id, buf, numargs, lookup);
+            }
+            else callcommand(id, args, numargs, lookup);
+            numargs = 0;
+            break;
+        case ID_VAR:
+            if(numargs <= 0) printvar(id); else setvarchecked(id, args, numargs);
+            break;
+        case ID_FVAR:
+            if(numargs <= 0) printvar(id); else setfvarchecked(id, forcefloat(args[0]));
+            break;
+        case ID_SVAR:
+            if(numargs <= 0) printvar(id); else setsvarchecked(id, forcestr(args[0]));
+            break;
+        case ID_ALIAS:
+            if(id->index < MAXARGS && !(aliasstack->usedargs&(1<<id->index))) break;
+            if(id->valtype==VAL_NULL) break;
+            #define callargs numargs
+            #define offset 0
+            #define op RET_NULL
+            #define SKIPARGS(offset) offset
+            CALLALIAS;
+            #undef callargs
+            #undef offset
+            #undef op
+            #undef SKIPARGS
+            break;
+    }
+    freeargs(args, numargs, 0);
+    commandret = prevret;
+    --rundepth;
+}
+
 char *executestr(const uint *code)
 {
     tagval result;
@@ -2094,6 +2144,21 @@ char *executestr(const char *p)
     if(result.type == VAL_NULL) return NULL;
     forcestr(result);
     return result.s;
+}
+
+char *executestr(ident *id, tagval *args, int numargs, bool lookup)
+{
+    tagval result;
+    executeret(id, args, numargs, lookup, result);
+    if(result.type == VAL_NULL) return NULL;
+    forcestr(result);
+    return result.s;
+}
+
+char *execidentstr(const char *name, bool lookup)
+{
+    ident *id = idents.access(name);
+    return id ? executestr(id, NULL, 0, lookup) : NULL;
 }
 
 int execute(const uint *code)
@@ -2113,6 +2178,15 @@ int execute(const char *p)
     tagval result;
     runcode(code.getbuf()+1, result);
     if(int(code[0]) >= 0x100) code.disown();
+    int i = result.getint();
+    freearg(result);
+    return i;
+}
+
+int execute(ident *id, tagval *args, int numargs, bool lookup)
+{
+    tagval result;
+    executeret(id, args, numargs, lookup, result);
     int i = result.getint();
     freearg(result);
     return i;

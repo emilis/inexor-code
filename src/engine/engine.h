@@ -136,13 +136,15 @@ struct font
 {
     struct charinfo
     {
-        short x, y, w, h, offsetx, offsety, advance, tex;
+        float x, y, w, h, offsetx, offsety, advance;
+        int tex;
     };
 
     char *name;
     vector<Texture *> texs;
     vector<charinfo> chars;
     int charoffset, defaultw, defaulth, scale;
+    float bordermin, bordermax, outlinemin, outlinemax;
 
     font() : name(NULL) {}
     ~font() { DELETEA(name); }
@@ -482,10 +484,13 @@ extern void checksleep(int millis);
 extern void clearsleep(bool clearoverrides = true);
 
 // console
+extern float conscale;
+
 extern void processkey(int code, bool isdown);
 extern void processtextinput(const char *str, int len);
 extern int rendercommand(int x, int y, int w);
-extern int renderconsole(int w, int h, int abovehud);
+extern float renderfullconsole(float w, float h);
+extern float renderconsole(float w, float h, float abovehud);
 extern void conoutf(const char *s, ...) PRINTFARGS(1, 2);
 extern void conoutf(int type, const char *s, ...) PRINTFARGS(2, 3);
 extern void resetcomplete();
@@ -520,7 +525,7 @@ extern float loadprogress;
 extern void renderbackground(const char *caption = NULL, Texture *mapshot = NULL, const char *mapname = NULL, const char *mapinfo = NULL, bool restore = false, bool force = false);
 extern void renderprogress(float bar, const char *text, GLuint tex = 0, bool background = false);
 
-extern int getfps(int which = 0);
+extern void getfps(int &fps, int &bestdiff, int &worstdiff);
 extern void swapbuffers(bool overlay = true);
 extern int getclockmillis();
 
@@ -621,17 +626,30 @@ extern double skyarea;
 extern void drawskybox(int farplane, bool limited);
 extern bool limitsky();
 
-// 3dgui
-extern void g3d_render();
-extern bool g3d_windowhit(bool on, bool act);
-extern bool g3d_key(int code, bool isdown);
-extern bool g3d_input(const char *str, int len);
+// ui
 
+namespace UI
+{
+    bool hascursor();
+    void getcursorpos(float &x, float &y);
+    void resetcursor();
+    bool movecursor(int dx, int dy);
+    bool keypress(int code, bool isdown);
+    bool textinput(const char *str, int len);
+    float abovehud();
+
+    void setup();
+    void update();
+    void render();
+    void cleanup();
+}
 // menus
 extern int mainmenu;
 
+extern void addchange(const char *desc, int type);
+extern void clearchanges(int type);
+extern void menuprocess();
 extern void clearmainmenu();
-extern void g3d_mainmenu();
 
 // sound
 extern void clearmapsounds();

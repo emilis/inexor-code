@@ -175,21 +175,24 @@ int drawconlines(int conskip, int confade, int conwidth, int conheight, int cono
     }
     return y+conoff;
 }
-
-int renderconsole(int w, int h, int abovehud)                   // render buffer taking into account time & scrolling
+float renderfullconsole(float w, float h)
 {
-    int conpad = fullconsole ? 0 : FONTH/4,
-        conoff = fullconsole ? FONTH : FONTH/3,
-        conheight = min(fullconsole ? ((h*fullconsize/100)/FONTH)*FONTH : FONTH*consize, h - 2*(conpad + conoff)),
-        conwidth = w - 2*(conpad + conoff) - (fullconsole ? 0 : game::clipconsole(w, h));
-    
-    extern void consolebox(int x1, int y1, int x2, int y2);
-    if(fullconsole) consolebox(conpad, conpad, conwidth+conpad+2*conoff, conheight+conpad+2*conoff);
-    
-    int y = drawconlines(conskip, fullconsole ? 0 : confade, conwidth, conheight, conpad+conoff, fullconsole ? fullconfilter : confilter);
-    if(!fullconsole && (miniconsize && miniconwidth))
-        drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*(conpad + conoff)))/100, min(FONTH*miniconsize, abovehud - y), conpad+conoff, miniconfilter, abovehud, -1);
-    return fullconsole ? conheight + 2*(conpad + conoff) : y;
+    float conpad = FONTH/2,
+          conheight = h - 2*conpad,
+          conwidth = w - 2*conpad;
+    drawconlines(conskip, 0, conwidth, conheight, conpad, fullconfilter);
+    return conheight + 2*conpad;
+}
+
+float renderconsole(float w, float h, float abovehud)
+{
+    float conpad = FONTH/2,
+          conheight = min(float(FONTH*consize), h - 2*conpad),
+          conwidth = w - 2*conpad - game::clipconsole(w, h);
+    float y = drawconlines(conskip, confade, conwidth, conheight, conpad, confilter);
+    if(miniconsize && miniconwidth)
+        drawconlines(miniconskip, miniconfade, (miniconwidth*(w - 2*conpad))/100, min(float(FONTH*miniconsize), abovehud - y), conpad, miniconfilter, abovehud, -1);
+    return y;
 }
 
 // keymap is defined externally in keymap.cfg
@@ -616,7 +619,7 @@ bool consolekey(int code, bool isdown)
 
 void processtextinput(const char *str, int len)
 {
-    if(!g3d_input(str, len))
+    if(!UI::textinput(str, len))
         consoleinput(str, len);
 }
 
@@ -624,7 +627,7 @@ void processkey(int code, bool isdown)
 {
     keym *haskey = keyms.access(code);
     if(haskey && haskey->pressed) execbind(*haskey, isdown); // allow pressed keys to release
-    else if(!g3d_key(code, isdown)) // 3D GUI mouse button intercept   
+    else if(!UI::keypress(code, isdown)) // UI key intercept
     {
         if(!consolekey(code, isdown))
         {

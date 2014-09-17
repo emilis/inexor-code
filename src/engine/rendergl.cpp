@@ -2112,12 +2112,7 @@ void gl_drawframe()
     if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
     renderpostfx();
 
-    defaultshader->set();
-    g3d_render();
-
-    glDisable(GL_TEXTURE_2D);
-    notextureshader->set();
-
+    UI::render();
     gl_drawhud();
 
     renderedgame = false;
@@ -2135,13 +2130,7 @@ void gl_drawmainmenu()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    defaultshader->set();
-    glEnable(GL_TEXTURE_2D);
-    g3d_render();
-
-    notextureshader->set();
-    glDisable(GL_TEXTURE_2D);
-
+	UI::render();
     gl_drawhud();
 }
 
@@ -2297,7 +2286,7 @@ void writecrosshairs(stream *f)
 
 void drawcrosshair(int w, int h)
 {
-    bool windowhit = g3d_windowhit(true, false);
+    bool windowhit = UI::hascursor();
     if(!windowhit && (hidehud || mainmenu)) return; //(hidehud || player->state==CS_SPECTATOR || player->state==CS_DEAD)) return;
 
     float r = 1, g = 1, b = 1, cx = 0.5f, cy = 0.5f, chsize;
@@ -2308,7 +2297,7 @@ void drawcrosshair(int w, int h)
         if(!cursor) cursor = textureload("data/guicursor.png", 3, true);
         crosshair = cursor;
         chsize = cursorsize*w/900.0f;
-        g3d_cursorpos(cx, cy);
+        UI::getcursorpos(cx, cy);
     }
     else
     { 
@@ -2377,6 +2366,8 @@ void gl_drawhud()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
+	glDisable(GL_TEXTURE_2D);
+    notextureshader->set();
     glColor3f(1, 1, 1);
 
     extern int debugsm;
@@ -2411,7 +2402,7 @@ void gl_drawhud()
     glEnable(GL_TEXTURE_2D);
     defaultshader->set();
 
-    int conw = int(w/conscale), conh = int(h/conscale), abovehud = conh - FONTH, limitgui = abovehud;
+    float conw = w/conscale, conh = h/conscale, abovehud = conh - FONTH;
     if(!hidehud && !mainmenu)
     {
         if(!hidestats)
@@ -2454,90 +2445,25 @@ void gl_drawhud()
                     roffset += FONTH;
                 }
             }
-                       
-            if(editmode || showeditstats)
-            {
-                static int laststats = 0, prevstats[8] = { 0, 0, 0, 0, 0, 0, 0 }, curstats[8] = { 0, 0, 0, 0, 0, 0, 0 };
-                if(totalmillis - laststats >= statrate)
-                {
-                    memcpy(prevstats, curstats, sizeof(prevstats));
-                    laststats = totalmillis - (totalmillis%statrate);
-                }
-                int nextstats[8] =
-                {
-                    vtris*100/max(wtris, 1),
-                    vverts*100/max(wverts, 1),
-                    xtraverts/1024,
-                    xtravertsva/1024,
-                    glde,
-                    gbatches,
-                    getnumqueries(),
-                    rplanes
-                };
-                loopi(8) if(prevstats[i]==curstats[i]) curstats[i] = nextstats[i];
-
-                abovehud -= 2*FONTH;
-                draw_textf("wtr:%dk(%d%%) wvt:%dk(%d%%) evt:%dk eva:%dk", FONTH/2, abovehud, wtris/1024, curstats[0], wverts/1024, curstats[1], curstats[2], curstats[3]);
-                draw_textf("ond:%d va:%d gl:%d(%d) oq:%d lm:%d rp:%d pvs:%d", FONTH/2, abovehud+FONTH, allocnodes*8, allocva, curstats[4], curstats[5], curstats[6], lightmaps.length(), curstats[7], getnumviewcells());
-                limitgui = abovehud;
-            }
-
-            if(editmode)
-            {
-                abovehud -= FONTH;
-                draw_textf("cube %s%d%s", FONTH/2, abovehud, selchildcount<0 ? "1/" : "", abs(selchildcount), showmat && selchildmat > 0 ? getmaterialdesc(selchildmat, ": ") : "");
-
-                char *editinfo = executestr("edithud");
-                if(editinfo)
-                {
-                    if(editinfo[0])
-                    {
-                        int tw, th;
-                        text_bounds(editinfo, tw, th);
-                        th += FONTH-1; th -= th%FONTH;
-                        abovehud -= max(th, FONTH);
-                        draw_text(editinfo, FONTH/2, abovehud);
-                    }
-                    DELETEA(editinfo);
-                }
-            }
-            else if(identexists("gamehud"))
-            {
-                char *gameinfo = executestr("gamehud");
-                if(gameinfo)
-                {
-                    if(gameinfo[0])
-                    {
-                        int tw, th;
-                        text_bounds(gameinfo, tw, th);
-                        th += FONTH-1; th -= th%FONTH;
-                        roffset += max(th, FONTH);    
-                        draw_text(gameinfo, conw-max(5*FONTH, 2*FONTH+tw), conh-FONTH/2-roffset);
-                    }
-                    DELETEA(gameinfo);
-                }
-            } 
-            
-            glPopMatrix();
+			glPopMatrix();
         }
 
         if(hidestats || (!editmode && !showeditstats))
         {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             game::gameplayhud(w, h);
-            limitgui = abovehud = min(abovehud, int(conh*game::abovegameplayhud(w, h)));
+            abovehud = min(abovehud, conh*game::abovegameplayhud(w, h));
         }
 
         rendertexturepanel(w, h);
     }
     
-    g3d_limitscale((2*limitgui - conh) / float(conh));
+	abovehud = min(abovehud, conh*UI::abovehud());
 
     glPushMatrix();
     glScalef(conscale, conscale, 1);
     abovehud -= rendercommand(FONTH/2, abovehud - FONTH/2, conw-FONTH);
-    extern int fullconsole;
-    if(!hidehud || fullconsole) renderconsole(conw, conh, abovehud - FONTH/2);
+    if(!hidehud && !UI::uivisible("fullconsole")) renderconsole(conw, conh, abovehud - FONTH/2);
     glPopMatrix();
 
     drawcrosshair(w, h);

@@ -446,6 +446,7 @@ void renderprogress(float bar, const char *text, GLuint tex, bool background)   
     swapbuffers(false);
 }
 
+VARNP(relativemouse, userelativemouse, 0, 1, 1);
 
 bool shouldgrab = false, grabinput = false, minimized = false, canrelativemouse = true, relativemouse = false;
 int keyrepeatmask = 0, textinputmask = 0;
@@ -885,7 +886,6 @@ void checkinput()
 
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                     {
-                        holdscreenlock;
                         SDL_GetWindowSize(screen, &screenw, &screenh);
                         if(!(SDL_GetWindowFlags(screen) & SDL_WINDOW_FULLSCREEN))
                         {
@@ -903,14 +903,14 @@ void checkinput()
                 {
                     int dx = event.motion.xrel, dy = event.motion.yrel;
                     checkmousemotion(dx, dy);
-                    if(!g3d_movecursor(dx, dy)) mousemove(dx, dy);
+                    if(!UI::movecursor(dx, dy)) mousemove(dx, dy);
                     mousemoved = true;
                 }
                 else if(shouldgrab) inputgrab(grabinput = true);
                 break;
 
             case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
+            case SDL_MOUSEBUTTONUP: //todo
 #ifdef __linux__
 #define keycodeshift 0
 #else
@@ -919,7 +919,7 @@ void checkinput()
                 processkey(-event.button.button - keycodeshift, event.button.state==SDL_PRESSED);
                 break;
     
-            case SDL_MOUSEWHEEL:
+            case SDL_MOUSEWHEEL: //todo
                 if(event.wheel.y > 0) { processkey(-4, true); processkey(-4, false); }
                 else if(event.wheel.y < 0) { processkey(-5, true); processkey(-5, false); }
                 if(event.wheel.x > 0) { processkey(-35, true); processkey(-35, false); }
@@ -1203,6 +1203,8 @@ int main(int argc, char **argv)
     if(!execfile("data/stdlib.cfg", false)) fatal("cannot find data files (you are running from the wrong folder, try .bat file in the main folder)");   // this is the first file we load.
     if(!execfile("data/font.cfg", false)) fatal("cannot find font definitions");
     if(!setfont("default")) fatal("no default font specified");
+
+    UI::setup();
 
     inbetweenframes = true;
     renderbackground("initializing...");

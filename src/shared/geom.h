@@ -150,6 +150,12 @@ struct vec
     {
         return dist_to_bb(o, T(o).add(size));
     }
+    static vec hexcolor(int color)
+    {
+        return vec(((color>>16)&0xFF)*(1.0f/255.0f), ((color>>8)&0xFF)*(1.0f/255.0f), (color&0xFF)*(1.0f/255.0f));
+    }
+
+    int tohexcolor() const { return (int(::clamp(r, 0.0f, 1.0f)*255)<<16)|(int(::clamp(g, 0.0f, 1.0f)*255)<<8)|int(::clamp(b, 0.0f, 1.0f)*255); }
 };
 
 static inline bool htcmp(const vec &x, const vec &y)
@@ -267,9 +273,18 @@ struct vec2
     vec2 &sub(float f)       { x -= f; y -= f; return *this; }
     vec2 &sub(const vec2 &o) { x -= o.x; y -= o.y; return *this; }
     vec2 &neg()              { x = -x; y = -y; return *this; }
-
+    vec2 &min(const vec2 &o) { x = ::min(x, o.x); y = ::min(y, o.y); return *this; }
+    vec2 &max(const vec2 &o) { x = ::max(x, o.x); y = ::max(y, o.y); return *this; }
+    vec2 &min(float f)       { x = ::min(x, f); y = ::min(y, f); return *this; }
+    vec2 &max(float f)       { x = ::max(x, f); y = ::max(y, f); return *this; }
+    
     vec2 &lerp(const vec2 &b, float t) { x += (b.x-x)*t; y += (b.y-y)*t; return *this; }
     vec2 &lerp(const vec2 &a, const vec2 &b, float t) { x = a.x + (b.x-a.x)*t; y = a.y + (b.y-a.y)*t; return *this; }
+
+	vec2 &rotate_around_z(float c, float s) { float rx = x, ry = y; x = c*rx-s*ry; y = c*ry+s*rx; return *this; }
+    vec2 &rotate_around_z(float angle) { return rotate_around_z(cosf(angle), sinf(angle)); }
+    vec2 &rotate_around_z(const vec2 &sc) { return rotate_around_z(sc.x, sc.y); }
+
 };
 
 inline vec::vec(const vec2 &v, float z) : x(v.x), y(v.y), z(z) {}
@@ -1464,3 +1479,14 @@ extern bool linecylinderintersect(const vec &from, const vec &to, const vec &sta
 
 extern const vec2 sincos360[];
 
+static inline int mod360(int angle)
+{
+    if(angle < 0) angle = 360 + (angle <= -360 ? angle%360 : angle);
+    else if(angle >= 360) angle %= 360;
+    return angle;
+}
+static inline const vec2 &sincosmod360(int angle) { return sincos360[mod360(angle)]; }
+static inline float cos360(int angle) { return sincos360[angle].x; }
+static inline float sin360(int angle) { return sincos360[angle].y; }
+static inline float tan360(int angle) { const vec2 &sc = sincos360[angle]; return sc.y/sc.x; }
+static inline float cotan360(int angle) { const vec2 &sc = sincos360[angle]; return sc.x/sc.y; }

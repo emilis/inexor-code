@@ -598,7 +598,7 @@ namespace UI
 
         void adjustlayout()
         {
-            float aspect = float(hudw)/hudh;
+            float aspect = float(screenw)/screenh;
             ph = max(max(h, w/aspect), 1.0f);
             pw = aspect*ph;
             Object::adjustlayout(0, 0, pw, ph);
@@ -620,20 +620,19 @@ namespace UI
 
         void projection()
         {
-            hudmatrix.ortho(px, px + pw, py + ph, py, -1, 1);
-            resethudmatrix();
-            sscale = vec2(hudmatrix.a.x, hudmatrix.b.y).mul(0.5f);
-            soffset = vec2(hudmatrix.d.x, hudmatrix.d.y).mul(0.5f).add(0.5f);
+            glOrtho(px, px + pw, py + ph, py, -1, 1); //hudmatrix.ortho(px, px + pw, py + ph, py, -1, 1);
+            sscale = vec2(conscale, conscale);        //vec2(hudmatrix.a.x, hudmatrix.b.y).mul(0.5f);
+            soffset = vec2(0.5, 0.5);//vec2(hudmatrix.d.x, hudmatrix.d.y).mul(0.5f).add(0.5f);
         }
 
         void calcscissor(float x1, float y1, float x2, float y2, int &sx1, int &sy1, int &sx2, int &sy2)
         {
             vec2 s1 = vec2(x1, y2).mul(sscale).add(soffset),
                  s2 = vec2(x2, y1).mul(sscale).add(soffset);
-            sx1 = clamp(int(floor(s1.x*hudw)), 0, hudw);
-            sy1 = clamp(int(floor(s1.y*hudh)), 0, hudh);
-            sx2 = clamp(int(ceil(s2.x*hudw)), 0, hudw);
-            sy2 = clamp(int(ceil(s2.y*hudh)), 0, hudh);
+            sx1 = clamp(int(floor(s1.x*screenw)), 0, screenw);
+            sy1 = clamp(int(floor(s1.y*screenh)), 0, screenh);
+            sx2 = clamp(int(ceil(s2.x*screenw)), 0, screenw);
+            sy2 = clamp(int(ceil(s2.y*screenh)), 0, screenh);
         }
 
         float calcabovehud()
@@ -642,7 +641,9 @@ namespace UI
         }
     };
 
-    static hashnameset<Window *> windows;
+    static inline bool htcmp(const char *key, const Window *w) { return !strcmp(key, w->name); }
+
+    static hashset<Window *> windows;
 
     void ClipArea::scissor()
     {
@@ -1205,9 +1206,9 @@ namespace UI
         Color(uchar r, uchar g, uchar b, uchar a = 255) : r(r), g(g), b(b), a(a) {}
 
         void init() { glColor4ub(r, g, b, a); }
-        void attrib() { gle::attribub(r, g, b, a); }
+		void attrib() { }//gle::attribub(r, g, b, a); }
 
-        static void def() { gle::defcolor(4, GL_UNSIGNED_BYTE); }
+		static void def() { }//gle::defcolor(4, GL_UNSIGNED_BYTE); }
     };
 
     struct FillColor : Filler
@@ -1822,7 +1823,7 @@ namespace UI
         {
             Text::setup(scale_, color_, wrap_);
 
-            if(val != val_) { val = val_; intformat(str, val, sizeof(str)); }
+			if(val != val_) { val = val_; intformat(str, val); } //, sizeof(str)); }
         }
 
         static const char *typestr() { return "#TextInt"; }
@@ -1842,7 +1843,7 @@ namespace UI
         {
             Text::setup(scale_, color_, wrap_);
 
-            if(val != val_) { val = val_; floatformat(str, val, sizeof(str)); }
+			if(val != val_) { val = val_; floatformat(str, val); } //, sizeof(str)); }
         }
 
         static const char *typestr() { return "#TextFloat"; }
@@ -1948,8 +1949,8 @@ namespace UI
 
             float k = drawscale();
             glPushMatrix();
-            hudmatrix.translate(sx, sy, 0);
-            hudmatrix.scale(k, k, 1);
+			glTranslatef(sx, sy, 0); //hudmatrix.translate(sx, sy, 0);
+            glScalef(k, k, 1); //hudmatrix.scale(k, k, 1);
 			//flushmatrix
             renderfullconsole(w/k, h/k);
             glPopMatrix();
@@ -2513,8 +2514,8 @@ namespace UI
 
             float k = drawscale();
             glPushMatrix();
-            hudmatrix.translate(sx, sy, 0);
-            hudmatrix.scale(k, k, 1);
+			glTranslatef(sx, sy, 0); //hudmatrix.translate(sx, sy, 0);
+			glScalef(k, k, 1); //hudmatrix.scale(k, k, 1);
             //flushhudmatrix();
 
             edit->draw(FONTW/2, 0, 0xFFFFFF, isfocus());
@@ -3389,8 +3390,8 @@ namespace UI
     bool movecursor(int dx, int dy)
     {
         if(!hascursor()) return false;
-        cursorx = clamp(cursorx + dx*uisensitivity/hudw, 0.0f, 1.0f);
-        cursory = clamp(cursory + dy*uisensitivity/hudh, 0.0f, 1.0f);
+        cursorx = clamp(cursorx + dx*uisensitivity/screenw, 0.0f, 1.0f);
+        cursory = clamp(cursory + dy*uisensitivity/screenh, 0.0f, 1.0f);
         return true;
     }
 
@@ -3449,7 +3450,7 @@ namespace UI
     {
         uitextscale = 1.0f/uitextrows;
 
-        int tw = hudw, th = hudh;
+        int tw = screenw, th = screenh;
         if(forceaspect) tw = int(ceil(th*forceaspect));
         gettextres(tw, th);
         uicontextscale = conscale/th;
