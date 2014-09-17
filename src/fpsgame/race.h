@@ -152,7 +152,7 @@ struct raceclientmode : clientmode
         else if (d->racestate == 2 && d->racerank >= 4) return ANIM_LOSE|ANIM_LOOP;
         return ANIM_LOSE|ANIM_LOOP;
     }
-
+#if 0
     void renderscoreboard(g3d_gui &g, game::scoregroup &sg, int fgcolor, int bgcolor) {
         if (showracerank) {
             g.pushlist();
@@ -223,7 +223,7 @@ struct raceclientmode : clientmode
             g.poplist();
         }
     }
-
+#endif
     void killed(fpsent *d, fpsent *actor) {
         // conoutf("killed");
         // d->state.racetime = 0;

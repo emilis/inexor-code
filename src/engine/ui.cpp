@@ -2902,7 +2902,7 @@ namespace UI
         void previewslot(Slot &slot, VSlot &vslot, float x, float y)
         {
             if(slot.sts.empty()) return;
-            VSlot *layer = NULL, *decal = NULL;
+            VSlot *layer = NULL;
             Texture *t = NULL, *glowtex = NULL, *layertex = NULL, *decaltex = NULL;
             if(slot.loaded)
             {
@@ -2915,11 +2915,6 @@ namespace UI
                     layer = &lookupvslot(vslot.layer);
                     if(!layer->slot->sts.empty()) layertex = layer->slot->sts[0].t;
                 }
-                //if(vslot.decal)
-                //{
-                //    decal = &lookupvslot(vslot.decal);
-                //    if(!decal->slot->sts.empty()) decaltex = decal->slot->sts[0].t;
-                //}
             }
             else
             {

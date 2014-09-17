@@ -80,7 +80,8 @@ struct hideandseekclientmode : clientmode
     void rendergame() {
     }
 
-    void renderscoreboard(g3d_gui &g, game::scoregroup &sg, int fgcolor, int bgcolor) {
+#if 0
+	void renderscoreboard(g3d_gui &g, game::scoregroup &sg, int fgcolor, int bgcolor) {
         /*
         if (showhideandseekrole) {
             g.pushlist();
@@ -94,6 +95,7 @@ struct hideandseekclientmode : clientmode
         }
         */
     }
+#endif
 
     void killed(fpsent *d, fpsent *actor) {
     }

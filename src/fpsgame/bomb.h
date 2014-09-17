@@ -189,7 +189,7 @@ struct bombclientmode : clientmode
     {
     	renderplayersposindicator();
     }
-
+#if 0
     void renderscoreboard(g3d_gui &g, game::scoregroup &sg, int fgcolor, int bgcolor)
     {
         if(showbombs)
@@ -228,7 +228,8 @@ struct bombclientmode : clientmode
             }
             g.poplist();
         }
-    }
+    } 
+#endif
 
     void killed(fpsent *d, fpsent *actor)
     {
