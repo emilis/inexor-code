@@ -2750,7 +2750,7 @@ namespace UI
                 else
                 {
                     vector<int> anims;
-                    game::findanims(animspec, anims);
+                    findanims(animspec, anims);
                     if(anims.length()) anim = anims[0];
                 }
             }
@@ -2781,7 +2781,8 @@ namespace UI
                 m->boundbox(center, radius);
                 float yaw;
                 vec o = calcmodelpreviewpos(radius, yaw).sub(center);
-                rendermodel(name, anim, o, yaw, 0, 0, 0, NULL, NULL, 0);
+				entitylight light;
+				rendermodel(&light,name, anim, o, yaw, 0, 0, 0, NULL, NULL, 0);
             }
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
@@ -2822,7 +2823,7 @@ namespace UI
             window->calcscissor(sx, sy, sx+w, sy+h, sx1, sy1, sx2, sy2);
             glDisable(GL_BLEND);
             modelpreview::start(sx1, sy1, sx2-sx1, sy2-sy1, false, clipstack.length() > 0);
-            game::renderplayerpreview(model, color, team, weapon);
+            game::renderplayerpreview(model, team, weapon);
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
             defaultshader->set();
@@ -2866,7 +2867,7 @@ namespace UI
             glDisable(GL_BLEND);
 
             modelpreview::start(sx1, sy1, sx2-sx1, sy2-sy1, false, clipstack.length() > 0);
-            previewprefab(name, color);
+           // previewprefab(name, color); todo
             if(clipstack.length()) clipstack.last().scissor();
             modelpreview::end();
             defaultshader->set();
@@ -2914,11 +2915,11 @@ namespace UI
                     layer = &lookupvslot(vslot.layer);
                     if(!layer->slot->sts.empty()) layertex = layer->slot->sts[0].t;
                 }
-                if(vslot.decal)
-                {
-                    decal = &lookupvslot(vslot.decal);
-                    if(!decal->slot->sts.empty()) decaltex = decal->slot->sts[0].t;
-                }
+                //if(vslot.decal)
+                //{
+                //    decal = &lookupvslot(vslot.decal);
+                //    if(!decal->slot->sts.empty()) decaltex = decal->slot->sts[0].t;
+                //}
             }
             else
             {
@@ -2933,7 +2934,7 @@ namespace UI
             }
             SETSHADER(hudrgb);
             vec2 tc[4] = { vec2(0, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) };
-            int xoff = vslot.offset.x, yoff = vslot.offset.y;
+            int xoff = vslot.xoffset, yoff = vslot.yoffset;
             if(vslot.rotation)
             {
                 if((vslot.rotation&5) == 1) { swap(xoff, yoff); loopk(4) swap(tc[k].x, tc[k].y); }
@@ -2943,7 +2944,7 @@ namespace UI
             float xt = min(1.0f, t->xs/float(t->ys)), yt = min(1.0f, t->ys/float(t->xs));
             loopk(4) { tc[k].x = tc[k].x/xt - float(xoff)/t->xs; tc[k].y = tc[k].y/yt - float(yoff)/t->ys; }
             glBindTexture(GL_TEXTURE_2D, t->id);
-            if(slot.loaded) gle::color(vslot.colorscale);
+            if(slot.loaded) glColor3fv(&vslot.colorscale.x);
             quad(x, y, w, h, tc);
             if(decaltex)
             {
@@ -2954,18 +2955,18 @@ namespace UI
             {
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE);
                 glBindTexture(GL_TEXTURE_2D, glowtex->id);
-                gle::color(vslot.glowcolor);
+                glColor3fv(&vslot.glowcolor.x);
                 quad(x, y, w, h, tc);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }
             if(layertex)
             {
                 glBindTexture(GL_TEXTURE_2D, layertex->id);
-                gle::color(layer->colorscale);
+                glColor3fv(&layer->colorscale.x);
                 quad(x, y, w/2, h/2, tc);
             }
-            gle::colorf(1, 1, 1);
-            hudshader->set();
+            glColor3f(1, 1, 1);
+            defaultshader->set();
         }
 
         void draw(float sx, float sy)
@@ -3243,7 +3244,6 @@ namespace UI
             case VAL_FLOAT:
                 BUILD(TextFloat, o, o->setup(t.f, scale, color, wrap), children);
                 break;
-            case VAL_CSTR:
             case VAL_MACRO:
             case VAL_STR:
                 if(t.s[0])

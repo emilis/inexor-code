@@ -279,6 +279,7 @@ extern vec worldpos, camdir, camright, camup;
 extern void disablezoom();
 
 extern vec calcavatarpos(const vec &pos, float dist);
+extern vec calcmodelpreviewpos(const vec &radius, float &yaw);
 
 extern void damageblend(int n);
 extern void damagecompass(int n, const vec &loc);
@@ -286,7 +287,6 @@ extern void damagecompass(int n, const vec &loc);
 extern vec minimapcenter, minimapradius, minimapscale;
 extern void bindminimap();
 
-extern matrix3x4 hudmatrix;
 // renderparticles
 enum
 {

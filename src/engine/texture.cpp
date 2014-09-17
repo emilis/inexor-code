@@ -2080,32 +2080,46 @@ void linkslotshaders()
     }
 }
 
-Texture *loadthumbnail(Slot &slot)
+static void blitthumbnail(ImageData &d, ImageData &s, int x, int y)
 {
-    if(slot.thumbnail) return slot.thumbnail;
-    if(!slot.variants)
+    forcergbimage(d);
+    forcergbimage(s);
+    uchar *dstrow = &d.data[d.pitch*y + d.bpp*x], *srcrow = s.data;
+    loop(y, s.h)
     {
-        slot.thumbnail = notexture;
-        return slot.thumbnail;
+        for(uchar *dst = dstrow, *src = srcrow, *end = &srcrow[s.w*s.bpp]; src < end; dst += d.bpp, src += s.bpp)
+        loopk(3) dst[k] = src[k];
+        dstrow += d.pitch;
+        srcrow += s.pitch;
     }
-    VSlot &vslot = *slot.variants;
-    linkslotshader(slot, false);
+}
+
+Texture *Slot::loadthumbnail()
+{
+    if(thumbnail) return thumbnail;
+    if(!variants)
+    {
+        thumbnail = notexture;
+        return thumbnail;
+    }
+    VSlot &vslot = *variants;
+    linkslotshader(*this, false);
     linkvslotshader(vslot, false);
     vector<char> name;
-    if(vslot.colorscale == vec(1, 1, 1)) addname(name, slot, slot.sts[0], false, "<thumbnail>");
+    if(vslot.colorscale == vec(1, 1, 1)) addname(name, *this, sts[0], false, "<thumbnail>");
     else
     {
         defformatstring(prefix)("<thumbnail:%.2f/%.2f/%.2f>", vslot.colorscale.x, vslot.colorscale.y, vslot.colorscale.z);
-        addname(name, slot, slot.sts[0], false, prefix);
+         addname(name, *this, sts[0], false, prefix);
     }
     int glow = -1;
-    if(slot.texmask&(1<<TEX_GLOW)) 
+    if(texmask&(1<<TEX_GLOW))
     { 
-        loopvj(slot.sts) if(slot.sts[j].type==TEX_GLOW) { glow = j; break; } 
+        loopvj(sts) if(sts[j].type==TEX_GLOW) { glow = j; break; }
         if(glow >= 0) 
         {
             defformatstring(prefix)("<glow:%.2f/%.2f/%.2f>", vslot.glowcolor.x, vslot.glowcolor.y, vslot.glowcolor.z); 
-            addname(name, slot, slot.sts[glow], true, prefix);
+            addname(name, *this, sts[glow], true, prefix);
         }
     }
     VSlot *layer = vslot.layer ? &lookupvslot(vslot.layer, false) : NULL;
@@ -2120,19 +2134,20 @@ Texture *loadthumbnail(Slot &slot)
     }
     name.add('\0');
     Texture *t = textures.access(path(name.getbuf()));
-    if(t) slot.thumbnail = t;
+    if(t) thumbnail = t;
     else
     {
         ImageData s, g, l;
-        texturedata(s, NULL, &slot.sts[0], false);
-        if(glow >= 0) texturedata(g, NULL, &slot.sts[glow], false);
-        if(layer) texturedata(l, NULL, &layer->slot->sts[0], false);
-        if(!s.data) t = slot.thumbnail = notexture;
+		
+        texturedata(s, NULL, &sts[0], false);
+        if(glow >= 0) texturedata(g, NULL, &sts[glow], false);
+        if(layer) texturedata(l, NULL, &layer->slot->sts[0], false); //todo
+        if(!s.data) t = thumbnail = notexture;
         else
         {
             if(vslot.colorscale != vec(1, 1, 1)) texmad(s, vslot.colorscale, vec(0, 0, 0));
             int xs = s.w, ys = s.h;
-            if(s.w > 64 || s.h > 64) scaleimage(s, min(s.w, 64), min(s.h, 64));
+            if(s.w > 128 || s.h > 128) scaleimage(s, min(s.w, 128), min(s.h, 128));
             if(g.data)
             {
                 if(g.w != s.w || g.h != s.h) scaleimage(g, s.w, s.h);
@@ -2142,21 +2157,12 @@ Texture *loadthumbnail(Slot &slot)
             {
                 if(layer->colorscale != vec(1, 1, 1)) texmad(l, layer->colorscale, vec(0, 0, 0));
                 if(l.w != s.w/2 || l.h != s.h/2) scaleimage(l, s.w/2, s.h/2);
-                forcergbimage(s);
-                forcergbimage(l); 
-                uchar *dstrow = &s.data[s.pitch*l.h + s.bpp*l.w], *srcrow = l.data;
-                loop(y, l.h) 
-                {
-                    for(uchar *dst = dstrow, *src = srcrow, *end = &srcrow[l.w*l.bpp]; src < end; dst += s.bpp, src += l.bpp)
-                        loopk(3) dst[k] = src[k]; 
-                    dstrow += s.pitch;
-                    srcrow += l.pitch;
-                }
+                blitthumbnail(s, l, s.w-l.w, s.h-l.h);
             }
             t = newtexture(NULL, name.getbuf(), s, 0, false, false, true);
             t->xs = xs;
             t->ys = ys;
-            slot.thumbnail = t;
+            thumbnail = t;
         }
     }
     return t;

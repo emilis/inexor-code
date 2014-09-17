@@ -1670,17 +1670,30 @@ void drawcubemap(int size, const vec &o, float yaw, float pitch, const cubemapsi
     envmapping = false;
 }
 
+VAR(modelpreviewfov, 10, 20, 100);
+VAR(modelpreviewpitch, -90, -15, 90);
 bool modelpreviewing = false;
-
 namespace modelpreview
 {
     physent *oldcamera;
-    float oldfogstart, oldfogend, oldfogcolor[4]; 
-
     physent camera;
 
-    void start(bool background)
+    float oldfogstart, oldfogend, oldfogcolor[4]; 
+	float oldaspect, oldfovy, oldfov;
+    int oldfarplane;
+
+    int x, y, w, h;
+    bool background, scissor;
+
+   void start(int x, int y, int w, int h, bool background, bool scissor)
     {
+        modelpreview::x = x;
+        modelpreview::y = y;
+        modelpreview::w = w;
+        modelpreview::h = h;
+        modelpreview::background = background;
+        modelpreview::scissor = scissor;
+
         float fovy = 90.f, aspect = 1.f;
         envmapping = modelpreviewing = true;
 
@@ -1705,6 +1718,16 @@ namespace modelpreview
         glClearColor(fogc[0], fogc[1], fogc[2], fogc[3]);
 
         glClear((background ? GL_COLOR_BUFFER_BIT : 0) | GL_DEPTH_BUFFER_BIT);
+		
+		oldaspect = aspect;
+        oldfovy = fovy;
+        oldfov = curfov;
+        oldfarplane = farplane;
+
+        aspect = w/float(h);
+        fovy = modelpreviewfov;
+        curfov = 2*atan2(tan(fovy/2*RAD), 1/aspect)/RAD;
+        farplane = 1024;
 
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
@@ -1740,6 +1763,13 @@ namespace modelpreview
         camera1 = oldcamera;
         envmapping = modelpreviewing = false;
     }
+}
+
+vec calcmodelpreviewpos(const vec &radius, float &yaw)
+{
+    yaw = fmod(lastmillis/10000.0f*360.0f, 360.0f);
+    float dist = max(radius.magnitude2()/aspect, radius.magnitude())/sinf(fovy/2*RAD);
+    return vec(0, dist, 0).rotate_around_x(camera1->pitch*RAD);
 }
 
 bool minimapping = false;

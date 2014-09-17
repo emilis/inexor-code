@@ -630,6 +630,17 @@ void setvarchecked(ident *id, int val)
     }
 }
 
+static inline void setvarchecked(ident *id, tagval *args, int numargs)
+{
+    int val = forceint(args[0]);
+    if(id->flags&IDF_HEX && numargs > 1)
+    {
+        val = (val << 16) | (forceint(args[1])<<8);
+        if(numargs > 2) val |= forceint(args[2]);
+    }
+    setvarchecked(id, val);
+}
+
 float clampfvar(ident *id, float val, float minval, float maxval)
 {
     if(val < minval) val = minval;
@@ -2090,14 +2101,10 @@ void executeret(ident *id, tagval *args, int numargs, bool lookup, tagval &resul
         default:
             if(!id->fun) break;
             // fall-through
-        case ID_COMMAND:
-            if(numargs < id->numargs)
-            {
+        case ID_COMMAND: //todo
                 tagval buf[MAXARGS];
                 memcpy(buf, args, numargs*sizeof(tagval));
                 callcommand(id, buf, numargs, lookup);
-            }
-            else callcommand(id, args, numargs, lookup);
             numargs = 0;
             break;
         case ID_VAR:
@@ -2116,7 +2123,7 @@ void executeret(ident *id, tagval *args, int numargs, bool lookup, tagval &resul
             #define offset 0
             #define op RET_NULL
             #define SKIPARGS(offset) offset
-            CALLALIAS;
+            CALLALIAS(0); //todo
             #undef callargs
             #undef offset
             #undef op
@@ -2403,6 +2410,13 @@ const char *floatstr(float v)
 void floatret(float v)
 {
     commandret->setfloat(v);
+}
+
+const char *numberstr(double v)
+{
+    retidx = (retidx + 1)%4;
+    numberformat(retbuf[retidx], v);
+    return retbuf[retidx];
 }
 
 #undef ICOMMANDNAME

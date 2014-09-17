@@ -195,6 +195,7 @@ extern const char *intstr(int v);
 extern void intret(int v);
 extern const char *floatstr(float v);
 extern void floatret(float v);
+extern const char *numberstr(double v);
 extern void stringret(char *s);
 extern void result(tagval &v);
 extern void result(const char *s);
@@ -218,6 +219,12 @@ PARSEFLOAT(number, double)
 
 static inline void intformat(char *buf, int v) { formatstring(buf)("%d", v); }
 static inline void floatformat(char *buf, float v) { formatstring(buf)(v==int(v) ? "%.1f" : "%.7g", v); }
+static inline void numberformat(char *buf, double v, int len = 20)
+{
+    int i = int(v);
+    if(v == i) formatstring(buf)("%d", i);
+    else formatstring(buf)("%.7g", v);
+}
 
 static inline const char *getstr(const identval &v, int type) 
 {

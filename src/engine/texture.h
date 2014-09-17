@@ -623,6 +623,8 @@ struct Slot
 
     Slot(int index = -1) : index(index), variants(NULL), autograss(NULL), layermaskname(NULL), layermask(NULL) { reset(); }
     
+	Texture *loadthumbnail();
+
     void reset()
     {
         sts.shrink(0);
@@ -696,7 +698,6 @@ extern int reservevpparams, maxvpenvparams, maxvplocalparams, maxfpenvparams, ma
 
 extern Shader *lookupshaderbyname(const char *name);
 extern Shader *useshaderbyname(const char *name);
-extern Texture *loadthumbnail(Slot &slot);
 extern void resetslotshader();
 extern void setslotshader(Slot &s);
 extern void linkslotshader(Slot &s, bool load = true);
