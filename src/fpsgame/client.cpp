@@ -886,7 +886,7 @@ namespace game
 		conoutf(CON_TEAMCHAT, "\f4pm to %s:\f6 %s", colorname(clients[i]), text); 
 		addmsg(N_PRIVMSG, "rcis", player1, i, text);
 	}
-	ICOMMAND(sendpm, "is", (int *i, char *text), sayprivate(*i, text));
+	ICOMMAND(pm, "is", (int *i, char *text), sayprivate(*i, text));
 
     ICOMMAND(servcmd, "C", (char *cmd), addmsg(N_SERVCMD, "rs", cmd));
 
