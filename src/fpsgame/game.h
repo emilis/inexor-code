@@ -589,6 +589,10 @@ struct fpsstate
             ammo[GUN_PISTOL] = 80;
             ammo[GUN_GL] = 1;
         }
+		else if(m_edit)
+        {
+            loopi(NUMGUNS-1) ammo[1+i] = 1;
+        }
         else
         {
             armourtype = A_BLUE;
