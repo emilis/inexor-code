@@ -20,7 +20,6 @@ namespace entities
             case RESPAWNPOINT:
             case BOX:
             case BARREL:
-            case OBSTACLE:
             case PLATFORM:
             case ELEVATOR:
                 e.attr1 = (int(e.attr1)+180)%360;
@@ -30,7 +29,6 @@ namespace entities
         {
             case BOX:
             case BARREL:
-            case OBSTACLE:
             case PLATFORM:
             case ELEVATOR:
                 int yaw = (int(e.attr1)%360 + 360)%360 + 7; 
