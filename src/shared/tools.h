@@ -1234,6 +1234,7 @@ extern void getstring(char *t, ucharbuf &p, size_t len);
 template<size_t N> static inline void getstring(char (&t)[N], ucharbuf &p) { getstring(t, p, N); }
 extern void filtertext(char *dst, const char *src, bool whitespace = true, size_t len = sizeof(string)-1);
 extern void cutextension(char *str, char *ext = NULL);
+extern const char *gettimestr(const char *format = "%d_%b_%y_%H.%M.%S", bool forcelowercase = false);
 
 struct ipmask
 {

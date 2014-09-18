@@ -703,12 +703,12 @@ struct fpsent : dynent, fpsstate
 
 //a more compact "fpsent"
 //usefull for playerinfo without the need for actual engine-data e.g. to save infos about the match in a demo or for extended serverbrowser-data
-struct playerinfo {
+struct playersummary {
 	string name, team; //tag  not required, it will overwrite team if necessary
 	int clientnum, privilege, playermodel, state, //basic states
 		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
 	
-	playerinfo() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
+	playersummary() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
 	{
 		name[0] = team[0] = '\0';
 	}
@@ -745,11 +745,19 @@ static inline bool htcmp(const char *team, const teaminfo &t) { return !strcmp(t
 
 
 //a container of the compact data of a game, purpose see playerinfo
-struct gameinfo
+struct gamesummary
 {
-	string map, mode, info;
+	string map, mode, info, date;
+	
+	struct bookmark {
+		string comment;
+		int type, time;
+		bookmark() : type(-1), time(0) { comment[0] = '\0'; }
+	};
+	vector<bookmark>bookmarks; //timestamps of favorite events, as well as flag scored, chat-events, kills ..
+	
 	hashset<teaminfo> teams;
-	vector<playerinfo> players; 
+	vector<playersummary> players; 
 };
 
 namespace entities

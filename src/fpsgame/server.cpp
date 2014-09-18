@@ -618,6 +618,7 @@ namespace server
     bool demonextmatch = false;
     stream *demotmp = NULL, *demorecord = NULL, *demoplayback = NULL;
     int nextplayback = 0, demomillis = 0;
+	gamesummary *cursummary = NULL;
 
     VAR(maxdemos, 0, 5, 25);
     VAR(maxdemosize, 0, 16, 31);
@@ -1080,24 +1081,24 @@ namespace server
         DELETEP(demotmp);
     }
 
-	//writes the info of the played game at the end of the demo, followed by the size of the footer.
-	//todo signalize readdemo end of normal part
-    void writedemofooter()
+    gamesummary *getgamesummary()
 	{
-		const char *map = game::getclientmap(), *name = strrchr(map, '/');
-		gameinfo gi;
-		int size = sizeof(gi.map);
-		copystring(gi.map, name ? name+1 : map);
-		demorecord->write(gi.map, sizeof(gi.map));
-		lilswap(&size, 1);
-		demorecord->write(&size, 1);
+		if(!cursummary) cursummary = new gamesummary();
+		gamesummary *gi = cursummary;
+
+		copystring(gi->map, smapname);
+		copystring(gi->mode, modename(gamemode));
+		
+		const char *date = gettimestr("%d_%b_%y_%H.%M");
+		if(date) copystring(gi->date, date);
+
+		//todo players & teams (+ tags)
+		return gi;
 	}
     
 	void enddemorecord()
     {
         if(!demorecord) return;
-
-		writedemofooter();
 
         DELETEP(demorecord);
 
