@@ -134,22 +134,26 @@ namespace game
 			filtertext(player1->name, name, false, MAXNAMELEN);
 			if(!player1->name[0]) copystring(player1->name, "unnamed");
 		}
-		filtertext(player1->tag, tag, false, MAXTAGLEN);
+		if(tag) filtertext(player1->tag, tag, false, MAXTAGLEN);
 		addmsg(N_SWITCHNAME, "rss", player1->name, player1->tag);
     }
     void printname()
     {
-		string tagstr; tagstr[0] = '\0';
-		if(player1->tag[0]) formatstring(tagstr) (". Your Tag is %s", player1->tag);
-        conoutf("your name is: %s %s", colorname(player1), tagstr);
+        conoutf("your name is: %s", colorname(player1));
     }
-    ICOMMAND(name, "ssN", (char *name, char *tag, int *numargs),
+    ICOMMAND(name, "sN", (char *s, int *numargs),
     {
-        if(*numargs > 0) switchname(name, tag);
+        if(*numargs > 0) switchname(s, NULL);
         else if(!*numargs) printname();
         else result(colorname(player1));
     });
     ICOMMAND(getname, "", (), result(player1->name));
+	ICOMMAND(tag, "sN", (char *s, int *numargs),
+	{
+		if(*numargs > 0) switchname("", s);
+		else if(!*numargs) conoutf("your tag is: %s", player1->tag);
+		else result(player1->tag);
+	});
 	ICOMMAND(gettag, "", (), result(player1->tag));
 
     void switchteam(const char *team)
