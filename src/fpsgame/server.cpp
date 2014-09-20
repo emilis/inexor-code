@@ -1099,6 +1099,24 @@ namespace server
         if(!cursummary) newgamesummary();
 		return cursummary;
 	}
+	void addplayer(gamesummary *g, clientinfo *ci)
+	{
+		loopv(g->players) if(!strcmp(ci->name, g->players[i].name)) return; //todo rewrite reconnected player
+		playersummary &ps = g->players.add();
+		copystring(ps.name, ci->name);
+		copystring(ps.team, ci->team);
+		copystring(ps.tag, ci->tag);
+		ps.clientnum = ci->clientnum;
+		ps.privilege = ci->privilege;
+		ps.playermodel = ci->playermodel;
+		ps.state = ci->state.state;
+		ps.frags = ci->state.frags;
+		ps.flags = ci->state.flags;
+		ps.deaths = ci->state.deaths;
+		ps.teamkills = ci->state.teamkills;
+		ps.totaldamage = ci->state.damage;
+		ps.totalshots = ci->state.shotdamage;
+	}
     
 	void enddemorecord()
     {
@@ -2101,7 +2119,7 @@ namespace server
         
     void changemap(const char *s, int mode)
     {
-		loopv(clients) getcursummary()->addplayer(clients[i]);
+		loopv(clients) addplayer(getcursummary(), clients[i]);
         
 		stopdemo();
         pausegame(false,NULL);
@@ -2802,7 +2820,7 @@ namespace server
         if(ci->connected)
         {
 			getcursummary()->addbookmark(N_CDIS); //current game summary
-			getcursummary()->addplayer(ci);       //save info about player
+			addplayer(getcursummary(), ci);       //save info about player in the gamesummary
 
             if(ci->privilege) setmaster(ci, false);
             if(smode) smode->leavegame(ci, true);

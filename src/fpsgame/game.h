@@ -757,25 +757,6 @@ struct gamesummary
 	
 	hashset<teaminfo> teams;
 	vector<playersummary> players;
-
-	void addplayer(server::clientinfo *ci)
-	{
-		loopv(players) if(!strcmp(ci->name, players[i].name)) return; //todo rewrite reconnected player
-		playersummary &ps = players.add();
-		copystring(ps.name, ci->name);
-		copystring(ps.team, ci->team);
-		copystring(ps.tag, ci->tag);
-		ps.clientnum = ci->clientnum;
-		ps.privilege = ci->privilege;
-		ps.playermodel = ci->playermodel;
-		ps.state = ci->state.state;
-		ps.frags = ci->state.frags;
-		ps.flags = ci->state.flags;
-		ps.deaths = ci->state.deaths;
-		ps.teamkills = ci->state.teamkills;
-		ps.totaldamage = ci->state.damage;
-		ps.totalshots = ci->state.shotdamage;
-	}
 	
 	void addbookmark(int type, int time = -1, const char *comment = NULL, int actor = -1) //todo
 	{
