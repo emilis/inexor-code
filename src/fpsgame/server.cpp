@@ -1080,11 +1080,10 @@ namespace server
         demotmp->read(d.data, len);
         DELETEP(demotmp);
     }
-
-    gamesummary *getgamesummary()
+    
+	void newgamesummary()
 	{
-		if(!cursummary) cursummary = new gamesummary();
-		gamesummary *gi = cursummary;
+		gamesummary *gi = new gamesummary();
 
 		copystring(gi->map, smapname);
 		copystring(gi->mode, modename(gamemode));
@@ -1092,8 +1091,13 @@ namespace server
 		const char *date = gettimestr("%d_%b_%y_%H.%M");
 		if(date) copystring(gi->date, date);
 
-		//todo players & teams (+ tags)
-		return gi;
+		cursummary = gi;
+	}
+	
+	gamesummary *getcursummary()
+	{
+        if(!cursummary) newgamesummary();
+		return cursummary;
 	}
     
 	void enddemorecord()
@@ -1140,7 +1144,6 @@ namespace server
         sendservmsg("recording demo");
 
         demorecord = f;
-
         demoheader hdr;
         memcpy(hdr.magic, DEMO_MAGIC, sizeof(hdr.magic));
         hdr.version = DEMO_VERSION;
@@ -2056,7 +2059,9 @@ namespace server
         
     void changemap(const char *s, int mode)
     {
-        stopdemo();
+		loopv(clients) getcursummary()->addplayer(clients[i]);
+        
+		stopdemo();
         pausegame(false,NULL);
         changegamespeed(100);
         if(smode) smode->cleanup();
@@ -2102,7 +2107,7 @@ namespace server
         }
 
         aiman::changemap();
-
+		newgamesummary();
         if(m_demo)
         {
             if(clients.length()) setupdemoplayback();
@@ -2754,6 +2759,9 @@ namespace server
         loopv(clients) if(clients[i]->authkickvictim == ci->clientnum) clients[i]->cleanauth(); 
         if(ci->connected)
         {
+			getcursummary()->addbookmark(N_CDIS); //current game summary
+			getcursummary()->addplayer(ci);       //save info about player
+
             if(ci->privilege) setmaster(ci, false);
             if(smode) smode->leavegame(ci, true);
             ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
@@ -3353,7 +3361,9 @@ namespace server
                 getstring(text, p);
                 filtertext(text, text);
                 QUEUE_STR(text);
-                if(isdedicatedserver() && cq) logoutf("%s: %s", colorname(cq), text);
+				defformatstring(ttext) ("%s: %s", colorname(cq), text);
+                if(isdedicatedserver() && cq) logoutf(ttext);
+				getcursummary()->addbookmark(N_TEXT, -1, ttext);
                 break;
             }
 

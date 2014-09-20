@@ -701,19 +701,6 @@ struct fpsent : dynent, fpsstate
 
 };
 
-//a more compact "fpsent"
-//usefull for playerinfo without the need for actual engine-data e.g. to save infos about the match in a demo or for extended serverbrowser-data
-struct playersummary {
-	string name, team; //tag  not required, it will overwrite team if necessary
-	int clientnum, privilege, playermodel, state, //basic states
-		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
-	
-	playersummary() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
-	{
-		name[0] = team[0] = '\0';
-	}
-};
-
 struct teamscore
 {
     const char *team;
@@ -743,6 +730,18 @@ struct teaminfo
 static inline uint hthash(const teaminfo &t) { return hthash(t.team); }
 static inline bool htcmp(const char *team, const teaminfo &t) { return !strcmp(team, t.team); }
 
+//a more compact "fpsent"
+//usefull for playerinfo without the need for actual engine-data e.g. to save infos about the match in a demo or for extended serverbrowser-data
+struct playersummary {
+	string name, team, tag;
+	int clientnum, privilege, playermodel, state, //basic states
+		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
+	
+	playersummary() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
+	{
+		name[0] = team[0] = tag[0] = '\0';
+	}
+};
 
 //a container of the compact data of a game, purpose see playerinfo
 struct gamesummary
@@ -751,13 +750,42 @@ struct gamesummary
 	
 	struct bookmark {
 		string comment;
-		int type, time;
-		bookmark() : type(-1), time(0) { comment[0] = '\0'; }
+		int type, time, actor;
+		bookmark() : type(-1), time(0), actor(-1) { comment[0] = '\0'; }
 	};
 	vector<bookmark>bookmarks; //timestamps of favorite events, as well as flag scored, chat-events, kills ..
 	
 	hashset<teaminfo> teams;
-	vector<playersummary> players; 
+	vector<playersummary> players;
+
+	void addplayer(server::clientinfo *ci)
+	{
+		loopv(players) if(!strcmp(ci->name, players[i].name)) return; //todo rewrite reconnected player
+		playersummary &ps = players.add();
+		copystring(ps.name, ci->name);
+		copystring(ps.team, ci->team);
+		copystring(ps.tag, ci->tag);
+		ps.clientnum = ci->clientnum;
+		ps.privilege = ci->privilege;
+		ps.playermodel = ci->playermodel;
+		ps.state = ci->state.state;
+		ps.frags = ci->state.frags;
+		ps.flags = ci->state.flags;
+		ps.deaths = ci->state.deaths;
+		ps.teamkills = ci->state.teamkills;
+		ps.totaldamage = ci->state.damage;
+		ps.totalshots = ci->state.shotdamage;
+	}
+	
+	void addbookmark(int type, int time = -1, const char *comment = NULL, int actor = -1) //todo
+	{
+		bookmark &bm = bookmarks.add();
+		bm.type = type;
+		if(time < 0) time = lastmillis;
+		bm.time = time;
+		if(comment) copystring(bm.comment, comment);
+		if(actor >= 0) bm.actor = actor;
+	}
 };
 
 namespace entities

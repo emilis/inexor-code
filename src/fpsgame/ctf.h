@@ -348,7 +348,8 @@ struct ctfclientmode : clientmode
         int team = ctfteamflag(ci->team), score = addscore(team, 1);
         if(m_hold) spawnflag(goal);
         sendf(-1, MSG_CHANNEL,"rii9i", N_SCOREFLAG, ci->clientnum, relay, relay >= 0 ? ++flags[relay].version : -1, goal, ++flags[goal].version, flags[goal].spawnindex, team, score, ci->state.flags, flagruntime);
-        if(score >= FLAGLIMIT) startintermission();
+		getcursummary()->addbookmark(N_SCOREFLAG, -1, ci->team); 
+		if(score >= FLAGLIMIT) startintermission();
     }
 
     void takeflag(clientinfo *ci, int i, int version)
