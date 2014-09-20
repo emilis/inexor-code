@@ -608,7 +608,7 @@ namespace server
 
     struct demofile
     {
-        string info;
+		gamesummary *info;
         uchar *data;
         int len;
     };
@@ -1069,10 +1069,10 @@ namespace server
         if(!demotmp) return;
         int len = (int)min(demotmp->size(), stream::offset((maxdemosize<<20) + 0x10000));
         demofile &d = demos.add();
-        time_t t = time(NULL);
-        char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
-        while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
-        formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, modename(gamemode), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
+        //time_t t = time(NULL);
+        //char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
+        //while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
+        //formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, modename(gamemode), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         sendservmsgf("demo \"%s\" recorded", d.info);
         d.data = new uchar[len];
         d.len = len;
@@ -1156,12 +1156,54 @@ namespace server
         writedemo(1, p.buf, p.len);
     }
 
-    void listdemos(int cn)
+	//demo information:
+	void putdemoplayer(playersummary &pl, packetbuf &p)
+	{
+		sendstring(pl.name, p);
+		sendstring(pl.tag, p);
+		sendstring(pl.team, p);
+		
+		putint(p, pl.clientnum);
+		putint(p, pl.privilege);
+		putint(p, pl.playermodel);
+		putint(p, pl.state);
+        
+		putint(p, pl.frags);
+		putint(p, pl.flags);
+		putint(p, pl.deaths);
+		putint(p, pl.teamkills);
+		putint(p, pl.totaldamage);
+		putint(p, pl.totalshots);
+	}
+
+    void putdemoinfo(demofile &d, packetbuf &p)
+	{
+		gamesummary *g = d.info;
+
+		putint(p, d.len);
+		sendstring(g->map, p);
+		sendstring(g->mode, p);
+		sendstring(g->date, p);
+		sendstring(g->info, p);
+
+		//teams
+		putint(p, g->teams.numelems);
+		enumerate(g->teams, teaminfo, tmi, {
+			sendstring(tmi.team, p);
+			putint(p, tmi.frags);
+		});
+
+		//players
+		putint(p, g->players.length());
+		loopv(g->players) putdemoplayer(g->players[i], p);
+	}
+    
+	void listdemos(int cn)
     {
         packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         putint(p, N_SENDDEMOLIST);
         putint(p, demos.length());
-        loopv(demos) sendstring(demos[i].info, p);
+        loopv(demos) putdemoinfo(demos[i], p);
         sendpacket(cn, MSG_CHANNEL, p.finalize());
     }
 
