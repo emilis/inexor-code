@@ -1175,6 +1175,68 @@ namespace game
                 return;
         }
     }
+	
+	void parsesummaryplayer(gamesummary &g, ucharbuf &p)
+	{
+		static char text[MAXTRANS];
+
+		playersummary &pl = g.players.add();
+		getstring(text, p);
+		filtertext(pl.name, text, false, MAXNAMELEN);
+		getstring(text, p);
+		filtertext(pl.tag, text, false, MAXTAGLEN);
+		getstring(text, p);
+		filtertext(pl.team, text, false, MAXTEAMLEN);
+
+		conoutf("name %s, team %s, tag %s", pl.name, pl.team, pl.tag);
+
+		pl.clientnum = getint(p);
+		pl.privilege = getint(p);
+		pl.playermodel = getint(p);
+		pl.state = getint(p);
+
+		conoutf("cn %d, priv %d, plmdl %d, state %d", pl.clientnum, pl.privilege, pl.playermodel, pl.state);
+
+		pl.frags = getint(p);
+		pl.flags = getint(p);
+		pl.deaths = getint(p);
+		pl.teamkills = getint(p);
+		pl.totaldamage = getint(p);
+		pl.totalshots = getint(p);
+		
+		conoutf("frags %d, flags %d, deaths %d, tk %d, damage %d, totaldamage %d", pl.frags, pl.flags, pl.deaths, pl.teamkills, pl.totaldamage, pl.totalshots);
+	}
+
+	void parsegamesummary(ucharbuf &p) //todo consistent names
+	{
+		gamesummary g;
+		static char text[MAXTRANS];
+		
+		int len = getint(p);
+
+		getstring(text, p);
+		filtertext(g.map, text, false);
+		getstring(text, p);
+		filtertext(g.mode, text, false);
+		getstring(g.date, p);
+		getstring(g.info, p);
+		conoutf("%s on %s", g.mode, g.map);
+		conoutf("size %.2f%s", len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
+		conoutf("date %s, info %s", g.date, g.info);
+
+	    int numteams = getint(p);
+		conoutf("teams: %d", numteams);
+		loopi(numteams) 
+		{
+			getstring(text, p);
+			int frags = getint(p);
+			conoutf("%s %d", text, frags);
+		}
+
+        int numplayers = getint(p);
+		conoutf("players: %d", numplayers);
+		loopi(numplayers) parseplayer(g, p);
+	}
 
     void parsestate(fpsent *d, ucharbuf &p, bool resume = false)
     {
@@ -1769,9 +1831,8 @@ namespace game
                 if(demos <= 0) conoutf("no demos available");
                 else loopi(demos)
                 {
-                    getstring(text, p);
+					parsedemoinfo(p);
                     if(p.overread()) break;
-                    conoutf("%d. %s", i+1, text);
                 }
                 break;
             }
