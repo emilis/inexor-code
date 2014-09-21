@@ -1096,9 +1096,8 @@ namespace server
         if(!cursummary) newgamesummary();
 		return cursummary;
 	}
-	void addplayer(gamesummary *g, clientinfo *ci)
+	void gsaddplayer(gamesummary *g, clientinfo *ci)
 	{
-		loopv(g->players) if(!strcmp(ci->name, g->players[i].name)) return; //todo rewrite reconnected player
 		playersummary &ps = g->players.add();
 		copystring(ps.name, ci->name);
 		copystring(ps.team, ci->team);
@@ -1113,6 +1112,14 @@ namespace server
 		ps.teamkills = ci->state.teamkills;
 		ps.totaldamage = ci->state.damage;
 		ps.totalshots = ci->state.shotdamage;
+
+		ps.ip = getclientip(ci->clientnum);
+	}
+
+	//remove a player of the gamesummary, used when disconnected client reconnects
+	void gsremoveplayer(gamesummary *g, uint ip)
+	{
+		loopv(g->players) if(g->players[i].ip == ip) { g->players.remove(i); break; }
 	}
     
 	void enddemorecord()
@@ -1610,6 +1617,7 @@ namespace server
     {
         uint ip = getclientip(ci->clientnum);
         if(!ip && !ci->local) return 0;
+		gsremoveplayer(getcursummary(), ip); //old score out of date now
         if(!insert)
         {
             loopv(clients)
@@ -2116,7 +2124,7 @@ namespace server
         
     void changemap(const char *s, int mode)
     {
-		loopv(clients) addplayer(getcursummary(), clients[i]);
+		loopv(clients) gsaddplayer(getcursummary(), clients[i]);
         
 		stopdemo();
         pausegame(false,NULL);
@@ -2817,7 +2825,7 @@ namespace server
         if(ci->connected)
         {
 			getcursummary()->addbookmark(N_CDIS); //current game summary
-			addplayer(getcursummary(), ci);       //save info about player in the gamesummary
+			gsaddplayer(getcursummary(), ci);       //save info about player in the gamesummary
 
             if(ci->privilege) setmaster(ci, false);
             if(smode) smode->leavegame(ci, true);

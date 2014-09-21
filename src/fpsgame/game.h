@@ -737,7 +737,9 @@ struct playersummary {
 	int clientnum, privilege, playermodel, state, //basic states
 		frags, flags, deaths, teamkills, totaldamage, totalshots; //statistics
 	
-	playersummary() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0)
+	uint ip; //just to reassign player, do not write or share it
+
+	playersummary() : clientnum(-1), privilege(PRIV_NONE), playermodel(0), state(CS_ALIVE), frags(0), flags(0), deaths(0), teamkills(0), totaldamage(0), totalshots(0), ip(0)
 	{
 		name[0] = team[0] = tag[0] = '\0';
 	}
