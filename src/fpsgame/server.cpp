@@ -1069,13 +1069,10 @@ namespace server
         if(!demotmp) return;
         int len = (int)min(demotmp->size(), stream::offset((maxdemosize<<20) + 0x10000));
         demofile &d = demos.add();
-        //time_t t = time(NULL);
-        //char *timestr = ctime(&t), *trim = timestr + strlen(timestr);
-        //while(trim>timestr && iscubespace(*--trim)) *trim = '\0';
-        //formatstring(d.info)("%s: %s, %s, %.2f%s", timestr, modename(gamemode), smapname, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
-        sendservmsgf("demo \"%s\" recorded", d.info);
+		d.info = getcursummary();
+		sendservmsgf("demo recorded: %s on %s %s (%.2f%s)", d.info->mode, d.info->map, d.info->date, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         d.data = new uchar[len];
-        d.len = len;
+		d.len = len;
         demotmp->seek(0, SEEK_SET);
         demotmp->read(d.data, len);
         DELETEP(demotmp);
