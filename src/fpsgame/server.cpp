@@ -1060,7 +1060,11 @@ namespace server
     {
         int n = clamp(demos.length() + extra - maxdemos, 0, demos.length());
         if(n <= 0) return;
-        loopi(n) delete[] demos[i].data;
+		loopi(n)
+		{
+			DELETEP(demos[i].info)
+			delete[] demos[i].data;
+		}
         demos.remove(0, n);
     }
  
@@ -1284,25 +1288,6 @@ namespace server
 
         loopv(clients) sendwelcome(clients[i]);
     }
-	void getdemofooter() //test
-	{
-		if(!demoplayback) return;
-		int size;
-		stream::offset oldpos = demoplayback->tell();
-		demoplayback->seek(- int(sizeof(size)), SEEK_END);
-        if(demoplayback->read(&size, sizeof(size))!=sizeof(size))
-        {
-           conoutf("No valid info found");
-            return;
-        }
-        lilswap(&size, 1);
-		demoplayback->seek(-size, SEEK_CUR);
-		char buf[5000];
-		demoplayback->read(buf, size);
-		conoutf("buf = %s, size %d", buf, size);
-		demoplayback->seek(oldpos, SEEK_SET);
-	}
-	COMMAND(getdemofooter, "");
 
     void setupdemoplayback()
     {
