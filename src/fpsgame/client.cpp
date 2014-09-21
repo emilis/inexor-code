@@ -1239,7 +1239,7 @@ namespace game
 
         int numplayers = getint(p);
 		conoutf("players: %d", numplayers);
-		loopi(numplayers) parseplayer(g, p);
+		loopi(numplayers) parsesummaryplayer(g, p);
 	}
 
     void parsestate(fpsent *d, ucharbuf &p, bool resume = false)
@@ -1835,7 +1835,7 @@ namespace game
                 if(demos <= 0) conoutf("no demos available");
                 else loopi(demos)
                 {
-					parsedemoinfo(p);
+					parsegamesummary(p);
                     if(p.overread()) break;
                 }
                 break;
