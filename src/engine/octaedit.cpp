@@ -1977,7 +1977,8 @@ ICOMMAND(replacetex, "iii", (int *oldtex, int *newtex, int *insel), {
 	if(noedit()) return;
 	mpreplacetex(*oldtex, *newtex, *insel!=0, sel, true);
 });
-
+SVARP(texturedir, "packages/");
+SVARP(mapdir, "packages/base");
 void savevslot(stream *f, int slot)
 {
 	if(slot < 0) return;
