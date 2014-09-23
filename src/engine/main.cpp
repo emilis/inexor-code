@@ -1014,7 +1014,7 @@ VAR(numcpus, 1, 1, 16);
 /**
 * Benchmarking
 */
-CBenchmarking zeit;
+CBenchmarking ben;
 
 
 // FIXME: WTF? - main is in macutils.mm?
@@ -1240,30 +1240,66 @@ int main(int argc, char **argv)
     for(;;)
     {
 		/**
-		* begin measuring
+		* start benchmark measuring
 		*/
-		zeit.begin("body", "root");
-	
-		zeit.begin("arm", "body");
-		zeit.end("arm");
-		zeit.begin("arm22", "body");
-		zeit.end("arm22");
-		zeit.begin("arm33", "body");
-		zeit.end("arm33");
-		zeit.begin("arm44", "body");
-		zeit.end("arm44");
-		
-		zeit.begin("UNTER1", "arm44");
-		zeit.end("UNTER1");
-		zeit.begin("UNTER2", "arm44");
-		zeit.end("UNTER2");
+		// ben.begin("body", "root");
+		// root is default and does not need to be specified!
+		/*
+		ben.begin("body");
+			ben.begin("chest", "body");
+				ben.begin("leftarm", "chest");
+					ben.begin("lefthand", "leftarm");
+					ben.end("lefthand");
+				ben.end("leftarm");
 
-		zeit.begin("arm55", "body");
-		zeit.end("arm55");
-		zeit.begin("arm66", "body");
-		zeit.end("arm66");
-				
-		zeit.end("body");
+				ben.begin("rightarm", "chest");
+					ben.begin("righthand", "rightarm");
+					ben.end("righthand");
+				ben.end("rightarm");
+			ben.end("chest");
+
+			ben.begin("pelvic", "body");
+				ben.begin("leftleg", "pelvic");
+					ben.begin("leftfoot", "leftleg");
+					ben.end("leftfoot");
+				ben.end("leftleg");
+
+				ben.begin("rightleg", "pelvic");
+					ben.begin("rightfoot", "rightleg");
+					ben.end("rightfoot");
+				ben.end("rightleg");
+			ben.end("pelvic");
+
+		ben.end("body");
+		*/
+
+
+		ben.begin("eins");
+			ben.begin("zwei", "eins");
+			ben.end("zwei");
+			ben.begin("drei", "eins");
+			ben.end("drei");
+			ben.begin("vier", "eins");
+			ben.end("vier");
+			ben.begin("fuenf", "eins");
+			ben.end("fuenf");
+			ben.begin("sechs", "eins");
+				ben.begin("sieben.eins", "sieben");
+				ben.end("sieben.eins");
+			ben.end("sechs");
+			ben.begin("sieben", "eins");
+			ben.end("sieben");
+			ben.begin("acht", "eins");
+			ben.end("acht");
+			ben.begin("neun", "eins");
+			ben.end("neun");
+			ben.begin("zehn", "eins");
+			ben.end("zehn");
+			ben.begin("elf", "eins");
+			ben.end("elf");
+			ben.begin("zwoelf", "eins");
+			ben.end("zwoelf");
+		ben.end("eins");
 
 
         static int frames = 0;

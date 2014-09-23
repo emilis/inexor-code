@@ -2624,12 +2624,15 @@ void gl_drawhud(int w, int h)
 		notextureshader->set();				
 		glEnable(GL_TEXTURE_2D);
 		glLoadIdentity();
-		glBegin(GL_TRIANGLE_STRIP); // fastest, according to http://wiki.delphigl.com/index.php/glBegin
 
-		// RENDER
-		render_subchart(zeit.getroot(), 0,   0, 0, 600, 400);
-		
+		// Debug...
+		conoutf(CON_DEBUG, " ");
+
+		// RENDER CHART
+		render_subchart(ben.getroot(), 0,   0, 0, 400, 400);
 		glEnd();
+
+
 		// End rendering
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
@@ -2637,38 +2640,70 @@ void gl_drawhud(int w, int h)
 }
 
 
-
 /**
 * Render triangle
 */
-void RenderTriangle(float x, float y, float width, float height,  int depth)
+void RenderTriangle(float left, float top, float width, float height, /* NOT USED ATM */ int depth)
 {
-	const float colors[][3] = 
+	/**
+	* New rendering engine!
+	*/
+	// Start rendering
+	glBegin(GL_TRIANGLE_FAN);
+
+	// Calculate middle
+	float middle_x = left+ (width/2);
+	float middle_y = top+ (height/2);
+
+	// The center triangle will be red
+	glColor3f(255.0f, 0.0f, 0.0f); 
+	glVertex2f( middle_x, middle_y); // CENTER
+
+	// the others will be black
+	glColor3f(0.0f,0.0f,0.0f);
+	glVertex2f(left,top); // TOP LEFT
+	glVertex2f(left+width, top); // TOP RIGHT
+	glVertex2f(left+width, top+height); // BOTTOM RIGHT
+	glVertex2f(left, top+height); // BOTTOM LEFT
+	// close it...
+	glVertex2f(left,top); // TOP LEFT
+
+	glEnd();
+
+	/**
+	* Constant color array
+	*/
+	/*const float colorarray[][3] = 
 	{
-		{255.0f,0.0f,0.0f},
-		{255.0f,255.0f,0.0f},
-		{255.0f,0.0f,255.0f},
-		{0.0f,255.0f,0.0f},
-		{0.0f,255.0f,255.0f},
-		{0.0f,0.0f,255.0f},
-		{100.0f,0.0f,255.0f},
-		{0.0f,100.0f,255.0f},
-		{0.0f,0.0f,100.0f},
-		{0.0f,255.0f,100.0f},
-		{255.0f,100.0f,255.0f},
+		{ 255.0f, 0.0f, 0.0f},
+		{ 0.0f, 255.0f, 0.0f},
+		{ 0.0f, 0.0f, 255.0f},
+		{ 255.0f, 255.0f, 0.0f},
+		{ 0.0f, 255.0f, 255.0f},
+		{ 255.0f, 0.0f, 255.0f},
+		{ 255.0f, 69.0f, 0.0f },
+		{ 255.0f, 215.0f, 0.0f },
+		{ 0.0f, 255.0f, 255.0f},
+		{ 0.0f, 255.0f, 127.0f},
 	};
+
+	// Calculate index
+	int arraysize = sizeof(colorarray) / sizeof(colorarray[0]);
+	int index = depth % arraysize;
 	
-	int index = depth % sizeof(colors);
+	// Debug message
+	conoutf(CON_DEBUG, "   picked color: %f %f %f, %d", colorarray[index][0], colorarray[index][1], colorarray[index][2], index);
 
-	//glColor3f(255.0f, 0.0f, 0.0f);
-	glColor3f(colors[index][0], colors[index][1], colors[index][2]);
-
-	glVertex2f(x, y);
-	glVertex2f(x, y+height);
-	glVertex2f(x + width, y);
-	glVertex2f(x + width, y+height);
+	// Set color
+	glColor3f(colorarray[index][0], colorarray[index][1], colorarray[index][2]);
+	
+	// GL_QUADS
+	glVertex2f(left, top);
+	glVertex2f(left, top+height);
+	glVertex2f(left + width, top+height);
+	glVertex2f(left + width, top);
+	*/
 }
-
 
 
 /**
@@ -2684,8 +2719,20 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 	/**	
 	* Rendering offset
 	*/
-	float woffset = 0.0f;
-	float hoffset = 0.0f;
+	static float woffset = 0.0f;
+	static float hoffset = 0.0f;
+
+	// depthindex
+	static int calltime = 0;
+
+	/**
+	* Reset if this is the root node
+	*/
+	if(parent == ben.getroot()) 
+	{
+		woffset = hoffset = 0.0f; // reset
+		calltime = 0;
+	}
 	
 	/**
 	* Render all sub nodes of this parent
@@ -2703,8 +2750,12 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 		// Width and Height coefficients
 		float height_factor = 1.0f;
 		float width_factor = 1.0f;
-				
+			
+		// Calculate next depth
 		int nextdepth = depth + 1;
+
+		// Increment calls
+		calltime++;
 
 		/**
 		* How many sub nodes do exist?
@@ -2726,17 +2777,22 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			RenderTriangle(woffset, top, newleft, top+height, i);
-
-
-			// add offset
-			woffset += newleft;
+			conoutf(CON_DEBUG, "HORIZONTAL %f %f %f %f %d", woffset, top, newleft, top+height, i);
+			RenderTriangle(woffset, hoffset, newleft, top+height, calltime);
 
 			if(subn->subnodes.size() != 0)
 			{
 				// Call next sub node
-				render_subchart(subn, nextdepth,   woffset, top, newleft, height);
+				render_subchart(subn, nextdepth,   left, top, newleft, height);
 			}
+			else 
+			{
+				// why do we have to render an area that will be over-rendered later?
+				//RenderTriangle(woffset, hoffset, newleft, top+height, calltime);
+			}
+
+			// add offset (later!)
+			woffset += newleft;
 		}
 		else 
 		{
@@ -2749,18 +2805,22 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			RenderTriangle(left, /*newheight*/ hoffset, width, height, i);
+			conoutf(CON_DEBUG, "VERTICAL %f %f %f %f %d", left, hoffset, width, newheight, i);
+			RenderTriangle(left, hoffset, width, newheight, calltime);
 
-
-			// add offset
-			hoffset += newheight;
-			
 			if(subn->subnodes.size() != 0)
 			{
 				// Call sub nodes
-				render_subchart(subn, nextdepth,  hoffset, top, width, newheight);
+				render_subchart(subn, nextdepth,   hoffset, top, width, newheight);
 			}
+			else 
+			{
+				// Don't render areas that will be over-rendered later o
+				//RenderTriangle(left, hoffset, width, newheight, calltime);
+			}
+
+			// add offset o(later!)
+			hoffset += newheight;
 		}
 	}
-
 }

@@ -26,7 +26,7 @@
 
 
 /**
-* Simple class implementation for benchmarking
+* Simple class implementation for ben
 */
 class CBenchmark 
 {	
@@ -81,6 +81,6 @@ class CBenchmark
 };
 
 
-extern CBenchmark benchmarking;
+extern CBenchmark ben;
 
 #endif /* #ifdef ENGINE_BENCHMARK_H */

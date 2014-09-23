@@ -203,6 +203,6 @@ class CBenchmarking
 
 };
 
-extern CBenchmarking zeit;
+extern CBenchmarking ben;
 
 #endif /* #ifdef ENGINE_BENCHMARKING_H*/
