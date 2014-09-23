@@ -2627,10 +2627,9 @@ void gl_drawhud(int w, int h)
 
 		// Debug...
 		conoutf(CON_DEBUG, " ");
-		conoutf(CON_DEBUG, " ");
-
+		
 		// RENDER CHART
-		render_subchart(ben.getroot(), 0, screen->w-450, 50, 400, 400);
+		render_subchart(ben.getroot(), 0,  1000,100,500,500);
 		glEnd();
 
 		// End rendering
@@ -2671,10 +2670,67 @@ void RenderTriangle(float left, float top, float width, float height, /* NOT USE
 
 
 
+	
+
+void render_subchart(STimerNode* parent, int depth, float left, float top, float width, float height)
+{
+        // Should we render this horizontal or vertical?
+        // division rest (modulo) of depth decides about that
+        int horizontal = depth % 2;
+     
+        // depthindex
+        static int calltime = 0;
+     
+        float subnode_width = 0.0f;
+        float subnode_height = 0.0f;
+
+        if (parent->subnodes.size() == 0) {
+                subnode_width = width;
+                subnode_height = height;
+        } else {
+                if (horizontal) {
+                        subnode_width = width / parent->subnodes.size();
+                        subnode_height = height;
+                } else {
+                        subnode_width = width;
+                        subnode_height = height / parent->subnodes.size();
+                }
+        }
+     
+        for(unsigned int i = 0; i < parent->subnodes.size(); i++)
+        {
+                // Copy subnode (for shorter name)
+                STimerNode* subnode = parent->subnodes[i];
+     
+				// Hanack has proven as a genius several times here
+                float node_left = left;
+                float node_top = top;
+				if(horizontal) node_left += i*subnode_width;
+				else node_top += i*subnode_height;
+				
+				// Debug message
+				defformatstring(indentation)("");
+				for(int k=0; k<depth; k++) formatstring(indentation)("%s-", indentation);
+				conoutf(CON_DEBUG, "%snode_left:%f node_top:%f subnode_width:%f subnode_height:%f", indentation, node_left, node_top, subnode_width, subnode_height);
+
+                if (subnode->subnodes.size() > 0)
+                {
+                        // Call next sub node
+                        render_subchart(subnode, depth + 1, node_left, node_top, subnode_width, subnode_height);
+                } else {
+                        // why do we have to render an area that will be over-rendered later?
+                        RenderTriangle(node_left, node_top, subnode_width, subnode_height, calltime);
+                }
+        }
+}
+
+
+
 /**
 * render sub chart
 * recursive function
 */
+#if 0
 void render_subchart(STimerNode* parent, int depth,    float left, float top, float width, float height)
 {
 	// Should we render this horizontal or vertical?
@@ -2705,6 +2761,9 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 	*/
 	unsigned int cmp = parent->subnodes.size();
 
+	// Calculate next depth
+	int nextdepth = depth + 1;
+
 	/**
 	* Render all sub nodes
 	*/
@@ -2717,9 +2776,6 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 		float height_factor = 1.0f;
 		float width_factor = 1.0f;
 			
-		// Calculate next depth
-		int nextdepth = depth + 1;
-
 		// Increment calls
 		//calltime++;
 
@@ -2750,7 +2806,7 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			conoutf(CON_DEBUG, "%sH %f %f %f %f %d", preformat, woffset, top, newleft, height, i);
+			conoutf(CON_DEBUG, "%sH left:%f top:%f width:%f height:%f %d", preformat, woffset, top, newleft, height, i);
 
 			if(subn->subnodes.size() > 0)
 			{
@@ -2762,9 +2818,12 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 				// why do we have to render an area that will be over-rendered later?
 				RenderTriangle(woffset, hoffset, newleft, height, calltime);
 			}
-
-			// add offset (later!)
-			woffset += newleft;
+			
+			if(parent->subnodes.size() != 1) 
+			{	
+				// add offset (later!)
+				woffset += newleft;
+			}
 		}
 		else 
 		{
@@ -2777,26 +2836,28 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			conoutf(CON_DEBUG, "%sV %f %f %f %f %d", preformat, left, hoffset, width, newheight, i);
+			conoutf(CON_DEBUG, "%sV left:%f top:%f width:%f height:%f %d", preformat, left, hoffset, width, newheight, i);
 
 			if(subn->subnodes.size() > 0)
 			{
 				// Call sub nodes
-				render_subchart(subn, nextdepth,   hoffset, top, width, newheight);
+				render_subchart(subn, nextdepth,   left, top, width, newheight);
 			}
 			else 
 			{
 				// Don't render areas that will be over-rendered later o
-				RenderTriangle(left, hoffset, width, newheight, calltime);
+				RenderTriangle(woffset, hoffset, width, newheight, calltime);
 			}
 
 			/**
 			* Which rule?
 			*/
-			if(parent->subnodes.size() != 1) {
+			if(parent->subnodes.size() != 1) 
+			{
 				// add offset o(later!)
 				hoffset += newheight;
 			}
 		}
 	}
 }
+#endif

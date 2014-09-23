@@ -1273,31 +1273,122 @@ int main(int argc, char **argv)
 		ben.end("body");
 		*/
 
+
 		ben.begin("zwei");
 		ben.end("zwei");
 
 		ben.begin("eins");
-
+			
 			ben.begin("alpha", "eins");
+				
+				ben.begin("hanni","alpha");
+				ben.end("hanni");
+				ben.begin("hanni2","alpha");
+				ben.end("hanni2");
+				ben.begin("hanni3","alpha");
+				ben.end("hanni3");
+
+				ben.begin("hanni4","alpha");
+					
+					ben.begin("hanack1", "hanni4");
+					ben.end("hanack1");
+					ben.begin("hanack2", "hanni4");
+					ben.end("hanack2");
+					ben.begin("hanack2", "hanni4");
+					ben.end("hanack3");
+					ben.begin("hanack3", "hanni4");
+
+					ben.end("hanack4");
+
+						ben.begin("tux1", "hanack4");
+						ben.end("tux1");
+						ben.begin("tux2", "hanack4");
+						ben.end("tux2");
+						ben.begin("tux3", "hanack4");
+						ben.end("tux3");
+
+					ben.begin("hanack4", "hanni4");
+
+				ben.end("hanni3");
+
 			ben.end("alpha");
 			
 			ben.begin("beta", "eins");
 			ben.end("beta");
 			
+
+
+
+
+
+
 			ben.begin("gamma", "eins");
+
+				ben.begin("hankus1", "gamma");
+				ben.end("hankus1");
+				
+				ben.begin("hankus2", "gamma");
+				ben.end("hankus2");
+				
+				ben.begin("hankus3", "gamma");
+
+
+					ben.begin("fire1", "hankus3");
+					ben.end("fire1");
+					
+					ben.begin("fire2", "hankus3");
+					ben.end("fire2");
+
+					ben.begin("fire3", "hankus3");
+					ben.end("fire3");
+
+					ben.begin("fire4", "hankus3");
+					ben.end("fire4");
+
+					ben.begin("fire5", "hankus3");
+					ben.end("fire5");
+
+
+				ben.end("hankus3");
+
+				ben.begin("hankus4", "gamma");
+				ben.end("hankus4");
+
 			ben.end("gamma");
+
+
+
+
+
 			
 			ben.begin("epsilon", "eins");
 			ben.end("epsilon");
-
+			
 		ben.end("eins");
 		
 		ben.begin("drei");
+		
+			ben.begin("troll1", "drei");
+			ben.end("troll1");
+			ben.begin("troll2", "drei");
+			ben.end("troll2");
+			ben.begin("troll3", "drei");
+			ben.end("troll3");
+
 		ben.end("drei");
 
 		ben.begin("vier");
-		ben.end("vier");
 
+			ben.begin("peter1", "drei");
+			ben.end("peter1");
+			ben.begin("peter2", "drei");
+			ben.end("peter2");
+			ben.begin("peter3", "drei");
+			ben.end("peter3");
+			ben.begin("peter4", "drei");
+			ben.end("peter4");
+
+		ben.end("vier");
 
 
 
