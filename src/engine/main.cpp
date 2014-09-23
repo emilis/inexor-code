@@ -1273,26 +1273,32 @@ int main(int argc, char **argv)
 		ben.end("body");
 		*/
 
+		ben.begin("zwei");
+		ben.end("zwei");
 
 		ben.begin("eins");
-			ben.begin("zwei", "eins");
-			ben.end("zwei");
-			ben.begin("drei", "eins");
-			ben.end("drei");
-			ben.begin("vier", "eins");
-			ben.end("vier");
-			ben.begin("fuenf", "eins");
-				ben.begin("fuenf.1", "fuenf");
-				ben.end("fuenf.1");
-			ben.end("fuenf");
-			ben.begin("sechs", "eins");
-			ben.end("sechs");
-			ben.begin("sieben", "eins");
-			ben.end("sieben");
-			ben.begin("acht", "eins");
-			ben.end("acht");
-			ben.end("zwoelf");
+
+			ben.begin("alpha", "eins");
+			ben.end("alpha");
+			
+			ben.begin("beta", "eins");
+			ben.end("beta");
+			
+			ben.begin("gamma", "eins");
+			ben.end("gamma");
+			
+			ben.begin("epsilon", "eins");
+			ben.end("epsilon");
+
 		ben.end("eins");
+		
+		ben.begin("drei");
+		ben.end("drei");
+
+		ben.begin("vier");
+		ben.end("vier");
+
+
 
 
         static int frames = 0;

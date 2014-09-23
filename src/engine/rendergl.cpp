@@ -2627,11 +2627,11 @@ void gl_drawhud(int w, int h)
 
 		// Debug...
 		conoutf(CON_DEBUG, " ");
+		conoutf(CON_DEBUG, " ");
 
 		// RENDER CHART
-		render_subchart(ben.getroot(), 0,   0, 0, 400, 400);
+		render_subchart(ben.getroot(), 0, screen->w-400, 0, 400, 400);
 		glEnd();
-
 
 		// End rendering
 		glDisable(GL_TEXTURE_2D);
@@ -2670,6 +2670,7 @@ void RenderTriangle(float left, float top, float width, float height, /* NOT USE
 }
 
 
+
 /**
 * render sub chart
 * recursive function
@@ -2694,7 +2695,8 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 	*/
 	if(parent == ben.getroot()) 
 	{
-		woffset = hoffset = 0.0f; // reset
+		woffset = left; // reset
+		hoffset = top; // reset
 		calltime = 0;
 	}
 	
@@ -2742,9 +2744,8 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			* Render triangle
 			*/
 			conoutf(CON_DEBUG, "HORIZONTAL %f %f %f %f %d", woffset, top, newleft, top+height, i);
-			//RenderTriangle(woffset, hoffset, newleft, top+height, calltime);
 
-			if(subn->subnodes.size() != 0)
+			if(subn->subnodes.size() > 0)
 			{
 				// Call next sub node
 				render_subchart(subn, nextdepth,   left, top, newleft, height);
@@ -2770,9 +2771,8 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			* Render triangle
 			*/
 			conoutf(CON_DEBUG, "VERTICAL %f %f %f %f %d", left, hoffset, width, newheight, i);
-			//RenderTriangle(left, hoffset, width, newheight, calltime);
 
-			if(subn->subnodes.size() != 0)
+			if(subn->subnodes.size() > 0)
 			{
 				// Call sub nodes
 				render_subchart(subn, nextdepth,   hoffset, top, width, newheight);
@@ -2783,8 +2783,13 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 				RenderTriangle(left, hoffset, width, newheight, calltime);
 			}
 
-			// add offset o(later!)
-			hoffset += newheight;
+			/**
+			* Which rule?
+			*/
+			if(parent->subnodes.size() != 1) {
+				// add offset o(later!)
+				hoffset += newheight;
+			}
 		}
 	}
 }
