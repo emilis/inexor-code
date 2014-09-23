@@ -2630,7 +2630,7 @@ void gl_drawhud(int w, int h)
 		conoutf(CON_DEBUG, " ");
 
 		// RENDER CHART
-		render_subchart(ben.getroot(), 0, screen->w-400, 0, 400, 400);
+		render_subchart(ben.getroot(), 0, screen->w-450, 50, 400, 400);
 		glEnd();
 
 		// End rendering
@@ -2695,8 +2695,8 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 	*/
 	if(parent == ben.getroot()) 
 	{
-		woffset = left; // reset
-		hoffset = top; // reset
+		woffset = left;
+		hoffset = top; 
 		calltime = 0;
 	}
 	
@@ -2721,7 +2721,7 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 		int nextdepth = depth + 1;
 
 		// Increment calls
-		calltime++;
+		//calltime++;
 
 		/**
 		* How many sub nodes do exist?
@@ -2730,6 +2730,13 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 		unsigned int subnodesize = parent->subnodes.size();
 		// Avoid division by zero!
 		if(subnodesize == 0) subnodesize = 1;
+		
+		
+		/**
+		* Einrücken!
+		*/
+		defformatstring(preformat)("");
+		for(int push=0; push<depth; push++) formatstring(preformat)("%s--", preformat);
 
 
 		if(horizontal)
@@ -2743,7 +2750,7 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			conoutf(CON_DEBUG, "HORIZONTAL %f %f %f %f %d", woffset, top, newleft, top+height, i);
+			conoutf(CON_DEBUG, "%sH %f %f %f %f %d", preformat, woffset, top, newleft, height, i);
 
 			if(subn->subnodes.size() > 0)
 			{
@@ -2753,7 +2760,7 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			else 
 			{
 				// why do we have to render an area that will be over-rendered later?
-				RenderTriangle(woffset, hoffset, newleft, top+height, calltime);
+				RenderTriangle(woffset, hoffset, newleft, height, calltime);
 			}
 
 			// add offset (later!)
@@ -2770,7 +2777,7 @@ void render_subchart(STimerNode* parent, int depth,    float left, float top, fl
 			/**
 			* Render triangle
 			*/
-			conoutf(CON_DEBUG, "VERTICAL %f %f %f %f %d", left, hoffset, width, newheight, i);
+			conoutf(CON_DEBUG, "%sV %f %f %f %f %d", preformat, left, hoffset, width, newheight, i);
 
 			if(subn->subnodes.size() > 0)
 			{
