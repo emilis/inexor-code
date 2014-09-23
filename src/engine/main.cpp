@@ -1282,22 +1282,15 @@ int main(int argc, char **argv)
 			ben.begin("vier", "eins");
 			ben.end("vier");
 			ben.begin("fuenf", "eins");
+				ben.begin("fuenf.1", "fuenf");
+				ben.end("fuenf.1");
 			ben.end("fuenf");
 			ben.begin("sechs", "eins");
-				ben.begin("sieben.eins", "sieben");
-				ben.end("sieben.eins");
 			ben.end("sechs");
 			ben.begin("sieben", "eins");
 			ben.end("sieben");
 			ben.begin("acht", "eins");
 			ben.end("acht");
-			ben.begin("neun", "eins");
-			ben.end("neun");
-			ben.begin("zehn", "eins");
-			ben.end("zehn");
-			ben.begin("elf", "eins");
-			ben.end("elf");
-			ben.begin("zwoelf", "eins");
 			ben.end("zwoelf");
 		ben.end("eins");
 
