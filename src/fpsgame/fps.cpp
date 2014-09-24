@@ -1,5 +1,10 @@
 #include "game.h"
 
+/**
+* Include engine for benchmark
+*/
+#include "engine.h"
+
 namespace game
 {
     bool intermission = false;
@@ -235,30 +240,66 @@ namespace game
         if(!maptime) { maptime = lastmillis; maprealtime = totalmillis; return; }
         if(!curtime) { gets2c(); if(player1->clientnum>=0) c2sinfo(); return; }
 
+
+		benchmark.begin("physicsframe", "updateworld");
         physicsframe();
+		benchmark.end("physicsframe");
+
+        benchmark.begin("ai::navigate", "updateworld");
         ai::navigate();
-        if(player1->state != CS_DEAD && !intermission)
+		benchmark.end("physicsframe");
+        
+		benchmark.begin("checkquad", "entities::updateworld");
+		if(player1->state != CS_DEAD && !intermission)
         {
             if(player1->quadmillis) entities::checkquad(curtime, player1);
         }
+		benchmark.end("entities::updateworld");
+
+		benchmark.begin("updateweapons", "updateworld");
         updateweapons(curtime);
+		benchmark.end("updateweapons");
+
+		benchmark.begin("otherplayers", "updateworld");
         otherplayers(curtime);
+		benchmark.end("otherplayers");
+
+		benchmark.begin("ai::update", "updateworld");
         ai::update();
+		benchmark.end("ai::update");
+
+		benchmark.begin("moveragdolls", "updateworld");
         moveragdolls();
-        gets2c();
+        benchmark.end("moveragdolls");
+		
+		benchmark.begin("gets2c", "updateworld");
+		gets2c();
+		benchmark.end("gets2c");
+
+		benchmark.begin("updatemovables", "updateworld");
         updatemovables(curtime);
+		benchmark.end("updatemovables");
+
+		benchmark.begin("updatemonsters", "updateworld");
         updatemonsters(curtime);
+		benchmark.end("updateworld");
+
         if(player1->state == CS_DEAD)
         {
+			benchmark.begin("moveplayer", "updateworld");
             if(player1->ragdoll) moveragdoll(player1);
+
             else if(lastmillis-player1->lastpain<2000)
             {
                 player1->move = player1->strafe = 0;
                 moveplayer(player1, 10, true);
             }
-        }
-        else if(!intermission)
+			benchmark.end("moveplayer");
+        }		
+		else if(!intermission)
         {
+			benchmark.begin("miscintermission", "updateworld");
+
             if(player1->ragdoll) cleanragdoll(player1);
             moveplayer(player1, 10, true);
             swayhudgun(curtime);
@@ -270,6 +311,8 @@ namespace game
                 if(m_classicsp) entities::checktriggers();
             }
             else if(cmode) cmode->checkitems(player1);
+
+			benchmark.end("miscintermission");
         }
         if(player1->clientnum>=0) c2sinfo();   // do this last, to reduce the effective frame lag
     }

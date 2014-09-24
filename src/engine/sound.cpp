@@ -523,7 +523,10 @@ bool updatechannel(soundchannel &chan)
 
 void updatesounds()
 {
+	benchmark.begin("updatemumble", "updatesounds");
     updatemumble();
+	benchmark.end("updatemumble");
+
     if(nosound) return;
     if(minimized) stopsounds();
     else if(mainmenu) stopmapsounds();

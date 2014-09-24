@@ -820,6 +820,8 @@ void checkinput()
     SDL_Event event;
     int lasttype = 0, lastbut = 0;
     bool mousemoved = false; 
+
+	benchmark.begin("pollevents", "checkinput");
     while(events.length() || pollevent(event))
     {
         if(events.length()) event = events.remove(0);
@@ -867,7 +869,14 @@ void checkinput()
                 break;
         }
     }
-    if(mousemoved) resetmousemotion();
+	benchmark.end("pollevents");
+
+	benchmark.begin("resetmousemotion", "checkinput");
+    if(mousemoved) 
+	{
+		resetmousemotion();
+	}
+	benchmark.end("resetmousemotion");
 }
 
 void swapbuffers(bool overlay)
@@ -1014,7 +1023,7 @@ VAR(numcpus, 1, 1, 16);
 /**
 * Benchmarking
 */
-CBenchmarking ben;
+CBenchmarking benchmark;
 
 
 // FIXME: WTF? - main is in macutils.mm?
@@ -1236,238 +1245,103 @@ int main(int argc, char **argv)
 	// initialise curve renderer
 	curve_renderer.SetCurve( &dynamic_curve);
 
-	
     for(;;)
     {
-		/**
-		* start benchmark measuring
-		*/
-		// ben.begin("body", "root");
-		// root is default and does not need to be specified!
-		/*
-		ben.begin("body");
-			ben.begin("chest", "body");
-				ben.begin("leftarm", "chest");
-					ben.begin("lefthand", "leftarm");
-					ben.end("lefthand");
-				ben.end("leftarm");
-
-				ben.begin("rightarm", "chest");
-					ben.begin("righthand", "rightarm");
-					ben.end("righthand");
-				ben.end("rightarm");
-			ben.end("chest");
-
-			ben.begin("pelvic", "body");
-				ben.begin("leftleg", "pelvic");
-					ben.begin("leftfoot", "leftleg");
-					ben.end("leftfoot");
-				ben.end("leftleg");
-
-				ben.begin("rightleg", "pelvic");
-					ben.begin("rightfoot", "rightleg");
-					ben.end("rightfoot");
-				ben.end("rightleg");
-			ben.end("pelvic");
-
-		ben.end("body");
-		*/
-
-
-		ben.begin("zwei");
-		ben.end("zwei");
-
-		ben.begin("eins");
-			
-			ben.begin("alpha", "eins");
-				
-				ben.begin("hanni","alpha");
-				ben.end("hanni");
-				ben.begin("hanni2","alpha");
-				ben.end("hanni2");
-				ben.begin("hanni3","alpha");
-				ben.end("hanni3");
-
-				ben.begin("hanni4","alpha");
-					
-					ben.begin("hanack1", "hanni4");
-					ben.end("hanack1");
-					ben.begin("hanack2", "hanni4");
-					ben.end("hanack2");
-					ben.begin("hanack2", "hanni4");
-					ben.end("hanack3");
-					ben.begin("hanack3", "hanni4");
-
-					ben.end("hanack4");
-
-						ben.begin("tux1", "hanack4");
-						ben.end("tux1");
-						ben.begin("tux2", "hanack4");
-						ben.end("tux2");
-						ben.begin("tux3", "hanack4");
-						ben.end("tux3");
-
-					ben.begin("hanack4", "hanni4");
-
-				ben.end("hanni3");
-
-			ben.end("alpha");
-			
-			ben.begin("beta", "eins");
-			ben.end("beta");
-			
-
-
-
-
-
-
-			ben.begin("gamma", "eins");
-
-				ben.begin("hankus1", "gamma");
-				ben.end("hankus1");
-				
-				ben.begin("hankus2", "gamma");
-				ben.end("hankus2");
-				
-				ben.begin("hankus3", "gamma");
-
-
-					ben.begin("fire1", "hankus3");
-					ben.end("fire1");
-					
-					ben.begin("fire2", "hankus3");
-					ben.end("fire2");
-
-					ben.begin("fire3", "hankus3");
-					ben.end("fire3");
-
-					ben.begin("fire4", "hankus3");
-					ben.end("fire4");
-
-					ben.begin("fire5", "hankus3");
-					ben.end("fire5");
-
-
-				ben.end("hankus3");
-
-				ben.begin("hankus4", "gamma");
-				ben.end("hankus4");
-
-			ben.end("gamma");
-
-
-
-
-
-			
-			ben.begin("epsilon", "eins");
-			ben.end("epsilon");
-			
-		ben.end("eins");
-		
-		ben.begin("drei");
-		
-			ben.begin("troll1", "drei");
-			ben.end("troll1");
-			ben.begin("troll2", "drei");
-			ben.end("troll2");
-			ben.begin("troll3", "drei");
-			ben.end("troll3");
-
-		ben.end("drei");
-
-		ben.begin("vier");
-
-			ben.begin("peter1", "drei");
-			ben.end("peter1");
-			ben.begin("peter2", "drei");
-			ben.end("peter2");
-			ben.begin("peter3", "drei");
-			ben.end("peter3");
-			ben.begin("peter4", "drei");
-			ben.end("peter4");
-
-		ben.end("vier");
-
-
-
+		// no benchmark needed
         static int frames = 0;
         int millis = getclockmillis();
 
-		limitfps(millis, totalmillis);
+		benchmark.begin("limitfps");
+		limitfps(millis, totalmillis); // done
+		benchmark.end("limitfps");
+
+		// calculations
+		benchmark.begin("miscmath");
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
-        
-		int scaledtime = game::scaletime(elapsedtime) + timeerr;
+		int scaledtime = game::scaletime(elapsedtime) + timeerr; // done
 		curtime = scaledtime/100;
         timeerr = scaledtime%100;
-        
-
 		if(!multiplayer(false) && curtime>200) curtime = 200;
-        
-
 		if(game::ispaused()) curtime = 0;
 		lastmillis += curtime;
         totalmillis = millis;
-        updatetime();
-
-        checkinput();
-		menuprocess();
-		tryedit();
-		
-        if(lastmillis) game::updateworld();
-        checksleep(lastmillis);
-        serverslice(false, 0);
-
-        if(frames) updatefpshistory(elapsedtime);
-        frames++;
+        benchmark.end("miscmath");
 
 
-		/**
-		* Prepare dynamic renderin of bezier curves
-		*/
-		//#define BEZIER_CURVE_RENDERING
-		#ifdef BEZIER_CURVE_RENDERING
-		vector<extentity*> curves = entities::getents();
+		benchmark.begin("updatetime");
+		updatetime(); // done
+		benchmark.end("updatetime");
 
-		// Vollständig bereinigen!
-		dynamic_curve.ClearAllPoints();
+		benchmark.begin("checkinput");
+        checkinput(); // done
+		benchmark.end("checkinput");
 
-		// If vector is valid
-		if(curves.ulen > 0) 
+		benchmark.begin("menuprocess");
+		menuprocess(); // done
+		benchmark.end("menuprocess");
+
+		benchmark.begin("tryedit");
+		tryedit(); // done
+		benchmark.end("tryedit");
+
+        if(lastmillis) 
 		{
-			for(int i=0; i<curves.ulen; i++)
-			{
-				if(47 == curves[i]->type) 
-				{
-					// Add this as parameter point	
-					dynamic_curve.AddParamPoint(curves[i]->o);
-				}
-			}
-		}
-		// Dynamic rendering
-		dynamic_curve.CalculateCurve_BernsteinPolynom();
-		#endif
+			benchmark.begin("updateworld");
+			game::updateworld(); // done
+			benchmark.end("updateworld");
+        }
 
+		benchmark.begin("checksleep");
+		checksleep(lastmillis); // done
+		benchmark.end("checksleep");
+
+		benchmark.begin("serverslice");
+        serverslice(false, 0); // done
+		benchmark.end("serverslice");
+
+        if(frames) 
+		{
+			benchmark.begin("updatefpshistory");
+			updatefpshistory(elapsedtime); // done
+			benchmark.end("updatefpshistory");
+        }
+		frames++;
 
 		// miscellaneous general game effects
-        recomputecamera();
-        updateparticles();
-		updatesounds();
+		benchmark.begin("recomputecamera");
+        recomputecamera(); // done
+		benchmark.end("recomputecamera");
 		
+		benchmark.begin("updateparticles");
+        updateparticles(); // Uhm.. NO!
+		benchmark.end("updateparticles");
+
+		benchmark.begin("updatesounds");
+		updatesounds(); // done
+		benchmark.end("updatesounds");
+
 		if(minimized) continue;
         inbetweenframes = false;
+
         if(mainmenu) 
 		{ 
-			gl_drawmainmenu(screen->w, screen->h);
+			benchmark.begin("gl_drawmainmenu");
+			gl_drawmainmenu(screen->w, screen->h); // done
+			benchmark.end("gl_drawmainmenu");
 		}
 		else {
+			benchmark.begin("gl_drawframe");
 			gl_drawframe(screen->w, screen->h);
+			benchmark.end("gl_drawframe");
 		}
 
-        swapbuffers();
-        
+		// Swapping buffers
+		benchmark.begin("swapbuffers");
+        swapbuffers(); // done
+		benchmark.end("swapbuffers");
+
+		// no benchmark needed        
 		renderedframe = inbetweenframes = true;
     }
     

@@ -203,6 +203,6 @@ class CBenchmarking
 
 };
 
-extern CBenchmarking ben;
+extern CBenchmarking benchmark;
 
 #endif /* #ifdef ENGINE_BENCHMARKING_H*/
