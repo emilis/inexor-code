@@ -76,6 +76,21 @@ ICOMMAND(toggleconsole, "", (), { fullconsole ^= 1; });
 
 
 /**
+* Get the name of a type
+* small helper function for command line helper
+*/
+const char* GetTypeName(const char type)
+{
+	switch(type) 
+	{
+		case 's': return "string";
+		case 'i': return "int";
+		case 'h': return "hex";
+	}
+	return "n/a";
+}
+
+/**
 * Render command line with help functions
 */
 int rendercommand(int x, int y, int w)
@@ -149,8 +164,47 @@ int rendercommand(int x, int y, int w)
 			{
 				if(id->packedarguments) 
 				{
-					// render current value
-					//draw_text("/connect ip port [password]", x + 2*FONTW, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+					if(strlen(id->packedarguments))
+					{
+						// render current value
+						defformatstring(copied_argumentlist)(id->packedarguments);
+
+						// static vars
+						static string lastinput;
+
+						// Question:
+						// In how far do the arguments passed to the command line fit the frame?
+
+						vector<char*> unpacked_params;
+
+						// Split parameters by ','
+						char* delimiter = ",";
+						char* tokpointer = strtok(copied_argumentlist, delimiter);
+					
+						// continue splitting and add token to vector!
+						while(NULL != tokpointer)
+						{
+							// add to vector
+							unpacked_params.add(tokpointer);
+							// continue splitting
+							tokpointer = strtok(NULL, delimiter);
+						}
+
+						// Loop through all parameters and display them
+						defformatstring(parameterlist)("usage: /%s ", commandparts[0]);
+						for(int i=0; i<unpacked_params.length(); i++) 
+						{
+							formatstring(parameterlist)("%s %s[%s]", parameterlist, unpacked_params[i], GetTypeName(id->args[i])  );
+						}
+
+						// render final argument list
+						draw_text(parameterlist, x + 2*FONTW, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+					}
+					else 
+					{
+						// render final argument list
+						draw_text("no parameter help speficied (yet)", x + 2*FONTW, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+					}
 				}
 			}
 
