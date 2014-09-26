@@ -176,7 +176,10 @@ void trydisconnect(bool local)
     else conoutf("not connected");
 }
 
-ICOMMAND(connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));
+//ICOMMAND(connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));
+ICOMMAND_EXT("connects to the speficied game server", "ip,port,password", connect, "sis", (char *name, int *port, char *pw), connectserv(name, *port, pw));
+
+
 ICOMMAND(lanconnect, "is", (int *port, char *pw), connectserv(NULL, *port, pw));
 COMMAND(reconnect, "s");
 ICOMMAND(disconnect, "b", (int *local), trydisconnect(*local != 0));

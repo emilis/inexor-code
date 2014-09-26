@@ -190,6 +190,12 @@ void clearoverrides()
 static bool initedidents = false;
 static vector<ident> *identinits = NULL;
 
+
+
+/**
+* This is where we "spy" on parameters of functions for
+* auto completion and parameter suggestions!
+*/
 static inline ident *addident(const ident &id)
 {
     if(!initedidents)
@@ -198,10 +204,18 @@ static inline ident *addident(const ident &id)
         identinits->add(id);
         return NULL;
     }
+
+
+	// try to get access to hashset
     ident &def = idents.access(id.name, id);
-    def.index = identmap.length();
-    return identmap.add(&def);
+    // get hashset's length
+	def.index = identmap.length();
+    
+	// add ident to hashset
+	return identmap.add(&def);
 }
+
+
 
 static bool initidents()
 {
@@ -483,6 +497,19 @@ int variable(const char *name, int min, int cur, int max, int *storage, identfun
     addident(ident(ID_VAR, name, min, max, storage, (void *)fun, flags));
     return cur;
 }
+/**
+* Auto completion, parameter suggestion, current value and description texts
+*/
+int variable(const char *name, int min, int cur, int max, int *storage, identfun fun, int flags, const char *HELPTEXT, const char *PACKEDPARAMS)
+{
+    addident(
+		ident(HELPTEXT, PACKEDPARAMS, ID_VAR, name, min, max, storage, (void *)fun, flags)
+	);
+    return cur;
+}
+
+
+
 
 float fvariable(const char *name, float min, float cur, float max, float *storage, identfun fun, int flags)
 {
@@ -672,6 +699,14 @@ void setsvarchecked(ident *id, const char *val)
     }
 }
 
+
+
+
+
+
+/**
+* standard function
+*/
 bool addcommand(const char *name, identfun fun, const char *args)
 {
     uint argmask = 0;
@@ -686,9 +721,50 @@ bool addcommand(const char *name, identfun fun, const char *args)
         default: fatal("builtin %s declared with illegal type: %s", name, args); break;
     }
     if(limit && numargs > 8) fatal("builtin %s declared with too many args: %d", name, numargs);
-    addident(ident(ID_COMMAND, name, args, argmask, (void *)fun));
+    
+	/**
+	* In order to prevent invalid pointers for description and packedparams,
+	* we manipulate the constructor call of every standard function.
+	* ALL macro calls should be replaced with extended macro calls
+	* sooner or later
+	*/
+	addident(ident(ID_COMMAND, name, args, argmask, "no help available (yet)", "", (void *)fun));
+
     return false;
 }
+/**
+* This overloaded function will be called by alternative macro EXTCOMMAND
+*/
+bool addcommand(const char *name, identfun fun, const char *args, const char* descriptiontext, const char* packedparams)
+{
+    uint argmask = 0;
+    int numargs = 0;
+    bool limit = true;
+    for(const char *fmt = args; *fmt; fmt++) switch(*fmt)
+    {
+        case 'i': case 'b': case 'f': case 't': case 'N': case 'D': if(numargs < MAXARGS) numargs++; break;
+        case 's': case 'e': case 'r': case '$': if(numargs < MAXARGS) { argmask |= 1<<numargs; numargs++; } break;
+        case '1': case '2': case '3': case '4': if(numargs < MAXARGS) fmt -= *fmt-'0'+1; break;
+        case 'C': case 'V': limit = false; break;
+        default: fatal("builtin %s declared with illegal type: %s", name, args); break;
+    }
+    if(limit && numargs > 8) fatal("builtin %s declared with too many args: %d", name, numargs);
+    
+	// Debug message
+	conoutf(CON_DEBUG, "name: %s args: %s helptext: %s params: %s", name, args, descriptiontext, packedparams);
+
+	/**
+	* overloaded
+	*/
+	addident(
+		ident(ID_COMMAND, name, args, argmask, descriptiontext, packedparams, (void *)fun)
+	);
+
+    return false;
+}
+
+
+
 
 bool addkeyword(int type, const char *name)
 {

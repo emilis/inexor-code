@@ -74,16 +74,139 @@ void conoutf(int type, const char *fmt, ...)
 VAR(fullconsole, 0, 0, 1);
 ICOMMAND(toggleconsole, "", (), { fullconsole ^= 1; });
 
+
+/**
+* Render command line with help functions
+*/
 int rendercommand(int x, int y, int w)
 {
     if(commandmillis < 0) return 0;
 
+	y-=100;
+
+	// Will be manipulated below
+	static string command_name_suggestion;
+
+	/**
+	* Auto completion, parameter suggestion, help texts ans current value
+	*/
+	// Did the user enter a command?
+	if('/' == commandbuf[0])
+	{
+		// copy the command line input to a new string to split this string
+		// applying strtok to commandbuf would manipulate the value!
+		defformatstring(split_this)(commandbuf);
+
+		// command:     commandparts[0]
+		// parameters:  commandparts[1] - commandparts[n]
+		vector<char*> commandparts;
+
+		// split this string by " "
+		char *delimiter = " ";
+		// start splitting
+		char* ptr = strtok(split_this, delimiter);
+
+		// continue splitting and add token to vector!
+		while(NULL != ptr)
+		{
+			commandparts.add(ptr);
+			// continue splitting
+			ptr = strtok(NULL, delimiter);
+		}
+
+		// replace '/' of the command with ''
+		commandparts[0]++; // skip slash
+
+		// Is this even a command?
+		ident* id = idents.access(commandparts[0]);
+
+		// is this pointer valid - is it a command?
+		if(id)
+		{
+			// reset auto complete
+			formatstring(command_name_suggestion)("");
+			
+			// Variable? - Print current value!
+			if(id->type == ID_FVAR || id->type == ID_VAR)
+			{
+				// format current value
+				string minmaxcurrenthelp;
+				switch(id->type)
+				{
+					// render min, max, current
+					case ID_FVAR:
+					formatstring(minmaxcurrenthelp)("min: \f1%f\f7 max: \f1%f\f7 current: \f1%f", id->minvalf, id->maxvalf, *id->storage.f);
+					break;
+					case ID_VAR:
+					formatstring(minmaxcurrenthelp)("min: \f2%d\f7 max: \f2%d\f7 current: \f2%d", id->minval, id->maxval, *id->storage.i);
+					break;
+				}
+
+				// render current value
+				draw_text(minmaxcurrenthelp, x + 2*FONTW, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+			}
+			else if(id->type == ID_COMMAND)
+			{
+				if(id->packedarguments) 
+				{
+					// render current value
+					//draw_text("/connect ip port [password]", x + 2*FONTW, y, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+				}
+			}
+
+			// Description
+			if(id->description)
+			{	
+				// Render help texts
+				draw_text(id->description, x + 2*FONTW, y+FONTH, 0xFF, 0xFF, 0xFF, 0xFF, -1, w);
+			}
+		}
+		else 
+		{
+			/**
+			* The user did not enter a complete command name yet
+			* examples: /kic /conne /setmast ...
+			* now we try to suggest matching command line names
+			* every 500ms (1/2 seconds)
+			* We use Sauerbaten's standard function '' to complete the function
+			*/
+			static unsigned long long lasttime = 0;
+			static string lastinput;
+
+			// try every 500 ms
+			if(SDL_GetTicks() - lasttime > 500 || 0 != strcmp(commandparts[0], lastinput))
+			{
+				// store command name in separate string
+				formatstring(command_name_suggestion)(commandparts[0]);
+				// complete command name
+				complete(command_name_suggestion, NULL);
+				// Do not accept "no" suggestion!
+				if(0==strcmp(command_name_suggestion, commandparts[0]) || !strlen(command_name_suggestion))
+				{
+					// store command name in separate string
+					formatstring(command_name_suggestion)(commandparts[0]);
+					// do it again!
+					complete(command_name_suggestion, NULL);
+				}
+
+				// store "last time"
+				lasttime = SDL_GetTicks();
+				// remember our last command name so we reset auto complete if command name has changed
+				formatstring(lastinput)(commandparts[0]);
+			}
+		}
+	}
+	
+	// Render command name (default)
     defformatstring(s)("%s %s", commandprompt ? commandprompt : ">", commandbuf);
     int width, height;
     text_bounds(s, width, height, w);
     y -= height;
-    draw_text(s, x, y, 0xFF, 0xFF, 0xFF, 0xFF, (commandpos>=0) ? (commandpos+1+(commandprompt?strlen(commandprompt):1)) : strlen(s), w);
-    return height;
+	
+	// Render help text
+	draw_text(command_name_suggestion, x+92, y, 0x00, 0xFF, 0x00, 0xFF /*transparent*/, -1, w);
+	draw_text(s, x+5, y, 0xFF, 0xFF, 0xFF, 0xFF, (commandpos>=0) ? (commandpos+1+(commandprompt?strlen(commandprompt):1)) : strlen(s), w);
+	return height;
 }
 
 VARP(consize, 0, 5, 100);
@@ -814,6 +937,10 @@ void addlistcomplete(char *command, char *list)
 COMMANDN(complete, addfilecomplete, "sss");
 COMMANDN(listcomplete, addlistcomplete, "ss");
 
+/**
+* We will use the function to complete command name suggestions
+* as a part of the command line helper functions
+*/
 void complete(char *s, const char *cmdprefix)
 {
     int cmdlen = 0;

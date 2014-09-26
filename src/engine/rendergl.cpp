@@ -866,7 +866,14 @@ int farplane;
 VARP(zoominvel, 0, 250, 5000);
 VARP(zoomoutvel, 0, 100, 5000);
 VARP(zoomfov, 10, 35, 60);
-VARP(fov, 10, 100, 150);
+
+/**
+* Example for parameter suggestion implementations
+*/
+//VARP(fov, 10, 100, 150);
+VARP_EXT(fov, 10, 100, 150, "sets the field of view", "angle");
+
+
 VAR(avatarzoomfov, 10, 25, 60);
 VAR(avatarfov, 10, 65, 150);
 FVAR(avatardepth, 0, 0.5f, 1);
@@ -2726,7 +2733,7 @@ void gl_drawhud(int w, int h)
 		glLoadIdentity();
 
 		// Debug...
-		conoutf(CON_DEBUG, " ");
+		//conoutf(CON_DEBUG, " ");
 		
 		// RENDER CHART
 		render_subchart(benchmark.getroot(), 0,  1000,100,500,500);

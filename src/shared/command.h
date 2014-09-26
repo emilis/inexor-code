@@ -92,10 +92,38 @@ union identvalptr
 
 typedef void (__cdecl *identfun)();
 
+
+
+
+/**
+* We need to manipulate this
+* in order to make parameter suggestions
+*/
 struct ident
 {
-    int type;           // one of ID_* above
+	/**
+	* enum { ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS, ID_LOCAL };
+	*/
+	int type;           // one of ID_* above
+
+	// name
     const char *name;
+
+
+	/**
+	* Added for auto completion
+	*/
+	// function description (optional)
+	const char* description;
+	
+	// Packed arguments
+	// "ip,port,password"
+	const char* packedarguments;
+
+	// function parameters (split by ',')
+	vector<char> function_parameters;
+
+
     union
     {
         int minval;    // ID_VAR
@@ -124,38 +152,74 @@ struct ident
     int flags, index;
     
     ident() {}
+
+	/**
+	* All constructors below have been manipulated in order
+	* to fill out description and packedarguments in the constructor list.
+	* We need to avoid invalid parameters for these values!
+	* All function registrations using macros will be replaced with 
+	* the extended parameters and help text version sooner or later
+	*/
+
     // ID_VAR
     ident(int t, const char *n, int m, int x, int *s, void *f = NULL, int flags = 0)
-        : type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0))
+        : type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     { storage.i = s; }
+    /**
+	* ID_VAR overloaded for command line helper
+	*/
+	ident(const char* HELPTEXT, const char* PACKEDPARAMS, int t, const char *n, int m, int x, int *s, void *f = NULL, int flags = 0)
+        : description(HELPTEXT), packedarguments(PACKEDPARAMS), type(t), name(n), minval(m), maxval(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0))
+    { storage.i = s; }
+
     // ID_FVAR
     ident(int t, const char *n, float m, float x, float *s, void *f = NULL, int flags = 0)
-        : type(t), name(n), minvalf(m), maxvalf(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0))
+        : type(t), name(n), minvalf(m), maxvalf(x), fun((identfun)f), flags(flags | (m > x ? IDF_READONLY : 0)), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     { storage.f = s; }
+
     // ID_SVAR
     ident(int t, const char *n, char **s, void *f = NULL, int flags = 0)
-        : type(t), name(n), fun((identfun)f), flags(flags)
+        : type(t), name(n), fun((identfun)f), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     { storage.s = s; }
+
     // ID_ALIAS
     ident(int t, const char *n, char *a, int flags)
-        : type(t), name(n), valtype(VAL_STR), code(NULL), stack(NULL), flags(flags) 
+        : type(t), name(n), valtype(VAL_STR), code(NULL), stack(NULL), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     { val.s = a; }
+
     ident(int t, const char *n, int a, int flags)
-        : type(t), name(n), valtype(VAL_INT), code(NULL), stack(NULL), flags(flags)           
+        : type(t), name(n), valtype(VAL_INT), code(NULL), stack(NULL), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")       
     { val.i = a; }
-    ident(int t, const char *n, float a, int flags)
-        : type(t), name(n), valtype(VAL_FLOAT), code(NULL), stack(NULL), flags(flags)           
+    
+	ident(int t, const char *n, float a, int flags)
+        : type(t), name(n), valtype(VAL_FLOAT), code(NULL), stack(NULL), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")        
     { val.f = a; }
-    ident(int t, const char *n, int flags)
-        : type(t), name(n), valtype(VAL_NULL), code(NULL), stack(NULL), flags(flags)
+    
+	ident(int t, const char *n, int flags)
+        : type(t), name(n), valtype(VAL_NULL), code(NULL), stack(NULL), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     {}
-    ident(int t, const char *n, const tagval &v, int flags)
-        : type(t), name(n), valtype(v.type), code(NULL), stack(NULL), flags(flags)
+    
+	ident(int t, const char *n, const tagval &v, int flags)
+        : type(t), name(n), valtype(v.type), code(NULL), stack(NULL), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
     { val = v; }
-    // ID_COMMAND
+    
+	// ID_COMMAND
     ident(int t, const char *n, const char *args, uint argmask, void *f = NULL, int flags = 0)
-        : type(t), name(n), args(args), argmask(argmask), fun((identfun)f), flags(flags) 
-    {}
+        : type(t), name(n), args(args), argmask(argmask), fun((identfun)f), flags(flags), /* always keep this valid*/ description("no help available (yet)"), packedarguments("")
+    {
+	}
+
+
+	// ID_COMMAND
+	/**
+	* type, name, *NEW* description, arguments, *NEW* packed argument list (playercn,reason), 
+	*/
+    ident(int t, const char *n, const char *args, uint argmask, const char *descriptiontext, const char *packedparams, void *f = NULL, int flags = 0)
+        : type(t), name(n), args(args), argmask(argmask), description(descriptiontext), packedarguments(packedparams), fun((identfun)f), flags(flags)
+    {
+	}
+
+
 
     void changed() { if(fun) fun(); }
 
@@ -182,6 +246,12 @@ struct ident
     const char *getstr() const;
     void getval(tagval &v) const;
 };
+
+
+
+
+
+
 
 static inline bool htcmp(const char *key, const ident &id) { return !strcmp(key, id.name); }
 
@@ -267,12 +337,35 @@ inline void ident::getval(tagval &v) const
 #define COMMANDN(name, fun, nargs) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs)
 #define COMMAND(name, nargs) COMMANDN(name, name, nargs)
 
+/**
+* Auto completion, parameter suggestion, current value and description texts
+*/
+#define COMMANDN_EXT(name, fun, nargs, descriptiontext, packedparams) static bool __dummy_##fun = addcommand(#name, (identfun)fun, nargs, descriptiontext, packedparams)
+#define COMMAND_EXT(name, nargs, descriptiontext, packedparams) COMMANDN_EXT(name, name, nargs, descriptiontext, packedparams)
+
+
+
 #define _VAR(name, global, min, cur, max, persist)  int global = variable(#name, min, cur, max, &global, NULL, persist)
+/**
+* Auto completion, parameter suggestion, current value and description texts
+*/
+#define _VAR_EXT(name, global, min, cur, max, persist, DESCRIPTION, PERSIST) int global = variable(#name, min, cur, max, &global, NULL, persist, DESCRIPTION, PERSIST)
+
+
 #define VARN(name, global, min, cur, max) _VAR(name, global, min, cur, max, 0)
 #define VARNP(name, global, min, cur, max) _VAR(name, global, min, cur, max, IDF_PERSIST)
 #define VARNR(name, global, min, cur, max) _VAR(name, global, min, cur, max, IDF_OVERRIDE)
 #define VAR(name, min, cur, max) _VAR(name, name, min, cur, max, 0)
+
+
 #define VARP(name, min, cur, max) _VAR(name, name, min, cur, max, IDF_PERSIST)
+/**
+* Auto completion, parameter suggestion, current value and description texts
+*/
+#define VARP_EXT(name, min, cur, max, DESCRIPTION, PACKEDPARAMS) _VAR_EXT(name, name, min, cur, max, IDF_PERSIST, DESCRIPTION, PACKEDPARAMS)
+
+
+
 #define VARR(name, min, cur, max) _VAR(name, name, min, cur, max, IDF_OVERRIDE)
 #define _VARF(name, global, min, cur, max, body, persist)  void var_##name(); int global = variable(#name, min, cur, max, &global, var_##name, persist); void var_##name() { body; }
 #define VARFN(name, global, min, cur, max, body) _VARF(name, global, min, cur, max, body, 0)
@@ -322,9 +415,37 @@ inline void ident::getval(tagval &v) const
 // anonymous inline commands, uses nasty template trick with line numbers to keep names unique
 #define ICOMMANDNS(name, cmdname, nargs, proto, b) template<int N> struct cmdname; template<> struct cmdname<__LINE__> { static bool init; static void run proto; }; bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs); void cmdname<__LINE__>::run proto \
     { b; }
+
+/**
+* Auto completion, parameter suggestion, function description text
+*/
+#define EXTCOMMAND(name, cmdname, nargs, proto, b, description, packedparams) \
+	template<int N> struct cmdname; \
+	template<> struct cmdname<__LINE__> { \
+		static bool init; \
+		static void run proto; \
+	}; \
+	bool cmdname<__LINE__>::init = addcommand(name, (identfun)cmdname<__LINE__>::run, nargs, description, packedparams); \
+	void cmdname<__LINE__>::run proto \
+    { b; }
+
+
 #define ICOMMANDN(name, cmdname, nargs, proto, b) ICOMMANDNS(#name, cmdname, nargs, proto, b)
+
+/**
+* Auto completion, parameter suggestion, function description text
+*/
+#define ICOMMANDN_EXT(HELPTEXT, PACKEDPARAMS, name, cmdname, nargs, proto, b) EXTCOMMAND(#name, cmdname, nargs, proto, b, HELPTEXT, PACKEDPARAMS)
+
 #define ICOMMANDNAME(name) _icmd_##name
 #define ICOMMAND(name, nargs, proto, b) ICOMMANDN(name, ICOMMANDNAME(name), nargs, proto, b)
+
+/**
+* Auto completion, parameter suggestion, function description text
+*/
+#define ICOMMAND_EXT(HELPTEXT, PACKEDPARAMS, name, nargs, proto, b) ICOMMANDN_EXT(HELPTEXT, PACKEDPARAMS, name, ICOMMANDNAME(name), nargs, proto, b)
+
+
 #define ICOMMANDSNAME _icmds_
 #define ICOMMANDS(name, nargs, proto, b) ICOMMANDNS(name, ICOMMANDSNAME, nargs, proto, b)
  

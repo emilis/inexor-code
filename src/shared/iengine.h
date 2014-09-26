@@ -108,6 +108,13 @@ extern void mpremip(bool local);
 
 // command
 extern int variable(const char *name, int min, int cur, int max, int *storage, identfun fun, int flags);
+
+/**
+* Auto completion, parameter suggestion, current value and description texts
+*/
+extern int variable(const char *name, int min, int cur, int max, int *storage, identfun fun, int flags, const char *HELPTEXT, const char *PACKEDPARAMS);
+
+
 extern float fvariable(const char *name, float min, float cur, float max, float *storage, identfun fun, int flags);
 extern char *svariable(const char *name, const char *cur, char **storage, identfun fun, int flags);
 extern void setvar(const char *name, int i, bool dofunc = true, bool doclamp = true);
@@ -126,6 +133,13 @@ extern ident *newident(const char *name, int flags = 0);
 extern ident *readident(const char *name);
 extern ident *writeident(const char *name, int flags = 0);
 extern bool addcommand(const char *name, identfun fun, const char *narg);
+
+/**
+* Auto completion, parameter suggestion, current value and help texts
+*/
+extern bool addcommand(const char *name, identfun fun, const char *args, const char* descriptiontext, const char* packedparams);
+
+
 extern bool addkeyword(int type, const char *name);
 extern uint *compilecode(const char *p);
 extern void keepcode(uint *p);
