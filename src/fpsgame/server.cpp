@@ -1067,8 +1067,51 @@ namespace server
 		}
         demos.remove(0, n);
     }
- 
-    void adddemo()
+
+    /// Demo information (Gamesummaries) ///
+	void putdemoplayer(playersummary &pl, packetbuf &p)
+	{
+		sendstring(pl.name, p);
+		sendstring(pl.tag, p);
+		sendstring(pl.team, p);
+		
+		putint(p, pl.clientnum);
+		putint(p, pl.privilege);
+		putint(p, pl.playermodel);
+		putint(p, pl.state);
+        
+		putint(p, pl.frags);
+		putint(p, pl.flags);
+		putint(p, pl.deaths);
+		putint(p, pl.teamkills);
+		putint(p, pl.totaldamage);
+		putint(p, pl.totalshots);
+	}
+
+	//pack demo gamesummary into enet packetbuf
+    void putdemoinfo(demofile &d, packetbuf &p)
+	{
+		gamesummary *g = d.info;
+
+		putint(p, d.len);
+		sendstring(g->map, p);
+		sendstring(g->mode, p);
+		sendstring(g->date, p);
+		sendstring(g->info, p);
+
+		//teams
+		putint(p, g->teams.numelems);
+		enumerate(g->teams, teaminfo, tmi, {
+			sendstring(tmi.team, p);
+			putint(p, tmi.frags);
+		});
+
+		//players
+		putint(p, g->players.length());
+		loopv(g->players) putdemoplayer(g->players[i], p);
+	}
+
+	void adddemo()
     {
         if(!demotmp) return;
         int len = (int)min(demotmp->size(), stream::offset((maxdemosize<<20) + 0x10000));
@@ -1076,10 +1119,10 @@ namespace server
 		d.info = getcursummary();
 		sendservmsgf("demo recorded: %s on %s %s (%.2f%s)", d.info->mode, d.info->map, d.info->date, len > 1024*1024 ? len/(1024*1024.f) : len/1024.0f, len > 1024*1024 ? "MB" : "kB");
         d.data = new uchar[len];
-		d.len = len;
-        demotmp->seek(0, SEEK_SET);
+        d.len = len;
+		demotmp->seek(0, SEEK_SET);
         demotmp->read(d.data, len);
-        DELETEP(demotmp);
+        DELETEP(demotmp)
     }
     
 	void newgamesummary()
@@ -1100,6 +1143,7 @@ namespace server
         if(!cursummary) newgamesummary();
 		return cursummary;
 	}
+
 	void gsaddplayer(gamesummary *g, clientinfo *ci)
 	{
 		playersummary &ps = g->players.add();
@@ -1124,6 +1168,20 @@ namespace server
 	void gsremoveplayer(gamesummary *g, uint ip)
 	{
 		loopv(g->players) if(g->players[i].ip == ip) { g->players.remove(i); break; }
+	}
+
+	//save teaminfos into gamesummary
+	void gssaveteams(gamesummary *g)
+	{
+        enumerates(teaminfos, teaminfo, ti,
+            teaminfo *gt = g->teams.access(ti.team);
+			if(!gt)
+			{
+				gt = &g->teams[ti.team];
+				copystring(gt->team, ti.team, sizeof(gt->team));
+				gt->frags = ti.frags;
+			}
+        );
 	}
     
 	void enddemorecord()
@@ -1181,48 +1239,6 @@ namespace server
         welcomepacket(p, NULL);
         writedemo(1, p.buf, p.len);
     }
-
-	//demo information:
-	void putdemoplayer(playersummary &pl, packetbuf &p)
-	{
-		sendstring(pl.name, p);
-		sendstring(pl.tag, p);
-		sendstring(pl.team, p);
-		
-		putint(p, pl.clientnum);
-		putint(p, pl.privilege);
-		putint(p, pl.playermodel);
-		putint(p, pl.state);
-        
-		putint(p, pl.frags);
-		putint(p, pl.flags);
-		putint(p, pl.deaths);
-		putint(p, pl.teamkills);
-		putint(p, pl.totaldamage);
-		putint(p, pl.totalshots);
-	}
-
-    void putdemoinfo(demofile &d, packetbuf &p)
-	{
-		gamesummary *g = d.info;
-
-		putint(p, d.len);
-		sendstring(g->map, p);
-		sendstring(g->mode, p);
-		sendstring(g->date, p);
-		sendstring(g->info, p);
-
-		//teams
-		putint(p, g->teams.numelems);
-		enumerate(g->teams, teaminfo, tmi, {
-			sendstring(tmi.team, p);
-			putint(p, tmi.frags);
-		});
-
-		//players
-		putint(p, g->players.length());
-		loopv(g->players) putdemoplayer(g->players[i], p);
-	}
     
 	void listdemos(int cn)
     {
@@ -1288,6 +1304,23 @@ namespace server
 
         loopv(clients) sendwelcome(clients[i]);
     }
+
+	void readdemoinfo(int numplayers, int numteams, int numbookmarks)
+	{
+		if(!demoplayback) return;
+		gamesummary g;
+		loopi(numplayers) g.players.add();
+		loopi(numplayers) g.players.add();
+		loopi(numbookmarks) g.bookmarks.add();
+		if(demoplayback->read(&g, sizeof(g)) != sizeof(g))
+		{
+			sendservmsg("could not read demoinfo");
+			return;
+		}
+
+		conoutf("%s on %s (%s)", g.mode, g.map, g.date);
+		loopv(g.players) conoutf("name %s cn %d", g.players[i].name, g.players[i].clientnum);
+	}
 
     void setupdemoplayback()
     {
@@ -2110,7 +2143,7 @@ namespace server
     void changemap(const char *s, int mode)
     {
 		loopv(clients) gsaddplayer(getcursummary(), clients[i]);
-        
+		gssaveteams(getcursummary());
 		stopdemo();
         pausegame(false,NULL);
         changegamespeed(100);

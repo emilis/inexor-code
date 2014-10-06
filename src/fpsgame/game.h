@@ -749,7 +749,7 @@ struct playersummary {
 struct gamesummary
 {
 	string map, mode, info, date;
-	
+
 	struct bookmark {
 		string comment;
 		int type, time, actor;
