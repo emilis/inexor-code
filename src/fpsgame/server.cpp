@@ -1297,7 +1297,16 @@ namespace server
         if(!num) num = demos.length();
         if(!demos.inrange(num-1)) return;
         demofile &d = demos[num-1];
-        if((ci->getdemo = sendf(ci->clientnum, FILE_CHANNEL, "rim", N_SENDDEMO, d.len, d.data)))
+
+		packetbuf p(MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+		
+		putint(p, N_SENDDEMO);
+		putdemoinfo(d, p);	
+		p.put(d.data, d.len);
+		ENetPacket *packet = p.finalize();
+		sendpacket(ci->clientnum, FILE_CHANNEL, packet);
+
+		if((ci->getdemo = packet->referenceCount > 0 ? packet : NULL))
             ci->getdemo->freeCallback = freegetdemo;
     }
 

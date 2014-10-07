@@ -2034,8 +2034,10 @@ namespace game
             {
                 defformatstring(fname)("%d.dmo", lastmillis);
                 stream *demo = openrawfile(fname, "wb");
-                if(!demo) return;
-                conoutf("received demo \"%s\"", fname);
+				if(!demo) { conoutf("no demo data"); return; }
+                parsegamesummary(p);
+
+				conoutf("received demo \"%s\"", fname);
                 ucharbuf b = p.subbuf(p.remaining());
                 demo->write(b.buf, b.maxlen);
                 delete demo;
