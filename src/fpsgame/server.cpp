@@ -1183,6 +1183,13 @@ namespace server
 			}
         );
 	}
+
+	//finishes the gamesummary: writes players and teams ..
+	void gsfinish()
+	{
+		loopv(clients) gsaddplayer(getcursummary(), clients[i]);
+		gssaveteams(getcursummary());
+	}
     
 	void enddemorecord()
     {
@@ -1194,6 +1201,7 @@ namespace server
         if(!maxdemos || !maxdemosize) { DELETEP(demotmp); return; }
 
         prunedemos(1);
+		gsfinish();
         adddemo();
     }
 
@@ -2142,8 +2150,6 @@ namespace server
         
     void changemap(const char *s, int mode)
     {
-		loopv(clients) gsaddplayer(getcursummary(), clients[i]);
-		gssaveteams(getcursummary());
 		stopdemo();
         pausegame(false,NULL);
         changegamespeed(100);
