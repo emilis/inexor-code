@@ -781,19 +781,6 @@ void gl_init(int depth, int fsaa)
     glCullFace(GL_BACK);
     glDisable(GL_CULL_FACE);
 
-#ifdef __APPLE__
-    if(sdl_backingstore_bug)
-    {
-        if(fsaa)
-        {
-            sdl_backingstore_bug = 1;
-            // since SDL doesn't add kCGLPFABackingStore to the pixelformat and so it isn't guaranteed to be preserved - only manifests when using fsaa?
-            //conoutf(CON_WARN, "WARNING: Using SDL backingstore workaround. (use \"/sdl_backingstore_bug 0\" to disable if unnecessary)");
-        }
-        else sdl_backingstore_bug = -1;
-    }
-#endif
-
     extern int useshaders, forceglsl;
     bool hasshaders = (hasVP && hasFP) || hasGLSL;
     if(!useshaders || (useshaders<0 && avoidshaders) || !hasMT || !hasshaders)
