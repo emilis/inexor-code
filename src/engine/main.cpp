@@ -1326,6 +1326,7 @@ int main(int argc, char **argv)
 		if(minimized) continue;
         inbetweenframes = false;
 
+
         if(mainmenu) 
 		{ 
 			benchmark.begin("gl_drawmainmenu");
@@ -1337,11 +1338,17 @@ int main(int argc, char **argv)
 			gl_drawframe(screen->w, screen->h);
 			benchmark.end("gl_drawframe");
 		}
-
+		
 		// Swapping buffers
 		benchmark.begin("swapbuffers");
         swapbuffers(); // done
 		benchmark.end("swapbuffers");
+
+		/**
+		* Here we finally compile our profile!
+		*/
+		benchmark.compile();
+		benchmark.calculate_average();
 
 		// no benchmark needed        
 		renderedframe = inbetweenframes = true;

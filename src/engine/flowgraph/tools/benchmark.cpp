@@ -3,7 +3,6 @@
 */
 #include "benchmark.h"
 
-
 /**
 * Interval structure constructor
 */
@@ -23,6 +22,31 @@ void SInterval::calcduration(void)
 	duration = end - begin;
 }
 
+/**
+* Calculate average time
+*/
+void STimerNode::calc_average(void) 
+{
+	/**
+	* Calculate average
+	* Some errors with capacity could occur (?)!
+	*/
+	unsigned long long tmp = 0;
+
+	for(unsigned int i=0; i<durations.size(); i++)
+	{
+		// add duration to 
+		tmp += durations[i].duration;
+	}
+
+	// Calculate average
+	tmp /= durations.size();
+
+	// copy value
+	average = tmp;
+	// tmp will be deleted from heap memory automaticly...
+}
+
 /* ---------------------------------------------------------------------------- */
 
 /**
@@ -40,6 +64,10 @@ STimerNode::STimerNode()
 	ticking = false;
 	// free memory
 	subnodes.clear();
+	// no sums applied
+	sums_added = 0;
+	// reset average
+	average = 0;
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -62,7 +90,7 @@ CBenchmarking::CBenchmarking()
 	time = 0;
 
 	/**
-	* Only on Microsoft Windows
+	* We have a solution for this problem, but only for Microsoft Windows
 	*/
 	#ifdef WIN32
 	// We need this
@@ -155,8 +183,6 @@ int CBenchmarking::begin(char* name, char* group)
 	// time interval instance
 	SInterval time_interv;
 	time_interv.begin = time;
-	// new
-	timeregister[name]->dur.begin = time;
 
 	// insert one at the end
 	// copy, no pointers
@@ -231,19 +257,36 @@ void CBenchmarking::delete_node(STimerNode* node)
 /**
 * Get access to a process' duration
 */
-unsigned long long CBenchmarking::duration(char* name)
+unsigned long long CBenchmarking::average_duration(char* name)
 {
+	// Check if this node exists
 	if(timeregister.count(name) < 1) 
 	{
 		printf("error: index %s not found!\n", name);
 		return 0;
 	}
-	// return duration of the last process
-	//return timeregister[name]->durations[timeregister[name]->durations.size() - 1].duration;
-	
-	return timeregister[name]->dur.duration;
+
+	// return average duration
+	return timeregister[name]->average;
 }
 
+/**
+* Get access to the last duration of a process
+*/
+unsigned long long CBenchmarking::last_duration(char* name) 
+{
+	// check if this node exists
+	if(timeregister.count(name) < 1) 
+	{
+		printf("error: index %s not found!\n", name);
+		return 0;
+	}
+
+	/**
+	* Return duration of last process
+	*/
+	return timeregister[name]->durations.back().duration;
+}
 
 /**
 * Dump the whole tree
@@ -255,6 +298,8 @@ void CBenchmarking::dumpall(void)
 
 /**
 * dump tree node
+* this debug function is used to print a visual text map of all nodes in the console
+* for debugging purpose only..
 */
 void CBenchmarking::dumptreenode(STimerNode* node, unsigned int depth)
 {
@@ -262,79 +307,71 @@ void CBenchmarking::dumptreenode(STimerNode* node, unsigned int depth)
 	strcpy_s(test, 1024,"");
 	// format - tabulators
 	for(unsigned int i=0; i<depth; i++) sprintf_s(test, 1024, "%s-", test);
-	sprintf_s(test, 1024, "%s%s", test, node->name);
-	
-	// output
-	//conoutf(CON_DEBUG, test);
+	sprintf_s(test, 1024, "%s%s [%f]", test, node->name, node->average);
 
 	depth++;
 	for(unsigned int i=0; i<node->subnodes.size(); i++) 
 	{
+		// recursively dump child nodes
 		dumptreenode(node->subnodes[i], depth);
 	}
 }
-
 
 /**
 * Resolve nodes recursively
 */
 void CBenchmarking::recursiveresolve(STimerNode* node)
 {
+	// It should stop at "root" I hope...
 	if(node->parentnode == nullptr) return;
-
-	// increase sums of parent node
-	node->parentnode->summands++;
 	
 	/**
 	* Add latest delay to parent
 	*/
-	node->parentnode->dur.duration += node->dur.duration;
+	node->parentnode->durations.back().duration += node->durations.back().duration;
 
-	// recursively resolve parent node
-	recursiveresolve(node->parentnode);
+	// increase sums of parent node
+	node->parentnode->sums_added++;
+
+	/**
+	* Only of 
+	*/
+	if(node->subnodes.size() == node->sums_added)
+	{
+		// reset sum indicator
+		node->sums_added = 0;
+		// recursively resolve parent node
+		recursiveresolve(node->parentnode);
+	}
 }
-
 
 /**
 * Compile all times
+* sum up the binary tree backwards!
 */
 void CBenchmarking::compile(void)
 {
-	/**
-	* First step: find leaves!
-	*/
+	// First step: find leaves!
 	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++)
 	{
-		/**
-		* This node does not have sub-nodes
-		* it is a leaf!
-		*/
+		// This node does not have sub-nodes -> it is a leaf!
 		if(it->second->subnodes.size() == 0)
 		{
 			/**
-			* This is the last index of the leave's duration buffer
-			* and NOT of its parent!!
+			* Sum up the duration to the parent node
+			* This is important because the time which is needed in a "sub thing"
+			* also influences the time which is needed to do a "parent thing"...
 			*/
-			/*
-			int lastindexofleaf = it->second->durations.size() - 1;
-			// remove one at the front of the parent's buffer
-			it->second->parentnode->durations.pop_front();
-			// push back one in the parent's buffer
-			it->second->parentnode->durations.push_back(it->second->durations[lastindex]);
-			*/
-
-			// New way
-			it->second->parentnode->dur.duration = it->second->dur.duration;
-
+			it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
 			// increase value of added summands
-			it->second->summands++;
-			
-			// recursively call this
+			it->second->sums_added++;
+
+			// recursively call sub node
 			recursiveresolve(it->second);
 		}
 	}
-
 }
+
 
 /**
 * return root
@@ -342,4 +379,17 @@ void CBenchmarking::compile(void)
 STimerNode* CBenchmarking::getroot(void)
 {
 	return root;
+}
+
+/**
+* Calculate average
+*/
+void CBenchmarking::calculate_average(void) 
+{
+	/**
+	* Calculate average of each index
+	*/
+	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) {
+		it->second->calc_average();
+	}
 }

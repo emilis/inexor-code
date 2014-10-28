@@ -39,6 +39,7 @@ struct SInterval
 	/**
 	* 64 bit integer for microseconds
 	*/
+	// new: average value
 	unsigned long long begin, end, duration;
 
 	/**
@@ -73,30 +74,36 @@ struct STimerNode
 	bool ticking;
 
 	/**
-	* How many summands have been added?
-	*/
-	int summands;
-
-	/**
-	* this is the next leaf to sum up!
-	*/
-	//bool todo;
-
-	/**
 	* This deque stores the last durations
 	*/
 	std::deque<SInterval> durations;
 	
-	SInterval dur;
-
 	/**
 	* The parent node
 	*/
 	STimerNode* parentnode;
+
 	/**
 	* sub nodes (childs)
 	*/
 	std::vector<STimerNode*> subnodes;
+
+	/**
+	* How many sums have been applied to this node?
+	* the parent node will be called if sums_added == this_node->childs.size();
+	* which means that all childs have added their sum to the parent.
+	*/
+	int sums_added;
+
+	/**
+	* Average time
+	*/
+	unsigned long long average;
+
+	/**
+	* Calculate average time
+	*/
+	void calc_average(void);
 };
 
 
@@ -179,8 +186,9 @@ class CBenchmarking
 	/**
 	* Get access to a process' duration
 	*/
-	unsigned long long duration(char* name);
-
+	unsigned long long average_duration(char* name);
+	unsigned long long last_duration(char* name);
+	
 	/**
 	* dump all nodes and free memory
 	*/
@@ -195,6 +203,11 @@ class CBenchmarking
 	* Calculate all times
 	*/
 	void compile(void);
+
+	/**
+	* Calculate average
+	*/
+	void calculate_average(void);
 
 };
 

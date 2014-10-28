@@ -2741,7 +2741,8 @@ void gl_drawhud(int w, int h)
 		glLoadIdentity();
 		
 		// RENDER CHART
-		render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
+		//render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
+		render_subchart(benchmark.getroot(), 0, 100, 100, 700, 700);
 		glEnd();
 
 		// End rendering
@@ -2773,6 +2774,7 @@ void RenderTriangle(float left, float top, float width, float height, int depth)
 	glVertex2f(left+width, top); // TOP RIGHT
 	glVertex2f(left+width, top+height); // BOTTOM RIGHT
 	glVertex2f(left, top+height); // BOTTOM LEFT
+
 	// close it...
 	glVertex2f(left,top); // TOP LEFT
 
@@ -2791,42 +2793,69 @@ void render_subchart(STimerNode* parent, int depth, float left, float top, float
      
         // depthindex
         static int calltime = 0;
-     
         float subnode_width = 0.0f;
         float subnode_height = 0.0f;
 
-        if (parent->subnodes.size() == 0) {
-                subnode_width = width;
-                subnode_height = height;
-        } else {
-                if (horizontal) {
-                        subnode_width = width / parent->subnodes.size();
-                        subnode_height = height;
-                } else {
-                        subnode_width = width;
-                        subnode_height = height / parent->subnodes.size();
-                }
-        }
-     
-        for(unsigned int i = 0; i < parent->subnodes.size(); i++)
+		/**
+		* Render sub nodes
+		*/
+        for(unsigned int i=0;  i < parent->subnodes.size(); i++)
         {
+			/**
+			* uf no duration is set, skip this node
+			*/
+			//if(0 == parent->durations.back().duration) continue;
+
 		    // Copy subnode (for shorter name)
             STimerNode* subnode = parent->subnodes[i];
-     
+
+			/**
+			* If this node does not have child nodes
+			* width and height from the parent node will be applied
+			*/
+			if(parent->subnodes.size() == 0) 
+			{
+				subnode_width = width;
+				subnode_height = height;
+			}
+			else 
+			{
+				float this_performance = subnode->average;
+				float parent_performance_node_sum = parent->average;
+
+				/**
+				* Avoid division by zero!
+				*/
+				if(0==parent_performance_node_sum) parent_performance_node_sum=1;
+
+				float fResourceIntegral = this_performance/parent_performance_node_sum;
+				
+				if(horizontal) 
+				{
+					// take height from parent
+					subnode_height = height;
+					// calculate width
+					subnode_width = width * fResourceIntegral;
+					//subnode_width = width / parent->subnodes.size();
+				} 
+				else 
+				{
+					// take width from parent
+					subnode_width = width;
+					// calculate height
+					subnode_height = height * fResourceIntegral;
+					//subnode_height = height / parent->subnodes.size();1
+				}
+			}
+
 			// Hanack has proven as a genius several times here
             float node_left = left;
             float node_top = top;
 			if(horizontal) node_left += i*subnode_width;
 			else node_top += i*subnode_height;
-				
-			// Debug message
-			/*
-			defformatstring(indentation)("");
-			for(int k=0; k<depth; k++) formatstring(indentation)("%s-", indentation);
-			conoutf(CON_DEBUG, "%snode_left:%f node_top:%f subnode_width:%f subnode_height:%f", indentation, node_left, node_top, subnode_width, subnode_height);
-			*/
-
-            if(subnode->subnodes.size() > 0)
+			
+            // Render sub nodes
+			if(subnode->subnodes.size() > 0)
 			{
                 // Call next sub node
                 render_subchart(subnode, depth + 1, node_left, node_top, subnode_width, subnode_height);
