@@ -31,7 +31,7 @@ void SInterval::calcduration(void)
 STimerNode::STimerNode() 
 {
 	// allocate memory for deque
-	//durations.resize(100);
+	durations.resize(100);
 	// clean node name
 	strcpy_s(name, 256, "");
 	// set no parent yet
@@ -144,10 +144,10 @@ int CBenchmarking::begin(char* name, char* group)
 	}
 
 	// BUG? - is this time already ticking
-	if(timeregister[name]->ticking == true) 
+	/*if(timeregister[name]->ticking == true) 
 	{
 		//std::cout << "ERROR: time is already ticking!" << std::endl;
-	}
+	}*/
 
 	// begin time measuring
 	QueryPerformanceCounter((LARGE_INTEGER*)&time);
@@ -155,17 +155,14 @@ int CBenchmarking::begin(char* name, char* group)
 	// time interval instance
 	SInterval time_interv;
 	time_interv.begin = time;
+	// new
+	timeregister[name]->dur.begin = time;
 
 	// insert one at the end
 	// copy, no pointers
-	/*
 	timeregister[name]->durations.push_back(time_interv);
 	// remove 1 from the front
 	timeregister[name]->durations.pop_front();
-	*/
-
-	// new
-	timeregister[name]->dur.begin = time;
 
 	// function successful
 	return 1;
@@ -192,18 +189,11 @@ int CBenchmarking::end(char* name)
 		// query time
 		QueryPerformanceCounter((LARGE_INTEGER*)&time);
 
-		// New way to apply time
-		timeregister[name]->dur.end = time;
-		timeregister[name]->dur.calcduration();
-
-		/*
 		// a bit tricky
 		// set the end time of this performance counter's deque
 		timeregister[name]->durations[timeregister[name]->durations.size() -1].end = time;
-		
 		// Calculate duration
 		timeregister[name]->durations[timeregister[name]->durations.size() -1].calcduration();
-		*/
 	}
 
 	return 1;

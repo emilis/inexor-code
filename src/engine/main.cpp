@@ -1241,7 +1241,9 @@ int main(int argc, char **argv)
 
 
 	// Set curve precision
-	dynamic_curve.SetPrecision(100.0f);
+	dynamic_curve.SetPrecision(200.0f);
+	target_curve.SetPrecision(200.0f);
+
 	// initialise curve renderer
 	curve_renderer.SetCurve( &dynamic_curve);
 

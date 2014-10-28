@@ -146,7 +146,7 @@ void CBezierCurve::GenerateRandomCurve(unsigned int maxparameterpoints, bool aut
 	if(maxparameterpoints > m_uiParamLimit) return;
 
 	// Initialise random number generator
-	srand((unsigned)time(NULL) + SDL_GetTicks() );
+	srand((unsigned)time(NULL) + maxparameterpoints * SDL_GetTicks() );
 
 	// Generate at most 100 points with random positions
 	for(unsigned int i=0; i<maxparameterpoints;  i++) 
@@ -414,4 +414,4 @@ bool CBezierCurve::IsCurveComputed(void) {
 /**
 * Make curve global
 */
-CBezierCurve dynamic_curve;
+CBezierCurve dynamic_curve, target_curve;

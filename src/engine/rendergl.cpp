@@ -1022,15 +1022,19 @@ void recomputecamera()
         }
     }
 
-	// #define HANNI_FLYCAM_TEST
+	#define HANNI_FLYCAM_TEST
 	#ifdef HANNI_FLYCAM_TEST
 	if(flycamtest)
 	{
 		float fParam = SDL_GetTicks() % 4000 / 4000.0f;
 		int current_point_index = dynamic_curve.GetPointIndexFromFloat(fParam);
 		int next_point_index = current_point_index + 1;
+		
 		vec current_pos = dynamic_curve.GetComputedPointIndexed(current_point_index);
-		vec next_pos = dynamic_curve.GetComputedPointIndexed(next_point_index);
+
+		//vec next_pos = dynamic_curve.GetComputedPointIndexed(next_point_index);
+		vec next_pos = target_curve.GetComputedPointIndexed(next_point_index);
+	
 		float yaw, pitch;
 		vectoyawpitch( next_pos.sub(current_pos), yaw, pitch);
 		camera1->o = current_pos;
@@ -2041,6 +2045,7 @@ void gl_drawhud(int w, int h);
 int xtraverts, xtravertsva;
 
 
+VARP(showcurve, 0, 0, 1);
 
 void gl_drawframe(int w, int h)
 {
@@ -2175,9 +2180,12 @@ void gl_drawframe(int w, int h)
 	/**
 	* Render curve
 	*/
-	lineshader->set();
-	// render
-	curve_renderer.RenderCurve();
+	if(showcurve) 
+	{
+		lineshader->set();
+		curve_renderer.RenderCurve();
+	}
+
 
 	benchmark.begin("rendermapmodels", "gl_drawframe");
     rendermapmodels();
@@ -2731,12 +2739,9 @@ void gl_drawhud(int w, int h)
 		notextureshader->set();				
 		glEnable(GL_TEXTURE_2D);
 		glLoadIdentity();
-
-		// Debug...
-		//conoutf(CON_DEBUG, " ");
 		
 		// RENDER CHART
-		render_subchart(benchmark.getroot(), 0,  1000,100,500,500);
+		render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
 		glEnd();
 
 		// End rendering

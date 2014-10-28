@@ -71,11 +71,6 @@ struct STimerNode
 	* is this timer active/ticking ?
 	*/
 	bool ticking;
-	
-	/**
-	* For summing up the time
-	*/
-	//bool summandapplied;
 
 	/**
 	* How many summands have been added?
@@ -90,7 +85,7 @@ struct STimerNode
 	/**
 	* This deque stores the last durations
 	*/
-	//std::deque<SInterval> durations;
+	std::deque<SInterval> durations;
 	
 	SInterval dur;
 

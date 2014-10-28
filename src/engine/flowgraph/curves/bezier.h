@@ -247,6 +247,6 @@ class CBezierCurve
 /**
 * Make curve global
 */
-extern CBezierCurve dynamic_curve;
+extern CBezierCurve dynamic_curve, target_curve;
 
 #endif /* #ifndef ENGINE_BEZIER_CURVE_H */
