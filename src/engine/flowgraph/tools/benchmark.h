@@ -159,7 +159,6 @@ class CBenchmarking
 	void recursiveresolve(STimerNode* node);
 
 
-
 	public:
 
 	// constructor
@@ -209,6 +208,10 @@ class CBenchmarking
 	*/
 	void calculate_average(void);
 
+	/**
+	* Push back node sums
+	*/
+	void pushback_and_clear_node_sums(void);
 };
 
 extern CBenchmarking benchmark;

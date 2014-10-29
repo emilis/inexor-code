@@ -2049,15 +2049,15 @@ VARP(showcurve, 0, 0, 1);
 
 void gl_drawframe(int w, int h)
 {
-	benchmark.begin("drawtextures", "gl_drawframe");
+	////benchmark.begin("drawtextures", "gl_drawframe");
     if(deferdrawtextures) drawtextures();
-	benchmark.end("drawtextures");
+	////benchmark.end("drawtextures");
 
     defaultshader->set();
 
-	benchmark.begin("updatedynlights", "gl_drawframe");
+	////benchmark.begin("updatedynlights", "gl_drawframe");
     updatedynlights();
-	benchmark.end("updatedynlights");
+	////benchmark.end("updatedynlights");
 
     // calculations
 	aspect = forceaspect ? forceaspect : w/float(h);
@@ -2076,9 +2076,9 @@ void gl_drawframe(int w, int h)
     }
     else fogmat = MAT_AIR;    
     
-	benchmark.begin("setfog", "gl_drawframe");
+	////benchmark.begin("setfog", "gl_drawframe");
 	setfog(fogmat, fogblend, abovemat);
-	benchmark.end("setfog");
+	////benchmark.end("setfog");
 
 	// calculations
     if(fogmat!=MAT_AIR)
@@ -2090,25 +2090,25 @@ void gl_drawframe(int w, int h)
 
     farplane = worldsize*2;
 
-	benchmark.begin("project", "gl_drawframe");
+	////benchmark.begin("project", "gl_drawframe");
     project(fovy, aspect, farplane);
-	benchmark.end("project");
+	////benchmark.end("project");
     
-	benchmark.begin("transplayer", "gl_drawframe");
+	////benchmark.begin("transplayer", "gl_drawframe");
 	transplayer();
-	benchmark.end("transplayer");
+	////benchmark.end("transplayer");
 
-	benchmark.begin("readmatrices", "gl_drawframe");
+	////benchmark.begin("readmatrices", "gl_drawframe");
     readmatrices();
-	benchmark.end("readmatrices");
+	////benchmark.end("readmatrices");
 
-	benchmark.begin("findorientation", "gl_drawframe");
+	////benchmark.begin("findorientation", "gl_drawframe");
     findorientation();
-	benchmark.end("findorientation");
+	////benchmark.end("findorientation");
 
-	benchmark.begin("setenvmatrix", "gl_drawframe");
+	////benchmark.begin("setenvmatrix", "gl_drawframe");
     setenvmatrix();
-	benchmark.end("setenvmatrix");
+	////benchmark.end("setenvmatrix");
 
     glEnable(GL_FOG);
     glEnable(GL_CULL_FACE);
@@ -2121,61 +2121,61 @@ void gl_drawframe(int w, int h)
     {
         if(dopostfx)
         {
-			benchmark.begin("drawglaretex", "gl_drawframe");
+			////benchmark.begin("drawglaretex", "gl_drawframe");
             drawglaretex();
-			benchmark.end("drawglaretex");
+			////benchmark.end("drawglaretex");
 
-			benchmark.begin("drawdepthfxtex", "gl_drawframe");
+			////benchmark.begin("drawdepthfxtex", "gl_drawframe");
             drawdepthfxtex();
-			benchmark.end("drawdepthfxtex");
+			////benchmark.end("drawdepthfxtex");
             
-			benchmark.begin("drawreflections", "gl_drawframe");
+			////benchmark.begin("drawreflections", "gl_drawframe");
 			drawreflections();
-			benchmark.end("drawreflections");
+			////benchmark.end("drawreflections");
         }
         else dopostfx = true;
     }
 
-	benchmark.begin("visiblecubes", "gl_drawframe");
+	////benchmark.begin("visiblecubes", "gl_drawframe");
     visiblecubes();
-	benchmark.end("visiblecubes");
+	////benchmark.end("visiblecubes");
     
-	benchmark.begin("rendershadowmap", "gl_drawframe");
+	////benchmark.begin("rendershadowmap", "gl_drawframe");
     if(shadowmap && !hasFBO) rendershadowmap();
-	benchmark.end("rendershadowmap");
+	////benchmark.end("rendershadowmap");
 
     glClear(GL_DEPTH_BUFFER_BIT|(wireframe && editmode ? GL_COLOR_BUFFER_BIT : 0)|(hasstencil ? GL_STENCIL_BUFFER_BIT : 0));
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
 
-	benchmark.begin("drawskybox", "gl_drawframe");
+	//benchmark.begin("drawskybox", "gl_drawframe");
     if(limitsky()) drawskybox(farplane, true);
-	benchmark.end("drawskybox");
+	//benchmark.end("drawskybox");
 
-	benchmark.begin("rendergeom", "gl_drawframe");
+	//benchmark.begin("rendergeom", "gl_drawframe");
     rendergeom(causticspass);
-	benchmark.end("rendergeom");
+	//benchmark.end("rendergeom");
 
-	benchmark.begin("renderoutline", "gl_drawframe");
+	//benchmark.begin("renderoutline", "gl_drawframe");
     extern int outline;
     if(!wireframe && editmode && outline) renderoutline();
-	benchmark.end("renderoutline");
+	//benchmark.end("renderoutline");
 
-	benchmark.begin("queryreflections", "gl_drawframe");
+	//benchmark.begin("queryreflections", "gl_drawframe");
     queryreflections();
-	benchmark.end("queryreflections");
+	//benchmark.end("queryreflections");
 
-	benchmark.begin("generatefrass", "gl_drawframe");
+	//benchmark.begin("generatefrass", "gl_drawframe");
     generategrass();
-	benchmark.end("generategrass");
+	//benchmark.end("generategrass");
 
-	benchmark.begin("drawskybox", "gl_drawframe");
+	//benchmark.begin("drawskybox", "gl_drawframe");
     if(!limitsky()) drawskybox(farplane, false);
-	benchmark.end("drawskybox");
+	//benchmark.end("drawskybox");
 
-	benchmark.begin("renderdecals", "gl_drawframe");
+	//benchmark.begin("renderdecals", "gl_drawframe");
     renderdecals(true);
-	benchmark.end("renderdecals");
+	//benchmark.end("renderdecals");
 	
 	/**
 	* Render curve
@@ -2187,96 +2187,96 @@ void gl_drawframe(int w, int h)
 	}
 
 
-	benchmark.begin("rendermapmodels", "gl_drawframe");
+	//benchmark.begin("rendermapmodels", "gl_drawframe");
     rendermapmodels();
-	benchmark.end("rendermapmodels");
+	//benchmark.end("rendermapmodels");
 
-	benchmark.begin("rendergame", "gl_drawframe");
+	//benchmark.begin("rendergame", "gl_drawframe");
     rendergame(true);
-	benchmark.end("rendergame");
+	//benchmark.end("rendergame");
 
-	benchmark.begin("renderavatar", "gl_drawframe");
+	//benchmark.begin("renderavatar", "gl_drawframe");
     if(!isthirdperson())
     {
         project(curavatarfov, aspect, farplane, false, false, false, avatardepth);
         game::renderavatar();
         project(fovy, aspect, farplane);
     }
-	benchmark.end("renderavatar");
+	//benchmark.end("renderavatar");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if(hasFBO) 
     {
-		benchmark.begin("drawglaretex2", "gl_drawframe");
+		//benchmark.begin("drawglaretex2", "gl_drawframe");
         drawglaretex();
-		benchmark.end("drawglaretex2");
+		//benchmark.end("drawglaretex2");
         
-		benchmark.begin("drawdepthfxtex2", "gl_drawframe");
+		//benchmark.begin("drawdepthfxtex2", "gl_drawframe");
 		drawdepthfxtex();
-		benchmark.end("drawdepthfxtex2");
+		//benchmark.end("drawdepthfxtex2");
         
-		benchmark.begin("drawreflections2", "gl_drawframe");
+		//benchmark.begin("drawreflections2", "gl_drawframe");
 		drawreflections();
-		benchmark.end("drawreflections2");
+		//benchmark.end("drawreflections2");
     }
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    benchmark.begin("renderwater", "gl_drawframe");
+    //benchmark.begin("renderwater", "gl_drawframe");
 	renderwater();
-	benchmark.end("renderwater");
+	//benchmark.end("renderwater");
 
-	benchmark.begin("rendergrass", "gl_drawframe");
+	//benchmark.begin("rendergrass", "gl_drawframe");
     rendergrass();
-	benchmark.end("rendergrass");
+	//benchmark.end("rendergrass");
 
-	benchmark.begin("rendermaterials", "gl_drawframe");
+	//benchmark.begin("rendermaterials", "gl_drawframe");
     rendermaterials();
-	benchmark.end("rendermaterials");
+	//benchmark.end("rendermaterials");
 
-	benchmark.begin("renderalphageom", "gl_drawframe");
+	//benchmark.begin("renderalphageom", "gl_drawframe");
     renderalphageom();
-	benchmark.end("renderalphageom");
+	//benchmark.end("renderalphageom");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	benchmark.begin("renderparticles", "gl_drawframe");
+	//benchmark.begin("renderparticles", "gl_drawframe");
     renderparticles(true);
-	benchmark.end("renderparticles");
+	//benchmark.end("renderparticles");
 
     glDisable(GL_FOG);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
-	benchmark.begin("addmotionblur", "gl_drawframe");
+	//benchmark.begin("addmotionblur", "gl_drawframe");
     addmotionblur();
-	benchmark.end("addmotionblur");
+	//benchmark.end("addmotionblur");
 
-	benchmark.begin("addglare", "gl_drawframe");
+	//benchmark.begin("addglare", "gl_drawframe");
     addglare();
-	benchmark.end("addglare");
+	//benchmark.end("addglare");
     
-	benchmark.begin("drawfogoverlay", "gl_drawframe");
+	//benchmark.begin("drawfogoverlay", "gl_drawframe");
 	if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
-	benchmark.end("drawfogoverlay");
+	//benchmark.end("drawfogoverlay");
 
-	benchmark.begin("drawfogoverlay");
+	//benchmark.begin("drawfogoverlay");
     renderpostfx();
-	benchmark.end("drawfogoverlay");
+	//benchmark.end("drawfogoverlay");
 
     defaultshader->set();
 	
-	benchmark.begin("g3d_render2", "gl_drawframe");
+	//benchmark.begin("g3d_render2", "gl_drawframe");
     g3d_render();
-	benchmark.end("g3d_render2");
+	//benchmark.end("g3d_render2");
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
 
-	benchmark.begin("gl_drawhud2", "gl_drawframe");
+	//benchmark.begin("gl_drawhud2", "gl_drawframe");
     gl_drawhud(w, h);
-	benchmark.end("gl_drawhud2");
+	//benchmark.end("gl_drawhud2");
 
     renderedgame = false;
 }
@@ -2285,13 +2285,13 @@ void gl_drawmainmenu(int w, int h)
 {
     xtravertsva = xtraverts = glde = gbatches = 0;
 
-	benchmark.begin("renderbackground", "gl_drawmainmenu");
+	//benchmark.begin("renderbackground", "gl_drawmainmenu");
     renderbackground(NULL, NULL, NULL, NULL, true, true);
-	benchmark.end("renderbackground");
+	//benchmark.end("renderbackground");
 
-	benchmark.begin("renderpostfx", "gl_drawmainmenu");
+	//benchmark.begin("renderpostfx", "gl_drawmainmenu");
     renderpostfx();
-	benchmark.end("renderpostfx");
+	//benchmark.end("renderpostfx");
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -2301,16 +2301,16 @@ void gl_drawmainmenu(int w, int h)
     defaultshader->set();
     glEnable(GL_TEXTURE_2D);
     
-	benchmark.begin("g3d_render", "gl_drawmainmenu");
+	//benchmark.begin("g3d_render", "gl_drawmainmenu");
 	g3d_render();
-	benchmark.end("g3d_render");
+	//benchmark.end("g3d_render");
 
     notextureshader->set();
     glDisable(GL_TEXTURE_2D);
 
-	benchmark.begin("gl_drawhud", "gl_drawmainmenu");
+	//benchmark.begin("gl_drawhud", "gl_drawmainmenu");
     gl_drawhud(w, h);
-	benchmark.end("gl_drawhud");
+	//benchmark.end("gl_drawhud");
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);
@@ -2741,8 +2741,8 @@ void gl_drawhud(int w, int h)
 		glLoadIdentity();
 		
 		// RENDER CHART
-		//render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
-		render_subchart(benchmark.getroot(), 0, 100, 100, 700, 700);
+		render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
+		//render_subchart(//benchmark.getroot(), 0, 100, 100, 700, 700);
 		glEnd();
 
 		// End rendering
@@ -2799,6 +2799,8 @@ void render_subchart(STimerNode* parent, int depth, float left, float top, float
 		/**
 		* Render sub nodes
 		*/
+		float fResourceIntegral = 0.0f;
+
         for(unsigned int i=0;  i < parent->subnodes.size(); i++)
         {
 			/**
@@ -2818,18 +2820,27 @@ void render_subchart(STimerNode* parent, int depth, float left, float top, float
 				subnode_width = width;
 				subnode_height = height;
 			}
-			else 
+			else
 			{
+				/**
+				* Use the average values to
+				*/
 				float this_performance = subnode->average;
 				float parent_performance_node_sum = parent->average;
+				
+				// Debug
+				conoutf(CON_DEBUG, "%s: %d", subnode->name, subnode->average);
+
 
 				/**
 				* Avoid division by zero!
 				*/
 				if(0==parent_performance_node_sum) parent_performance_node_sum=1;
-
-				float fResourceIntegral = this_performance/parent_performance_node_sum;
+				fResourceIntegral = this_performance/parent_performance_node_sum;
 				
+				/**
+				* 
+				*/
 				if(horizontal) 
 				{
 					// take height from parent
@@ -2866,4 +2877,6 @@ void render_subchart(STimerNode* parent, int depth, float left, float top, float
                 RenderTriangle(node_left, node_top, subnode_width, subnode_height, calltime);
             }
         }
+
+		
 }

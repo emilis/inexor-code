@@ -213,6 +213,7 @@ int CBenchmarking::end(char* name)
 		}
 
 		// query time
+		// Windows specific!
 		QueryPerformanceCounter((LARGE_INTEGER*)&time);
 
 		// a bit tricky
@@ -323,18 +324,18 @@ void CBenchmarking::dumptreenode(STimerNode* node, unsigned int depth)
 void CBenchmarking::recursiveresolve(STimerNode* node)
 {
 	// It should stop at "root" I hope...
-	if(node->parentnode == nullptr) return;
+	//if(node->parentnode == nullptr) return;
 	
 	/**
-	* Add latest delay to parent
+	* Add latest delay value to parent delay sum
 	*/
 	node->parentnode->durations.back().duration += node->durations.back().duration;
-
 	// increase sums of parent node
 	node->parentnode->sums_added++;
 
 	/**
-	* Only of 
+	* Only if the number of sub nodes matches the amount of added summands
+	* we will continue
 	*/
 	if(node->subnodes.size() == node->sums_added)
 	{
@@ -363,6 +364,7 @@ void CBenchmarking::compile(void)
 			* also influences the time which is needed to do a "parent thing"...
 			*/
 			it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
+
 			// increase value of added summands
 			it->second->sums_added++;
 
@@ -374,7 +376,7 @@ void CBenchmarking::compile(void)
 
 
 /**
-* return root
+* return a pointer to the root node
 */
 STimerNode* CBenchmarking::getroot(void)
 {
@@ -389,7 +391,39 @@ void CBenchmarking::calculate_average(void)
 	/**
 	* Calculate average of each index
 	*/
-	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) {
+	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) 
+	{
+		// calculate average!
 		it->second->calc_average();
+	}
+}
+
+/**
+* ...
+*/
+void CBenchmarking::pushback_and_clear_node_sums(void)
+{
+	/**
+	* Find nodes, not leaves
+	*/
+	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) 
+	{
+		// find nodes
+		if(0 != it->second->subnodes.size())
+		{
+			// Create temporal structure instance 
+			SInterval tmp;
+			tmp.begin = 0;
+			tmp.end = 0;
+			tmp.duration = 0;
+
+			// append index to the end
+			it->second->durations.push_back(tmp);
+			// remove index form beginning
+			it->second->durations.pop_front();
+
+			// reset sum 
+			it->second->sums_added = 0;
+		}
 	}
 }
