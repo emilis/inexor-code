@@ -821,7 +821,7 @@ void checkinput()
     int lasttype = 0, lastbut = 0;
     bool mousemoved = false; 
 
-	////benchmark.begin("pollevents", "checkinput");
+	//benchmark.begin("pollevents", "checkinput");
     while(events.length() || pollevent(event))
     {
         if(events.length()) event = events.remove(0);
@@ -869,14 +869,14 @@ void checkinput()
                 break;
         }
     }
-	////benchmark.end("pollevents");
+	//benchmark.end("pollevents");
 
-	////benchmark.begin("resetmousemotion", "checkinput");
+	//benchmark.begin("resetmousemotion", "checkinput");
     if(mousemoved) 
 	{
 		resetmousemotion();
 	}
-	////benchmark.end("resetmousemotion");
+	//benchmark.end("resetmousemotion");
 }
 
 void swapbuffers(bool overlay)
@@ -1249,18 +1249,16 @@ int main(int argc, char **argv)
 
     for(;;)
     {
-		benchmark.begin("eins");
-
-		// no ////benchmark needed
+		// no benchmark needed
         static int frames = 0;
         int millis = getclockmillis();
 
-		////benchmark.begin("limitfps");
+		//benchmark.begin("limitfps");
 		limitfps(millis, totalmillis); // done
-		////benchmark.end("limitfps");
+		//benchmark.end("limitfps");
 
 		// calculations
-		////benchmark.begin("miscmath");
+		//benchmark.begin("miscmath");
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
 		int scaledtime = game::scaletime(elapsedtime) + timeerr; // done
@@ -1270,86 +1268,105 @@ int main(int argc, char **argv)
 		if(game::ispaused()) curtime = 0;
 		lastmillis += curtime;
         totalmillis = millis;
-        ////benchmark.end("miscmath");
+        //benchmark.end("miscmath");
 
-
-		////benchmark.begin("updatetime");
+		
+		//benchmark.begin("updatetime");
 		updatetime(); // done
-		////benchmark.end("updatetime");
+		//benchmark.end("updatetime");
 
-		////benchmark.begin("checkinput");
+		//benchmark.begin("checkinput");
         checkinput(); // done
-		////benchmark.end("checkinput");
+		//benchmark.end("checkinput");
 
-		////benchmark.begin("menuprocess");
+		//benchmark.begin("menuprocess");
 		menuprocess(); // done
-		////benchmark.end("menuprocess");
+		//benchmark.end("menuprocess");
 
-		////benchmark.begin("tryedit");
+		/************************************************************************/
+
+		srand((unsigned)time(NULL) * 40*SDL_GetTicks());
+
+		benchmark.begin("eins");
+			benchmark.begin("unter1", "eins");
+				Sleep( rand()%10+5);
+			benchmark.end("unter1");
+			benchmark.begin("unter2", "eins");
+				benchmark.begin("uu1", "unter2");
+					Sleep( rand()%10+5);
+				benchmark.end("uu1");
+			benchmark.end("unter2");
+		benchmark.end("eins");
+
+		benchmark.begin("zwei");
+		Sleep( rand()%10+5);
+		benchmark.end("zwei");
+
+		benchmark.begin("drei");
+		Sleep( rand()%10+5);
+		benchmark.end("drei");
+
+		/************************************************************************/
+
+		//benchmark.begin("tryedit");
 		tryedit(); // done
-		////benchmark.end("tryedit");
+		//benchmark.end("tryedit");
 
         if(lastmillis) 
 		{
-			////benchmark.begin("updateworld");
+			//benchmark.begin("updateworld");
 			game::updateworld(); // done
-			////benchmark.end("updateworld");
+			//benchmark.end("updateworld");
         }
 
-		////benchmark.begin("checksleep");
+		//benchmark.begin("checksleep");
 		checksleep(lastmillis); // done
-		////benchmark.end("checksleep");
+		//benchmark.end("checksleep");
 
-		////benchmark.begin("serverslice");
+		//benchmark.begin("serverslice");
         serverslice(false, 0); // done
-		////benchmark.end("serverslice");
+		//benchmark.end("serverslice");
 
         if(frames) 
 		{
-			////benchmark.begin("updatefpshistory");
+			//benchmark.begin("updatefpshistory");
 			updatefpshistory(elapsedtime); // done
-			////benchmark.end("updatefpshistory");
+			//benchmark.end("updatefpshistory");
         }
 		frames++;
 
 		// miscellaneous general game effects
-		////benchmark.begin("recomputecamera");
+		//benchmark.begin("recomputecamera");
         recomputecamera(); // done
-		////benchmark.end("recomputecamera");
+		//benchmark.end("recomputecamera");
 		
-		////benchmark.begin("updateparticles");
+		//benchmark.begin("updateparticles");
         updateparticles(); // Uhm.. NO!
-		////benchmark.end("updateparticles");
+		//benchmark.end("updateparticles");
 
-		////benchmark.begin("updatesounds");
+		//benchmark.begin("updatesounds");
 		updatesounds(); // done
-		////benchmark.end("updatesounds");
+		//benchmark.end("updatesounds");
 
 		if(minimized) continue;
         inbetweenframes = false;
-
-		benchmark.end("eins");
-
-		benchmark.begin("zwei");
-
+		
         if(mainmenu) 
 		{ 
-			////benchmark.begin("gl_drawmainmenu");
+			//benchmark.begin("gl_drawmainmenu");
 			gl_drawmainmenu(screen->w, screen->h); // done
-			////benchmark.end("gl_drawmainmenu");
+			//benchmark.end("gl_drawmainmenu");
 		}
 		else {
-			////benchmark.begin("gl_drawframe");
+			//benchmark.begin("gl_drawframe");
 			gl_drawframe(screen->w, screen->h);
-			////benchmark.end("gl_drawframe");
+			//benchmark.end("gl_drawframe");
 		}
-		
-		// Swapping buffers
-		////benchmark.begin("swapbuffers");
-        swapbuffers(); // done
-		////benchmark.end("swapbuffers");
 
-		benchmark.end("zwei");
+		// Swapping buffers
+		//benchmark.begin("swapbuffers");
+        swapbuffers(); // done
+		//benchmark.end("swapbuffers");
 
 		/**
 		* Here we finally compile our profile!
@@ -1359,7 +1376,7 @@ int main(int argc, char **argv)
 		benchmark.pushback_and_clear_node_sums();
 
 
-		// no ////benchmark needed        
+		// no benchmark needed        
 		renderedframe = inbetweenframes = true;
     }
     

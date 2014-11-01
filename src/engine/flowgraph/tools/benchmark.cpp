@@ -33,6 +33,7 @@ void STimerNode::calc_average(void)
 	*/
 	unsigned long long tmp = 0;
 
+	// Sum up all the entries
 	for(unsigned int i=0; i<durations.size(); i++)
 	{
 		// add duration to 
@@ -158,6 +159,7 @@ int CBenchmarking::begin(char* name, char* group)
 		}
 		else
 		{
+			// parent group not set?
 			printf("tree error: parent group does not exist!\n");
 			return -5;
 		}
@@ -363,11 +365,19 @@ void CBenchmarking::compile(void)
 			* This is important because the time which is needed in a "sub thing"
 			* also influences the time which is needed to do a "parent thing"...
 			*/
-			it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
+			//it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
+
+			/**
+			* Debug
+			*/
+			/*char test[1024];
+			sprintf_s(test, 1024, "adding %ul units from node %s to parent node %s (now: %ul)",
+				it->second->durations.back().duration, it->second->name, 
+				it->second->parentnode->name, it->second->parentnode->durations.back().duration);
+			*/
 
 			// increase value of added summands
 			it->second->sums_added++;
-
 			// recursively call sub node
 			recursiveresolve(it->second);
 		}
@@ -421,7 +431,6 @@ void CBenchmarking::pushback_and_clear_node_sums(void)
 			it->second->durations.push_back(tmp);
 			// remove index form beginning
 			it->second->durations.pop_front();
-
 			// reset sum 
 			it->second->sums_added = 0;
 		}

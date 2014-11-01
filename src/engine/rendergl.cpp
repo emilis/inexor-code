@@ -2049,15 +2049,15 @@ VARP(showcurve, 0, 0, 1);
 
 void gl_drawframe(int w, int h)
 {
-	////benchmark.begin("drawtextures", "gl_drawframe");
+	//benchmark.begin("drawtextures", "gl_drawframe");
     if(deferdrawtextures) drawtextures();
-	////benchmark.end("drawtextures");
+	//benchmark.end("drawtextures");
 
     defaultshader->set();
 
-	////benchmark.begin("updatedynlights", "gl_drawframe");
+	//benchmark.begin("updatedynlights", "gl_drawframe");
     updatedynlights();
-	////benchmark.end("updatedynlights");
+	//benchmark.end("updatedynlights");
 
     // calculations
 	aspect = forceaspect ? forceaspect : w/float(h);
@@ -2076,9 +2076,9 @@ void gl_drawframe(int w, int h)
     }
     else fogmat = MAT_AIR;    
     
-	////benchmark.begin("setfog", "gl_drawframe");
+	//benchmark.begin("setfog", "gl_drawframe");
 	setfog(fogmat, fogblend, abovemat);
-	////benchmark.end("setfog");
+	//benchmark.end("setfog");
 
 	// calculations
     if(fogmat!=MAT_AIR)
@@ -2090,25 +2090,25 @@ void gl_drawframe(int w, int h)
 
     farplane = worldsize*2;
 
-	////benchmark.begin("project", "gl_drawframe");
+	//benchmark.begin("project", "gl_drawframe");
     project(fovy, aspect, farplane);
-	////benchmark.end("project");
+	//benchmark.end("project");
     
-	////benchmark.begin("transplayer", "gl_drawframe");
+	//benchmark.begin("transplayer", "gl_drawframe");
 	transplayer();
-	////benchmark.end("transplayer");
+	//benchmark.end("transplayer");
 
-	////benchmark.begin("readmatrices", "gl_drawframe");
+	//benchmark.begin("readmatrices", "gl_drawframe");
     readmatrices();
-	////benchmark.end("readmatrices");
+	//benchmark.end("readmatrices");
 
-	////benchmark.begin("findorientation", "gl_drawframe");
+	//benchmark.begin("findorientation", "gl_drawframe");
     findorientation();
-	////benchmark.end("findorientation");
+	//benchmark.end("findorientation");
 
-	////benchmark.begin("setenvmatrix", "gl_drawframe");
+	//benchmark.begin("setenvmatrix", "gl_drawframe");
     setenvmatrix();
-	////benchmark.end("setenvmatrix");
+	//benchmark.end("setenvmatrix");
 
     glEnable(GL_FOG);
     glEnable(GL_CULL_FACE);
@@ -2121,61 +2121,61 @@ void gl_drawframe(int w, int h)
     {
         if(dopostfx)
         {
-			////benchmark.begin("drawglaretex", "gl_drawframe");
+			//benchmark.begin("drawglaretex", "gl_drawframe");
             drawglaretex();
-			////benchmark.end("drawglaretex");
+			//benchmark.end("drawglaretex");
 
-			////benchmark.begin("drawdepthfxtex", "gl_drawframe");
+			//benchmark.begin("drawdepthfxtex", "gl_drawframe");
             drawdepthfxtex();
-			////benchmark.end("drawdepthfxtex");
+			//benchmark.end("drawdepthfxtex");
             
-			////benchmark.begin("drawreflections", "gl_drawframe");
+			//benchmark.begin("drawreflections", "gl_drawframe");
 			drawreflections();
-			////benchmark.end("drawreflections");
+			//benchmark.end("drawreflections");
         }
         else dopostfx = true;
     }
 
-	////benchmark.begin("visiblecubes", "gl_drawframe");
+	//benchmark.begin("visiblecubes", "gl_drawframe");
     visiblecubes();
-	////benchmark.end("visiblecubes");
+	//benchmark.end("visiblecubes");
     
-	////benchmark.begin("rendershadowmap", "gl_drawframe");
+	//benchmark.begin("rendershadowmap", "gl_drawframe");
     if(shadowmap && !hasFBO) rendershadowmap();
-	////benchmark.end("rendershadowmap");
+	//benchmark.end("rendershadowmap");
 
     glClear(GL_DEPTH_BUFFER_BIT|(wireframe && editmode ? GL_COLOR_BUFFER_BIT : 0)|(hasstencil ? GL_STENCIL_BUFFER_BIT : 0));
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
 
-	//benchmark.begin("drawskybox", "gl_drawframe");
+	////benchmark.begin("drawskybox", "gl_drawframe");
     if(limitsky()) drawskybox(farplane, true);
-	//benchmark.end("drawskybox");
+	////benchmark.end("drawskybox");
 
-	//benchmark.begin("rendergeom", "gl_drawframe");
+	////benchmark.begin("rendergeom", "gl_drawframe");
     rendergeom(causticspass);
-	//benchmark.end("rendergeom");
+	////benchmark.end("rendergeom");
 
-	//benchmark.begin("renderoutline", "gl_drawframe");
+	////benchmark.begin("renderoutline", "gl_drawframe");
     extern int outline;
     if(!wireframe && editmode && outline) renderoutline();
-	//benchmark.end("renderoutline");
+	////benchmark.end("renderoutline");
 
-	//benchmark.begin("queryreflections", "gl_drawframe");
+	////benchmark.begin("queryreflections", "gl_drawframe");
     queryreflections();
-	//benchmark.end("queryreflections");
+	////benchmark.end("queryreflections");
 
-	//benchmark.begin("generatefrass", "gl_drawframe");
+	////benchmark.begin("generatefrass", "gl_drawframe");
     generategrass();
-	//benchmark.end("generategrass");
+	////benchmark.end("generategrass");
 
-	//benchmark.begin("drawskybox", "gl_drawframe");
+	////benchmark.begin("drawskybox", "gl_drawframe");
     if(!limitsky()) drawskybox(farplane, false);
-	//benchmark.end("drawskybox");
+	////benchmark.end("drawskybox");
 
-	//benchmark.begin("renderdecals", "gl_drawframe");
+	////benchmark.begin("renderdecals", "gl_drawframe");
     renderdecals(true);
-	//benchmark.end("renderdecals");
+	////benchmark.end("renderdecals");
 	
 	/**
 	* Render curve
@@ -2187,96 +2187,96 @@ void gl_drawframe(int w, int h)
 	}
 
 
-	//benchmark.begin("rendermapmodels", "gl_drawframe");
+	////benchmark.begin("rendermapmodels", "gl_drawframe");
     rendermapmodels();
-	//benchmark.end("rendermapmodels");
+	////benchmark.end("rendermapmodels");
 
-	//benchmark.begin("rendergame", "gl_drawframe");
+	////benchmark.begin("rendergame", "gl_drawframe");
     rendergame(true);
-	//benchmark.end("rendergame");
+	////benchmark.end("rendergame");
 
-	//benchmark.begin("renderavatar", "gl_drawframe");
+	////benchmark.begin("renderavatar", "gl_drawframe");
     if(!isthirdperson())
     {
         project(curavatarfov, aspect, farplane, false, false, false, avatardepth);
         game::renderavatar();
         project(fovy, aspect, farplane);
     }
-	//benchmark.end("renderavatar");
+	////benchmark.end("renderavatar");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if(hasFBO) 
     {
-		//benchmark.begin("drawglaretex2", "gl_drawframe");
+		////benchmark.begin("drawglaretex2", "gl_drawframe");
         drawglaretex();
-		//benchmark.end("drawglaretex2");
+		////benchmark.end("drawglaretex2");
         
-		//benchmark.begin("drawdepthfxtex2", "gl_drawframe");
+		////benchmark.begin("drawdepthfxtex2", "gl_drawframe");
 		drawdepthfxtex();
-		//benchmark.end("drawdepthfxtex2");
+		////benchmark.end("drawdepthfxtex2");
         
-		//benchmark.begin("drawreflections2", "gl_drawframe");
+		////benchmark.begin("drawreflections2", "gl_drawframe");
 		drawreflections();
-		//benchmark.end("drawreflections2");
+		////benchmark.end("drawreflections2");
     }
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    //benchmark.begin("renderwater", "gl_drawframe");
+    ////benchmark.begin("renderwater", "gl_drawframe");
 	renderwater();
-	//benchmark.end("renderwater");
+	////benchmark.end("renderwater");
 
-	//benchmark.begin("rendergrass", "gl_drawframe");
+	////benchmark.begin("rendergrass", "gl_drawframe");
     rendergrass();
-	//benchmark.end("rendergrass");
+	////benchmark.end("rendergrass");
 
-	//benchmark.begin("rendermaterials", "gl_drawframe");
+	////benchmark.begin("rendermaterials", "gl_drawframe");
     rendermaterials();
-	//benchmark.end("rendermaterials");
+	////benchmark.end("rendermaterials");
 
-	//benchmark.begin("renderalphageom", "gl_drawframe");
+	////benchmark.begin("renderalphageom", "gl_drawframe");
     renderalphageom();
-	//benchmark.end("renderalphageom");
+	////benchmark.end("renderalphageom");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	//benchmark.begin("renderparticles", "gl_drawframe");
+	////benchmark.begin("renderparticles", "gl_drawframe");
     renderparticles(true);
-	//benchmark.end("renderparticles");
+	////benchmark.end("renderparticles");
 
     glDisable(GL_FOG);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
-	//benchmark.begin("addmotionblur", "gl_drawframe");
+	////benchmark.begin("addmotionblur", "gl_drawframe");
     addmotionblur();
-	//benchmark.end("addmotionblur");
+	////benchmark.end("addmotionblur");
 
-	//benchmark.begin("addglare", "gl_drawframe");
+	////benchmark.begin("addglare", "gl_drawframe");
     addglare();
-	//benchmark.end("addglare");
+	////benchmark.end("addglare");
     
-	//benchmark.begin("drawfogoverlay", "gl_drawframe");
+	////benchmark.begin("drawfogoverlay", "gl_drawframe");
 	if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
-	//benchmark.end("drawfogoverlay");
+	////benchmark.end("drawfogoverlay");
 
-	//benchmark.begin("drawfogoverlay");
+	////benchmark.begin("drawfogoverlay");
     renderpostfx();
-	//benchmark.end("drawfogoverlay");
+	////benchmark.end("drawfogoverlay");
 
     defaultshader->set();
 	
-	//benchmark.begin("g3d_render2", "gl_drawframe");
+	////benchmark.begin("g3d_render2", "gl_drawframe");
     g3d_render();
-	//benchmark.end("g3d_render2");
+	////benchmark.end("g3d_render2");
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
 
-	//benchmark.begin("gl_drawhud2", "gl_drawframe");
+	////benchmark.begin("gl_drawhud2", "gl_drawframe");
     gl_drawhud(w, h);
-	//benchmark.end("gl_drawhud2");
+	////benchmark.end("gl_drawhud2");
 
     renderedgame = false;
 }
@@ -2285,13 +2285,13 @@ void gl_drawmainmenu(int w, int h)
 {
     xtravertsva = xtraverts = glde = gbatches = 0;
 
-	//benchmark.begin("renderbackground", "gl_drawmainmenu");
+	////benchmark.begin("renderbackground", "gl_drawmainmenu");
     renderbackground(NULL, NULL, NULL, NULL, true, true);
-	//benchmark.end("renderbackground");
+	////benchmark.end("renderbackground");
 
-	//benchmark.begin("renderpostfx", "gl_drawmainmenu");
+	////benchmark.begin("renderpostfx", "gl_drawmainmenu");
     renderpostfx();
-	//benchmark.end("renderpostfx");
+	////benchmark.end("renderpostfx");
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -2301,16 +2301,16 @@ void gl_drawmainmenu(int w, int h)
     defaultshader->set();
     glEnable(GL_TEXTURE_2D);
     
-	//benchmark.begin("g3d_render", "gl_drawmainmenu");
+	////benchmark.begin("g3d_render", "gl_drawmainmenu");
 	g3d_render();
-	//benchmark.end("g3d_render");
+	////benchmark.end("g3d_render");
 
     notextureshader->set();
     glDisable(GL_TEXTURE_2D);
 
-	//benchmark.begin("gl_drawhud", "gl_drawmainmenu");
+	////benchmark.begin("gl_drawhud", "gl_drawmainmenu");
     gl_drawhud(w, h);
-	//benchmark.end("gl_drawhud");
+	////benchmark.end("gl_drawhud");
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);
@@ -2519,16 +2519,20 @@ VAR(statrate, 1, 200, 1000);
 
 FVARP(conscale, 1e-3f, 0.33f, 1e3f);
 
+
+
+
 /**
 * Show debug or not?
 */
 VARP(showdebug, 0, 0, 1);
 
+
 /**
 * Pre define sub renderer
 */
 // REMOVE THIS LATER ON!
-void render_subchart(STimerNode* parent, int depth, float top, float left, float width, float height);
+void RenderTileCharts(STimerNode*, float, float, float, float, int);
 
 
 
@@ -2741,8 +2745,8 @@ void gl_drawhud(int w, int h)
 		glLoadIdentity();
 		
 		// RENDER CHART
-		render_subchart(benchmark.getroot(), 0, screen->w/2, 0,  screen->w/2, screen->h);
-		//render_subchart(//benchmark.getroot(), 0, 100, 100, 700, 700);
+		RenderTileCharts(benchmark.getroot(), 0, 0, 0, 500, 500);
+		//conoutf(CON_DEBUG, "------------------------------------------------------");
 		glEnd();
 
 		// End rendering
@@ -2755,128 +2759,125 @@ void gl_drawhud(int w, int h)
 /**
 * Render triangle (NEW)
 */
-void RenderTriangle(float left, float top, float width, float height, int depth)
+void RenderTriangle(float x, float y, float width, float height, 
+					int node_depth, float amount, char* name, bool horz)
 {
-	// Start rendering
+	// Start rendering (Triangle fan)
 	glBegin(GL_TRIANGLE_FAN);
 
-	// Calculate middle
-	float middle_x = left+ (width/2);
-	float middle_y = top+ (height/2);
+	#define RECTANGLE_RENDERING_5_REDMIDDLE
+	#ifdef RECTANGLE_RENDERING_5_REDMIDDLE
+	// Calculate the middle point of our parameter rectangle
+	float centerX = x+ (width/2);
+	float centerY = y+ (height/2);
 
-	// The center triangle will be red
+	// set the centered triangle's color to red
 	glColor3f(255.0f, 0.0f, 0.0f); 
-	glVertex2f( middle_x, middle_y); // CENTER
+	// create center vertex
+	glVertex2f(centerX, centerY);
 
-	// the others will be black
+	// set the color of the other 4 vertices to black
 	glColor3f(0.0f,0.0f,0.0f);
-	glVertex2f(left,top); // TOP LEFT
-	glVertex2f(left+width, top); // TOP RIGHT
-	glVertex2f(left+width, top+height); // BOTTOM RIGHT
-	glVertex2f(left, top+height); // BOTTOM LEFT
 
-	// close it...
-	glVertex2f(left,top); // TOP LEFT
+	// top left
+	glVertex2f(x,y);
+	// top right
+	glVertex2f(x+width, y);
+	// bottom right
+	glVertex2f(x+width, y+height);
+	// bottom left
+	glVertex2f(x, y+height);
+
+	// close the vertex
+	// do we need this?
+	glVertex2f(x,y);
+	#endif
 
 	// End rendering
 	glEnd();
 }
-	
+
 /**
-* Render sub charts
+* Render tiles
 */
-void render_subchart(STimerNode* parent, int depth, float left, float top, float width, float height)
+void RenderTileCharts(STimerNode* node, float x, float y, float width, float height, int depth)
 {
-        // Should we render this horizontal or vertical?
-        // division rest (modulo) of depth decides about that
-        int horizontal = depth % 2;
-     
-        // depthindex
-        static int calltime = 0;
-        float subnode_width = 0.0f;
-        float subnode_height = 0.0f;
+	/*
+	* Switch horizontal and vertical
+	* rendering depending on the depth.
+	*/
+	bool render_horizontally = (depth % 2 > 0);
+	int newdepth = depth + 1;
 
+	if(node->subnodes.size() == 0)
+	{
 		/**
-		* Render sub nodes
+		* No sub nodes: render triangle
 		*/
-		float fResourceIntegral = 0.0f;
+		RenderTriangle(x, y, width, height, depth, 1.0f, node->name, render_horizontally);	
+	}
+	else if(node->subnodes.size() == 1)
+	{
+		/**
+		* Analyse this sub node
+		*/
+		RenderTileCharts(node->subnodes[0], x, y, width, height, newdepth);
+	}
+	else if(node->subnodes.size() > 1)
+	{
+		/**
+		* More than 1 (at least 2) 
+		* subnodes
+		*/
+		float offsetX = 0.0f;
+		float offsetY = 0.0f;
 
-        for(unsigned int i=0;  i < parent->subnodes.size(); i++)
-        {
-			/**
-			* uf no duration is set, skip this node
-			*/
-			//if(0 == parent->durations.back().duration) continue;
+		// Loop through all sub nodes and render them
+		for(unsigned int i=0;  i<node->subnodes.size(); i++)
+		{
+			// Create a new parameter variable to create a shorter name
+			STimerNode* subnode = node->subnodes[i];
 
-		    // Copy subnode (for shorter name)
-            STimerNode* subnode = parent->subnodes[i];
-
-			/**
-			* If this node does not have child nodes
-			* width and height from the parent node will be applied
-			*/
-			if(parent->subnodes.size() == 0) 
+			// Does this sub node have sub nodes?
+			if(subnode->subnodes.size() > 0)
 			{
-				subnode_width = width;
-				subnode_height = height;
+				// Redner sub nodes
+				RenderTileCharts(subnode, x, y, width, height, newdepth);
 			}
-			else
+			else 
 			{
 				/**
-				* Use the average values to
+				* Calculate the "weight" of this node
 				*/
-				float this_performance = subnode->average;
-				float parent_performance_node_sum = parent->average;
-				
-				// Debug
-				conoutf(CON_DEBUG, "%s: %d", subnode->name, subnode->average);
+				float Amount = subnode->average / (subnode->parentnode->average +1);
 
-
-				/**
-				* Avoid division by zero!
-				*/
-				if(0==parent_performance_node_sum) parent_performance_node_sum=1;
-				fResourceIntegral = this_performance/parent_performance_node_sum;
-				
-				/**
-				* 
-				*/
-				if(horizontal) 
+				// horizontal rendering
+				if(render_horizontally)
 				{
-					// take height from parent
-					subnode_height = height;
-					// calculate width
-					subnode_width = width * fResourceIntegral;
-					//subnode_width = width / parent->subnodes.size();
-				} 
+					/*| | | | | | | | |
+					* | | | | | | | | |
+					* | | | | | | | | |
+					* | | | | | | | | |
+					*/
+					// no sub nodes, render triangle
+					RenderTriangle(offsetX, y, width*Amount, height, 
+									newdepth, Amount, subnode->name, render_horizontally);
+				}
+				// vertical rendering
 				else 
 				{
-					// take width from parent
-					subnode_width = width;
-					// calculate height
-					subnode_height = height * fResourceIntegral;
-					//subnode_height = height / parent->subnodes.size();1
+					/*________________
+					* ________________
+					* ________________
+					* ________________
+					*/
+					// no sub nodes, render triangle
+					RenderTriangle(offsetY, x, width, height*Amount, 
+									newdepth, Amount, subnode->name, render_horizontally);
 				}
 			}
 
-			// Hanack has proven as a genius several times here
-            float node_left = left;
-            float node_top = top;
-			if(horizontal) node_left += i*subnode_width;
-			else node_top += i*subnode_height;
-			
-            // Render sub nodes
-			if(subnode->subnodes.size() > 0)
-			{
-                // Call next sub node
-                render_subchart(subnode, depth + 1, node_left, node_top, subnode_width, subnode_height);
-            } 
-			else 
-			{
-                // why do we have to render an area that will be over-rendered later?
-                RenderTriangle(node_left, node_top, subnode_width, subnode_height, calltime);
-            }
-        }
+		}
+	}
 
-		
 }
