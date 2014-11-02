@@ -1023,7 +1023,7 @@ VAR(numcpus, 1, 1, 16);
 /**
 * Benchmarking
 */
-CBenchmarking benchmark;
+CBenchmarking bms;
 
 
 // FIXME: WTF? - main is in macutils.mm?
@@ -1285,26 +1285,27 @@ int main(int argc, char **argv)
 
 		/************************************************************************/
 
+		/*
+		benchmark.begin("unter1", "eins");
+			Sleep( rand()%10+5);
+		benchmark.end("unter1");
+
+		benchmark.begin("unter2", "eins");
+			benchmark.begin("uu1", "unter2");
+				Sleep( rand()%10+5);
+			benchmark.end("uu1");
+			benchmark.begin("uu2", "unter2");
+				Sleep( rand()%10+5);
+			benchmark.end("uu2");
+			benchmark.begin("uu3", "unter2");
+				Sleep( rand()%10+5);
+			benchmark.end("uu3");
+		benchmark.end("unter2");
+		*/
+
+
 		srand((unsigned)time(NULL) * 40*SDL_GetTicks());
 
-		benchmark.begin("eins");
-			benchmark.begin("unter1", "eins");
-				Sleep( rand()%10+5);
-			benchmark.end("unter1");
-			benchmark.begin("unter2", "eins");
-				benchmark.begin("uu1", "unter2");
-					Sleep( rand()%10+5);
-				benchmark.end("uu1");
-			benchmark.end("unter2");
-		benchmark.end("eins");
-
-		benchmark.begin("zwei");
-		Sleep( rand()%10+5);
-		benchmark.end("zwei");
-
-		benchmark.begin("drei");
-		Sleep( rand()%10+5);
-		benchmark.end("drei");
 
 		/************************************************************************/
 
@@ -1371,10 +1372,9 @@ int main(int argc, char **argv)
 		/**
 		* Here we finally compile our profile!
 		*/
-		benchmark.compile();
-		benchmark.calculate_average();
-		benchmark.pushback_and_clear_node_sums();
-
+		bms.compile();
+		bms.calculate_average();
+		bms.pushback_and_clear_node_sums();
 
 		// no benchmark needed        
 		renderedframe = inbetweenframes = true;

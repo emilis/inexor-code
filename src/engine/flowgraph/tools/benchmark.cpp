@@ -339,7 +339,7 @@ void CBenchmarking::recursiveresolve(STimerNode* node)
 	* Only if the number of sub nodes matches the amount of added summands
 	* we will continue
 	*/
-	if(node->subnodes.size() == node->sums_added)
+	if(node->subnodes.size() >= node->sums_added)
 	{
 		// reset sum indicator
 		node->sums_added = 0;
@@ -358,14 +358,14 @@ void CBenchmarking::compile(void)
 	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++)
 	{
 		// This node does not have sub-nodes -> it is a leaf!
-		if(it->second->subnodes.size() == 0)
+		if(it->second->subnodes.size() == 0 && nullptr != it->second->parentnode)
 		{
 			/**
 			* Sum up the duration to the parent node
 			* This is important because the time which is needed in a "sub thing"
 			* also influences the time which is needed to do a "parent thing"...
 			*/
-			//it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
+			it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
 
 			/**
 			* Debug

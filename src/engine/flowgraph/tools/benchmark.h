@@ -93,7 +93,7 @@ struct STimerNode
 	* the parent node will be called if sums_added == this_node->childs.size();
 	* which means that all childs have added their sum to the parent.
 	*/
-	int sums_added;
+	unsigned int sums_added;
 
 	/**
 	* Average time
@@ -214,6 +214,6 @@ class CBenchmarking
 	void pushback_and_clear_node_sums(void);
 };
 
-extern CBenchmarking benchmark;
+extern CBenchmarking bms;
 
 #endif /* #ifdef ENGINE_BENCHMARKING_H*/
