@@ -24,14 +24,32 @@ struct userinfo
 };
 hashtable<char *, userinfo> users;
 
-void adduser(char *name, char *pubkey)
+/*void adduser(char *name, char *pubkey)
 {
     name = newstring(name);
     userinfo &u = users[name];
     u.name = name;
     u.pubkey = parsepubkey(pubkey);
 }
-COMMAND(adduser, "ss");
+COMMAND(adduser, "ss");*/
+
+void adduser(char *name, char *desc, char *pubkey, char *priv)
+{
+	userkey key(name, desc);
+    userinfo &u = users[key];
+    if(u.pubkey) { freepubkey(u.pubkey); u.pubkey = NULL; }
+    if(!u.name) u.name = newstring(name);
+    if(!u.desc) u.desc = newstring(desc);
+    u.pubkey = parsepubkey(pubkey);
+    switch(priv[0])
+    {
+		case 'a': case 'A': u.privilege = PRIV_ADMIN; break; // server administrator
+        case 'm': case 'M': u.privilege = PRIV_OPERATOR; break; // network operator (previously auth) -> master
+        case 'u': case 'U': default: u.privilege = PRIV_AUTH; break; // authenticated user
+    }
+}
+
+COMMAND(adduser, "ssss");
 
 void clearusers()
 {

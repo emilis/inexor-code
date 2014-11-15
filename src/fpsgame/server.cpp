@@ -1350,8 +1350,9 @@ namespace server
         u.pubkey = parsepubkey(pubkey);
         switch(priv[0])
         {
-            case 'a': case 'A': u.privilege = PRIV_ADMIN; break;
-            case 'm': case 'M': default: u.privilege = PRIV_AUTH; break;
+            case 'a': case 'A': u.privilege = PRIV_ADMIN; break; // server administrator
+            case 'm': case 'M': u.privilege = PRIV_OPERATOR; break; // network operator (previously auth) -> master
+            case 'u': case 'U': default: u.privilege = PRIV_AUTH; break; // authenticated user
         }
     }
     COMMAND(adduser, "ssss");

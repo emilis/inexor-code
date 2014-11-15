@@ -233,7 +233,7 @@ enum
 
 // network messages codes, c2s, c2c, s2c
 
-enum { PRIV_NONE = 0, PRIV_MASTER, PRIV_AUTH, PRIV_ADMIN };
+enum { PRIV_NONE = 0, PRIV_AUTH, PRIV_MASTER, PRIV_OPERATOR, PRIV_ADMIN };
 
 enum
 {
