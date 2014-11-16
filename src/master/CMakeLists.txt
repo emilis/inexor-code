@@ -1,4 +1,4 @@
-add_definitions(-DSERVER -DSTANDALONE)
+add_definitions(-DMASTER -DSTANDALONE)
 
 if(${BUILD_TARGET_WINDOWS})
     set(EXTRA_LIBS ${EXTRA_LIBS} ws2_32 winmm)
@@ -8,31 +8,25 @@ elseif(${BUILD_TARGET_WINDOWS})
     set(EXTRA_LIBS ${EXTRA_LIBS} socket nsl)
 endif()
 
-set(SERVER_SOURCES
+set(MASTER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/crypto
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/stream
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/zip
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/server
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/master
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/command
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/worldio
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/entities
 )
 
-set(SB_SERVER_BINARY server_${BUILD_PLATFORM_BIN}_${BUILD_TARGET_ARCH} CACHE INTERNAL "Server binary name.")
-add_executable(${SB_SERVER_BINARY} ${SERVER_SOURCES})
-target_link_libraries(${SB_SERVER_BINARY}
+set(SB_MASTER_BINARY master_${BUILD_PLATFORM_BIN}_${BUILD_TARGET_ARCH} CACHE INTERNAL "Server binary name.")
+add_executable(${SB_MASTER_BINARY} ${MASTER_SOURCES})
+target_link_libraries(${SB_MASTER_BINARY}
     ${ENET_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${EXTRA_LIBS})
 
 install(TARGETS
-    ${SB_SERVER_BINARY}
+    ${SB_MASTER_BINARY}
     RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
     LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
     ARCHIVE DESTINATION ${INSTALL_ARCHIVE_DIR})

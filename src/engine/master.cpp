@@ -17,12 +17,7 @@
 
 FILE *logfile = NULL;
 
-struct userinfo
-{
-    char *name;
-    void *pubkey;
-};
-hashtable<char *, userinfo> users;
+hashset<userinfo> users;
 
 /*void adduser(char *name, char *pubkey)
 {
@@ -35,11 +30,9 @@ COMMAND(adduser, "ss");*/
 
 void adduser(char *name, char *desc, char *pubkey, char *priv)
 {
-	userkey key(name, desc);
+    userinfo key(name, desc);
     userinfo &u = users[key];
     if(u.pubkey) { freepubkey(u.pubkey); u.pubkey = NULL; }
-    if(!u.name) u.name = newstring(name);
-    if(!u.desc) u.desc = newstring(desc);
     u.pubkey = parsepubkey(pubkey);
     switch(priv[0])
     {
@@ -53,7 +46,11 @@ COMMAND(adduser, "ssss");
 
 void clearusers()
 {
-    enumerate(users, userinfo, u, { delete[] u.name; freepubkey(u.pubkey); });
+    enumerate(users, userinfo, u, {
+        DELETEA(u.name);
+        DELETEA(u.desc);
+        freepubkey(u.pubkey);
+    });
     users.clear();
 }
 COMMAND(clearusers, "");
@@ -483,7 +480,8 @@ void reqauth(client &c, uint id, char *name)
     if(enet_address_get_host_ip(&c.address, ip, sizeof(ip)) < 0) copystring(ip, "-");
     conoutf("%s: attempting \"%s\" as %u from %s", ct ? ct : "-", name, id, ip);
 
-    userinfo *u = users.access(name);
+    userinfo key(name, NULL);
+    userinfo *u = users.access(key);
     if(!u)
     {
         outputf(c, "failauth %u\n", id);

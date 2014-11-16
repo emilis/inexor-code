@@ -1318,35 +1318,13 @@ namespace server
 
     SVAR(serverauth, "");
 
-    struct userkey
-    {
-        char *name;
-        char *desc;
-        
-        userkey() : name(NULL), desc(NULL) {}
-        userkey(char *name, char *desc) : name(name), desc(desc) {}
-    };
-
-    static inline uint hthash(const userkey &k) { return ::hthash(k.name); }
-    static inline bool htcmp(const userkey &x, const userkey &y) { return !strcmp(x.name, y.name) && !strcmp(x.desc, y.desc); }
-
-    struct userinfo : userkey
-    {
-        void *pubkey;
-        int privilege;
-
-        userinfo() : pubkey(NULL), privilege(PRIV_NONE) {}
-        ~userinfo() { delete[] name; delete[] desc; if(pubkey) freepubkey(pubkey); }
-    };
     hashset<userinfo> users;
 
     void adduser(char *name, char *desc, char *pubkey, char *priv)
     {
-        userkey key(name, desc);
+        userinfo key(name, desc);
         userinfo &u = users[key];
         if(u.pubkey) { freepubkey(u.pubkey); u.pubkey = NULL; }
-        if(!u.name) u.name = newstring(name);
-        if(!u.desc) u.desc = newstring(desc);
         u.pubkey = parsepubkey(pubkey);
         switch(priv[0])
         {
@@ -1359,6 +1337,11 @@ namespace server
 
     void clearusers()
     {
+        enumerate(users, userinfo, u, {
+            DELETEA(u.name);
+            DELETEA(u.desc);
+            freepubkey(u.pubkey);
+        });
         users.clear();
     }
     COMMAND(clearusers, "");
@@ -2800,7 +2783,7 @@ namespace server
         copystring(ci->authdesc, desc);
         if(ci->authdesc[0])
         {
-            userinfo *u = users.access(userkey(ci->authname, ci->authdesc));
+            userinfo *u = users.access(userinfo(ci->authname, ci->authdesc));
             if(u) 
             {
                 uint seed[3] = { ::hthash(serverauth) + detrnd(size_t(ci) + size_t(user) + size_t(desc), 0x10000), uint(totalmillis), randomMT() };
@@ -2835,7 +2818,7 @@ namespace server
         {
             if(ci->authchallenge && checkchallenge(val, ci->authchallenge))
             {
-                userinfo *u = users.access(userkey(ci->authname, ci->authdesc));
+                userinfo *u = users.access(userinfo(ci->authname, ci->authdesc));
                 if(u) 
                 {
                     if(ci->connectauth) connected(ci);
@@ -3622,7 +3605,7 @@ namespace server
                 int authpriv = PRIV_AUTH;
                 if(desc[0])
                 {
-                    userinfo *u = users.access(userkey(name, desc));
+                    userinfo *u = users.access(userinfo(name, desc));
                     if(u) authpriv = u->privilege; else break;
                 }
                 if(ci->local || ci->privilege >= authpriv) trykick(ci, victim, text);

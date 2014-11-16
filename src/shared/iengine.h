@@ -421,6 +421,7 @@ extern void cleanragdoll(dynent *d);
 
 extern int maxclients;
 
+enum { PRIV_NONE = 0, PRIV_AUTH, PRIV_MASTER, PRIV_OPERATOR, PRIV_ADMIN };
 enum { DISC_NONE = 0, DISC_EOP, DISC_LOCAL, DISC_KICK, DISC_MSGERR, DISC_IPBAN, DISC_PRIVATE, DISC_MAXCLIENTS, DISC_TIMEOUT, DISC_OVERFLOW, DISC_PASSWORD, DISC_NUM };
 
 extern void *getclientinfo(int i);
@@ -442,6 +443,20 @@ extern void sendserverinforeply(ucharbuf &p);
 extern bool requestmaster(const char *req);
 extern bool requestmasterf(const char *fmt, ...) PRINTFARGS(1, 2);
 extern bool isdedicatedserver();
+
+struct userinfo
+{
+    char *name;
+    char *desc;
+    void *pubkey;
+    int privilege;
+
+    userinfo() : name(NULL), desc(NULL), pubkey(NULL), privilege(PRIV_NONE) {}
+    userinfo(char *name, char *desc) : name(name), desc(desc) {} // TODO: do a newstring() here?
+};
+
+static inline uint hthash(const userinfo &k) { return ::hthash(k.name); }
+static inline bool htcmp(const userinfo &x, const userinfo &y) { return !strcmp(x.name, y.name) && !strcmp(x.desc, y.desc); }
 
 // client
 extern void sendclientpacket(ENetPacket *packet, int chan);

@@ -78,6 +78,7 @@ endif()
 
 if(${BUILD_SERVER})
     add_subdirectory(server)
+    add_subdirectory(master)
 else()
     message(WARNING "not building the server")
 endif()
