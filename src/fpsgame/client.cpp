@@ -878,7 +878,7 @@ namespace game
 	};
 	vector<contentpack *> contentpacks;
 
-	SVARP(allowedfileext, ".cfg .iqm .jpg .md2 .md3 .md5mesh .md5anim .mp3 .obr .ogg .ogz .png .wav");
+	SVARP(allowedfileext, ".cfg .iqm .jpg .json .md2 .md3 .md5mesh .md5anim .mp3 .obr .ogg .ogz .png .wav");
 	VARP(allowfilereplacement, 0, 1, 1); //whether a downloadable modified file will be downloaded or skipped	
 
     //returns a pointer to the extension in filename
@@ -954,7 +954,7 @@ namespace game
     static bool comparefiles(const char *x, const char *y) { return strcmp(x, y) < 0; }
     
     //returns whether file needs to (not) be created. Otherwise makes backed-up file current
-    bool has_versioned_file(const char *filename, int crc)
+    bool hasversionedfile(const char *filename, int crc, bool createbackup = true)
     {
         string fn;
         const char *ext, *dir;
@@ -963,7 +963,6 @@ namespace game
         copystring(fn, filename, strlen(filename) - strlen(ext)); //cut extension
         path(fn);
         dir = parentdir(fn); //lookup in this directory for other versions of this file
-
 
         vector<char *>files; //receive filelist:
         listfiles(parentdir(fn), ext, files);
@@ -985,10 +984,10 @@ namespace game
             if(strstr(files[i], fn)) if((int)getfilecrc(files[i]) == crc) //we have!
             {
                 int fversion = getbackupversion(files[i]);
-                if(fversion) //not the current one
+                if(fversion && createbackup) //not the current one
                 {
                     //resort the files: backup current state (->maximum backup-version) and make this file the current state
-                    
+
                     defformatstring(current)("%s%s", fn, ext);
                     defformatstring(maxversioned)("%s_fv_%d%s", fn, maxversion+1,ext); //backup cur state
                     rename(current, maxversioned);
@@ -1002,22 +1001,23 @@ namespace game
         return false; //no matching backuped file found
     }
 
-	bool passedfirewall(const char *name, int orgcrc, const char *msgprefix, int msgtype)
-	{
-		string msg;
+    //returns whether file is valid and needed for download
+    //if createbackup is true, it already prepares the writing of the new file
+    bool passedfirewall(const char *name, int crc, bool createbackup, const char *msgprefix, int msgtype)
+    {
+        string msg;
         msg[0] = '\0';
-		if(!hasextension(name, allowedfileext)) formatstring(msg) ("%s %s \f3not allowed filetype", msgprefix, name);
-		if(fileexists(name, "r"))  {
-			if((int)getfilecrc(name) == orgcrc)	formatstring(msg) ("%s %s \f3already exists", msgprefix, name);
-			else if(!allowfilereplacement) formatstring(msg) ("%s %s \f3already exists in another version", msgprefix, name); 
-		}
-		if(msg[0]) 
-		{ 
-			conoutf(msgtype, msg);
-			return false;
-		}
-		return true;
-	}
+        if(!hasextension(name, allowedfileext)) formatstring(msg) ("%s %s \f3not allowed filetype", msgprefix, name);
+        if(fileexists(name, "r"))  {
+            if(hasversionedfile(name, crc, allowfilereplacement && createbackup)) ("%s %s \f3already exists", msgprefix, name);
+        }
+        if(msg[0])
+        {
+            conoutf(msgtype, msg);
+            return false;
+        }
+        return true;
+    }
 
 	contentpack *getcontentpack(int pack)
 	{
@@ -1043,7 +1043,7 @@ namespace game
 		if(!fi) return false; //last file will be false
 		const char *fname = findfile(fi->name, "r");
 		
-		if(!passedfirewall(newstring(fname), fi->crc, "skipped .. ", CON_WARN))
+		if(!passedfirewall(newstring(fname), fi->crc, false, "skipped .. ", CON_WARN))
 		{
 			return sendfilerequest(pack, file +1); //go for the next file
 		}
@@ -2180,7 +2180,7 @@ namespace game
 				int finished = getint(p); //in %
 				contentpack *cp = getcontentpack(pack);
 				contentpack::file *fi = getpackfile(cp, file);
-				if(finished < 0 || !passedfirewall(filename, fi->crc, "blocked .. ", CON_ERROR) || strcmp(fi->name, filename)) break;
+				if(finished < 0 || !passedfirewall(filename, fi->crc, true, "blocked .. ", CON_ERROR) || strcmp(fi->name, filename)) break;
 				
 				stream *f = openrawfile(filename, "wb");
 				if(!f) { conoutf(CON_ERROR, "could not save file (%s)", filename); break; }
