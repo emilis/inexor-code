@@ -881,11 +881,32 @@ namespace game
 	SVARP(allowedfileext, ".cfg .iqm .jpg .md2 .md3 .md5mesh .md5anim .mp3 .obr .ogg .ogz .png .wav");
 	VARP(allowfilereplacement, 0, 1, 1); //whether a downloadable modified file will be downloaded or skipped	
 
-	bool hasextension(const char *name, const char *extensions)
+    //returns a pointer to the extension in filename
+    const char *getextension(const char *filename, const char *guess = NULL)
+    {
+        if(!filename) return NULL;
+        loopirev(strlen(filename)) if(filename[i] == '.') return &filename[i];
+        return NULL;
+    }
+
+    //returns whether filename ends with extension
+    bool hasextension(const char *filename, const char *extension)
+    {
+        if(extension && extension[0]) 
+        {
+            size_t extlen = strlen(extension);
+            size_t fnlen = strlen(filename);
+            if(fnlen - extlen > 1 && !strcmp(&filename[fnlen-extlen], extension)) return extension; 
+        }
+    }
+
+    //returns whether name ends with one of the extensions in array extensions
+	bool compareextension(const char *name, const char *extensions)
 	{
 		if(!name || !extensions) return false;
+        if(!extensions[0]) return true; //no filter applied
 		vector<char *> exts;
-		char *pos = strtok(newstring(extensions), "\n\t ");;
+		char *pos = strtok(newstring(extensions), "\n\t "); //todo delete
 		while(pos)
 		{
 			exts.add(newstring(pos));
@@ -894,9 +915,7 @@ namespace game
 		if(exts.empty()) return true;
 		
 		loopv(exts) {
-			int exlen = strlen(exts[i]);  
-			int nlen = strlen(name); 
-			if( nlen-exlen > 0 && !strcmp(&name[nlen-exlen], exts[i])) return true;
+			if(hasextension(name, exts[i])) return true;
 		}
 		return false;
 	}
@@ -912,6 +931,76 @@ namespace game
 		delete f;
 		return crc;
 	}
+    
+    ///backuping files is based on renaming the files to name_fv_version.extension, where version is the backup-version.
+    //the pure filename will be used by the engine, and will hereafter be called "current". First backup or 2nd version is named filename_fv_2.ext
+    //the last backup has the highest backup-version and hence was the previous used state
+
+    //returns the backup-version of string filename or 0
+    int getbackupversion(const char *filename)
+    {
+        int version;
+        string fn;
+
+        int extlen = strlen(getextension(filename));
+        copystring(fn, filename, strlen(filename)-extlen);
+
+        const char *p = strstr(fn, "_fv_");
+        p = p+4; //skip _fv_
+        if(!p || !isdigit(p[0])) return 0; //current filename
+        return parseint(p+4);
+    }
+
+    static bool comparefiles(const char *x, const char *y) { return strcmp(x, y) < 0; }
+    
+    //returns whether file needs to (not) be created. Otherwise makes backed-up file current
+    bool has_versioned_file(const char *filename, int crc)
+    {
+        string fn;
+        const char *ext, *dir;
+        ext = getextension(filename);
+        if(!ext) return;
+        copystring(fn, filename, strlen(filename) - strlen(ext)); //cut extension
+        path(fn);
+        dir = parentdir(fn); //lookup in this directory for other versions of this file
+
+
+        vector<char *>files; //receive filelist:
+        listfiles(parentdir(fn), ext, files);
+        files.sort(comparefiles);
+        int maxversion = 0;
+        loopv(files)
+        {
+            if(i && !strcmp(files[i], files[i-1])) delete[] files.remove(i--); //remove redundant occurences
+            if(strstr(files[i], fn)) //correct file, find out current maximum version to create a properly named backup later:
+            {
+                int fversion = getbackupversion(files[i]);
+                if(fversion > maxversion) maxversion = fversion;
+            }
+        }
+        
+        //try whether we have this file in the history already:
+        loopv(files) 
+        {
+            if(strstr(files[i], fn)) if((int)getfilecrc(files[i]) == crc) //we have!
+            {
+                int fversion = getbackupversion(files[i]);
+                if(fversion) //not the current one
+                {
+                    //resort the files: backup current state (->maximum backup-version) and make this file the current state
+                    
+                    defformatstring(current)("%s%s", fn, ext);
+                    defformatstring(maxversioned)("%s_fv_%d%s", fn, maxversion+1,ext); //backup cur state
+                    rename(current, maxversioned);
+
+                    defformatstring(file)("%s_fv_%d%s", fn, fversion, ext); //make this file current
+                    rename(file, current);
+                }
+                return true;
+            }
+        }
+        return false; //no matching backuped file found
+    }
 
 	bool passedfirewall(const char *name, int orgcrc, const char *msgprefix, int msgtype)
 	{
