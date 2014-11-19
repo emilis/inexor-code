@@ -509,6 +509,7 @@ int listfiles(const char *dir, const char *ext, vector<char *> &files)
     size_t dirlen = strlen(dirname);
     while(dirlen > 1 && dirname[dirlen-1] == PATHDIV) dirname[--dirlen] = '\0';
     int dirs = 0;
+    if(ext && *ext == '.') ext++; //missuse prevention
     if(listdir(dirname, true, ext, files)) dirs++;
     string s;
     if(homedir[0])
