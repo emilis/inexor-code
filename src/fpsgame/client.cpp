@@ -885,7 +885,7 @@ namespace game
     const char *getextension(const char *filename, const char *guess = NULL)
     {
         if(!filename) return NULL;
-        loopirev(strlen(filename)) if(filename[i] == '.') return &filename[i];
+        loopirev(strlen(filename)) if(filename[i] == '.' && filename[i+1]) return &filename[i+1];
         return NULL;
     }
 
@@ -896,8 +896,9 @@ namespace game
         {
             size_t extlen = strlen(extension);
             size_t fnlen = strlen(filename);
-            if(fnlen - extlen > 1 && !strcmp(&filename[fnlen-extlen], extension)) return extension; 
+            if(fnlen - extlen > 1 && !strcmp(&filename[fnlen-extlen], extension)) return true; 
         }
+        return false;
     }
 
     //returns whether name ends with one of the extensions in array extensions
@@ -939,16 +940,30 @@ namespace game
     //returns the backup-version of string filename or 0
     int getbackupversion(const char *filename)
     {
-        int version;
         string fn;
-
-        int extlen = strlen(getextension(filename));
-        copystring(fn, filename, strlen(filename)-extlen);
-
-        const char *p = strstr(fn, "_fv_");
+        const char *ext = getextension(filename);
+        int extlen = ext ? strlen(ext) : 0;
+        int len = strlen(filename)-extlen+1;
+        copystring(fn, filename, len); //fn = filename without ext
+        char *p = strstr(fn, "_fv_");
+        if(!p || !p[0]) return 0; //no backup file
         p = p+4; //skip _fv_
-        if(!p || !isdigit(p[0])) return 0; //current filename
-        return parseint(p+4);
+        if(!isdigit(p[0])) return 0;
+        return parseint(p);
+    }
+
+    //cut leading directory of string name
+    //config/media.cfg becomes media.cfg
+    const char *cutdir(const char *name)
+    {
+        int len = strlen(name);
+        const char *n = name + len;
+        loopirev(len)
+        {
+            if(*n == '/' || *n == '\\') { n++; break; }
+            else n--; 
+        }
+        return n;
     }
 
     static bool comparefiles(const char *x, const char *y) { return strcmp(x, y) < 0; }
@@ -957,49 +972,64 @@ namespace game
     bool hasversionedfile(const char *filename, int crc, bool createbackup = true)
     {
         string fn;
-        const char *ext, *dir;
-        ext = getextension(filename);
-        if(!ext) return;
+        const char *ext = getextension(filename);
+        if(!ext) return false;
         copystring(fn, filename, strlen(filename) - strlen(ext)); //cut extension
         path(fn);
-        dir = parentdir(fn); //lookup in this directory for other versions of this file
+        const char *name = cutdir(fn); //filename without dir
 
         vector<char *>files; //receive filelist:
-        listfiles(parentdir(fn), ext, files);
+        listfiles(parentdir(fn), ext, files); //lookup in this directory for other versions of this file
         files.sort(comparefiles);
+
         int maxversion = 0;
         loopv(files)
         {
+            conoutf("file: %s", files[i]);
             if(i && !strcmp(files[i], files[i-1])) delete[] files.remove(i--); //remove redundant occurences
-            if(strstr(files[i], fn)) //correct file, find out current maximum version to create a properly named backup later:
+            if(!strncmp(files[i], name, strlen(name))) //correct file, find out current maximum version to create a properly named backup later:
             {
                 int fversion = getbackupversion(files[i]);
                 if(fversion > maxversion) maxversion = fversion;
             }
         }
-        
+        conoutf("max version: %d, files: %d, cutdir = %s", maxversion, files.length(), name);
+
         //try whether we have this file in the history already:
+
         loopv(files) 
         {
-            if(strstr(files[i], fn)) if((int)getfilecrc(files[i]) == crc) //we have!
+            if(!strncmp(files[i], name, strlen(name)) && (int)getfilecrc(files[i]) == crc) //we have!
             {
-                int fversion = getbackupversion(files[i]);
-                if(fversion && createbackup) //not the current one
+                if(createbackup)
                 {
-                    //resort the files: backup current state (->maximum backup-version) and make this file the current state
-
+                    int fversion = getbackupversion(files[i]);
                     defformatstring(current)("%s%s", fn, ext);
-                    defformatstring(maxversioned)("%s_fv_%d%s", fn, maxversion+1,ext); //backup cur state
-                    rename(current, maxversioned);
-
-                    defformatstring(file)("%s_fv_%d%s", fn, fversion, ext); //make this file current
-                    rename(file, current);
+                    conoutf("fitting");
+                    if(!fversion) //backup currently used file
+                    {
+                        defformatstring(maxversioned)("%s_fv_%d%s", fn, maxversion+1, ext); //backup cur state
+                        rename(current, maxversioned);
+                    }
+                    else //not the currently used one, but same crc as requested file
+                    {
+                        defformatstring(file)("%s_fv_%d%s", fn, fversion, ext); //make this file current
+                        rename(file, current);
+                    }
                 }
                 return true;
             }
         }
         return false; //no matching backuped file found
     }
+
+    void testbv(const char *name)
+    {
+        int crc = getfilecrc(findfile(name, "rb"));
+        conoutf("%s (crc: %d", findfile(name, "rb"), crc);
+        hasversionedfile(name, crc, true);
+    }
+    COMMAND(testbv, "s");
 
     //returns whether file is valid and needed for download
     //if createbackup is true, it already prepares the writing of the new file
