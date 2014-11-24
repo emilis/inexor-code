@@ -2113,7 +2113,7 @@ void gl_drawframe()
     renderpostfx();
 
     defaultshader->set();
-    g3d_render();
+    //UI::render();
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
@@ -2137,7 +2137,7 @@ void gl_drawmainmenu()
 
     defaultshader->set();
     glEnable(GL_TEXTURE_2D);
-    g3d_render();
+    //UI::render();
 
     notextureshader->set();
     glDisable(GL_TEXTURE_2D);
@@ -2297,7 +2297,7 @@ void writecrosshairs(stream *f)
 
 void drawcrosshair(int w, int h)
 {
-    bool windowhit = g3d_windowhit(true, false);
+    bool windowhit = true; //g3d_windowhit(true, false);
     if(!windowhit && (hidehud || mainmenu)) return; //(hidehud || player->state==CS_SPECTATOR || player->state==CS_DEAD)) return;
 
     float r = 1, g = 1, b = 1, cx = 0.5f, cy = 0.5f, chsize;
@@ -2308,7 +2308,7 @@ void drawcrosshair(int w, int h)
         if(!cursor) cursor = textureload("data/guicursor.png", 3, true);
         crosshair = cursor;
         chsize = cursorsize*w/900.0f;
-        g3d_cursorpos(cx, cy);
+        //g3d_cursorpos(cx, cy);
     }
     else
     { 
@@ -2530,8 +2530,6 @@ void gl_drawhud()
 
         rendertexturepanel(w, h);
     }
-    
-    g3d_limitscale((2*limitgui - conh) / float(conh));
 
     glPushMatrix();
     glScalef(conscale, conscale, 1);

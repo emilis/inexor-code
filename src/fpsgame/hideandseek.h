@@ -80,7 +80,7 @@ struct hideandseekclientmode : clientmode
     void rendergame() {
     }
 
-    void renderscoreboard(g3d_gui &g, game::scoregroup &sg, int fgcolor, int bgcolor) {
+    void renderscoreboard(game::scoregroup &sg, int fgcolor, int bgcolor) {
         /*
         if (showhideandseekrole) {
             g.pushlist();
