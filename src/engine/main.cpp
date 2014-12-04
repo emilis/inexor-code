@@ -1320,7 +1320,8 @@ int main(int argc, char **argv)
         if(minimized) continue;
 
         inbetweenframes = false;
-        if(mainmenu) gl_drawmainmenu();
+        if(mainmenu) 
+            ui::render();//gl_drawmainmenu();
         else gl_drawframe();
         swapbuffers();
         renderedframe = inbetweenframes = true;

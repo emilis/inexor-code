@@ -659,6 +659,11 @@ extern void renderblendbrush();
 extern bool loadblendmap(stream *f, int info);
 extern void saveblendmap(stream *f);
 extern uchar shouldsaveblendmap();
+///UI
+
+namespace ui {
+     extern void render();
+}
 
 // recorder
 
