@@ -4,7 +4,7 @@ namespace ui
 {
     vec4 strokeColor( 0,112,25, 255);     ///< Line drawing color
     vec4 fillColor( 255,255,255, 255);   ///< Area drawing color
-    int uiw = uih = 0;
+    int uiw = 0, uih = 0;
 
 
 //// Canvas Settings ////
@@ -78,6 +78,7 @@ namespace ui
             glColor4fv (strokeColor.v);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES,0,3);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         // deactivate vertex arrays after drawing
         glDisableClientState(GL_VERTEX_ARRAY);
@@ -86,7 +87,7 @@ namespace ui
     /// Draws a filled 2D quadrilateral given the coordinates
     // of its vertices.
     void quad (float x0, float y0,
-                float x1, float y1,
+               float x1, float y1,
                float x2, float y2,
                float x3, float y3)
     {
@@ -107,6 +108,7 @@ namespace ui
             glColor4fv (strokeColor.v);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_QUADS, 0, 4);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         // deactivate vertex arrays after drawing
         glDisableClientState(GL_VERTEX_ARRAY);
@@ -196,6 +198,7 @@ namespace ui
             glColor4fv (strokeColor.v);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDrawArrays(GL_TRIANGLES,0,3);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
         // deactivate vertex arrays after drawing
         glDisableClientState(GL_VERTEX_ARRAY);
