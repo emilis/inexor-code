@@ -12,7 +12,7 @@ namespace ui
     ///creates a Canvas of dimensions w and h
     //it still will spawn over the whole screen, w and h are for your orientation
 
-    void createCanvas(int w, int h, bool depth)
+    void createCanvas(int w, int h)
     {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -31,14 +31,14 @@ namespace ui
 //// Primitives ////
 
     /// Draws a point.
-    void point (float x, float y, float z)
+    void point (float x, float y)
     {
         if(strokeColor.a <= 0) return; //fully transparent
 
         // Draw point using the stroke color
         glColor4fv (strokeColor.v);
         glBegin (GL_POINTS);
-        glVertex3f (x,y,z);
+        glVertex2f(x, y);
         glEnd();
     }
 
@@ -50,8 +50,8 @@ namespace ui
 
         glColor4fv(strokeColor.v);
         glBegin(GL_LINES);
-            glVertex2f (x0, y0);
-            glVertex2f (x1, y1);
+            glVertex2f( x0, y0);
+            glVertex2f( x1, y1);
         glEnd();
     }
 
@@ -112,7 +112,7 @@ namespace ui
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 
-//// main drawing ////
+//// main drawing test ////
     void rest()
     {
         glMatrixMode(GL_PROJECTION);
@@ -123,25 +123,41 @@ namespace ui
         defaultshader->set();
         glEnable(GL_TEXTURE_2D);
 
-        //g3d_render();
-
         notextureshader->set();
         glDisable(GL_TEXTURE_2D);
 
         gl_drawhud();
     }
+
     FVARP(posz, -200, -1, 200);
     void render()
     {
-        createCanvas(screenw, screenh, true);
+        createCanvas(screenw, screenh);
         background(vec4(255,20,120, 255));
         strokeColor.a = 255;
         line(screenw / 2, screenh/ 2, 40, 900);
         triangle(posz, 500, posz, 1000, screenw, 0);
         rest();
     }
+//// 3D: ////
 
-    ///////// 3D Primitives /////////
+//// 3D environment ////
+
+
+
+//// 3D Primitives ////
+
+    /// Draws a point in a 3D environment.
+    void point3D(float x, float y, float z)
+    {
+        if(strokeColor.a <= 0) return; //fully transparent
+
+        // Draw point using the stroke color
+        glColor4fv (strokeColor.v);
+        glBegin (GL_POINTS);
+        glVertex3f (x,y,z);
+        glEnd();
+    }
 
     /// Draws a line segment in 3D
     // @param x0, y0 : first vertex coordinates
