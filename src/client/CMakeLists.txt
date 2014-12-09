@@ -16,7 +16,6 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools
     ${CMAKE_CURRENT_SOURCE_DIR}/../shared/zip
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/3dgui
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/bih
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/blend
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/client
@@ -45,6 +44,7 @@ set(CLIENT_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/shader
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/sound
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/texture
+    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/ui
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/water
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/world
     ${CMAKE_CURRENT_SOURCE_DIR}/../engine/worldio
