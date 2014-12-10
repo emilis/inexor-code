@@ -113,6 +113,15 @@ namespace ui
         // deactivate vertex arrays after drawing
         glDisableClientState(GL_VERTEX_ARRAY);
     }
+//// Color ////
+
+    void stroke(int r, int g, int b, int a)
+    {
+        strokeColor.r = r;
+        strokeColor.g = g;
+        strokeColor.b = b;
+        strokeColor.a = a;
+    }
 
 //// main drawing test ////
     void rest()
