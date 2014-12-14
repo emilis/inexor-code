@@ -133,9 +133,10 @@ namespace ui
     }
     
     // When changing just the color system, ranges are kept as is
-    void colorMode(int mode)
+    void colorMode(int mode, int range = -1)
     {
-        if(mode == RGB || mode == HSB) globcolormode = mode;
+        if(range >= 0) colorMode(mode, range, range, range, range);
+        else if(mode == RGB || mode == HSB) globcolormode = mode;
     }
 
     //sets the outlinecolor
