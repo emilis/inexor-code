@@ -32,7 +32,7 @@ namespace ui
     }
 
     /// Clear the window with a background color
-    void background(const vec4 c) 
+    void background(const vec4 c)
     {
         glClearColor (c.r * (1.0/255), c.g * (1.0/255), c.b * (1.0/255), c.a * (1.0/255));
         glClear (GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
@@ -55,7 +55,7 @@ namespace ui
 
     /// Draws a line segment in 2D
     // given the coordinates of two vertices
-    void line(float x0, float y0, 
+    void line(float x0, float y0,
               float x1, float y1)
     {
         if(strokeColor.a <= 0) return; //fully transparent
@@ -68,12 +68,12 @@ namespace ui
     }
 
     /// Draws a triangle in 2D given the coordinates of three vertices.
-    void triangle(float x0, float y0, 
-                  float x1, float y1, 
+    void triangle(float x0, float y0,
+                  float x1, float y1,
                   float x2, float y2)
     {
         GLfloat vertices[] = {    x0, y0,    x1, y1,    x2, y2 };
-        
+
         // activate and specify pointer to vertex array
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, vertices);
