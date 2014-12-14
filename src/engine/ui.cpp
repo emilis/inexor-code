@@ -2,6 +2,10 @@
 
 namespace ui
 {
+//// Processing Rendering Backend
+// adapted to the p5.js API
+// UI is softcoded
+////
     static int uiw = 0, uih = 0;
 
     static vec4 strokeColor( 0,112,25, 255);     ///< Line drawing color
@@ -18,7 +22,6 @@ namespace ui
 
     ///creates a Canvas of dimensions w and h
     //it still will spawn over the whole screen, w and h are for your orientation
-
     void createCanvas(int w, int h)
     {
         glMatrixMode(GL_PROJECTION);
@@ -29,7 +32,8 @@ namespace ui
     }
 
     /// Clear the window with a background color
-    void background(const vec4 c) {
+    void background(const vec4 c) 
+    {
         glClearColor (c.r * (1.0/255), c.g * (1.0/255), c.b * (1.0/255), c.a * (1.0/255));
         glClear (GL_COLOR_BUFFER_BIT| GL_DEPTH_BUFFER_BIT);
     }
@@ -38,7 +42,7 @@ namespace ui
 //// Primitives ////
 
     /// Draws a point.
-    void point (float x, float y)
+    void point(float x, float y)
     {
         if(strokeColor.a <= 0) return; //fully transparent
 
@@ -51,7 +55,8 @@ namespace ui
 
     /// Draws a line segment in 2D
     // given the coordinates of two vertices
-    void line (float x0, float y0, float x1, float y1)
+    void line(float x0, float y0, 
+              float x1, float y1)
     {
         if(strokeColor.a <= 0) return; //fully transparent
 
@@ -62,14 +67,13 @@ namespace ui
         glEnd();
     }
 
-    /// Draws a triangle in 2D given the coordinates
-    /// of its vertices.
-    void triangle (float x0, float y0,
-                   float x1, float y1,
-                   float x2, float y2)
+    /// Draws a triangle in 2D given the coordinates of three vertices.
+    void triangle(float x0, float y0, 
+                  float x1, float y1, 
+                  float x2, float y2)
     {
-
         GLfloat vertices[] = {    x0, y0,    x1, y1,    x2, y2 };
+        
         // activate and specify pointer to vertex array
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, 0, vertices);
@@ -93,10 +97,10 @@ namespace ui
 
     /// Draws a filled 2D quadrilateral given the coordinates
     // of its vertices.
-    void quad (float x0, float y0,
-               float x1, float y1,
-               float x2, float y2,
-               float x3, float y3)
+    void quad(float x0, float y0,
+              float x1, float y1,
+              float x2, float y2,
+              float x3, float y3)
     {
         GLfloat vertices[] = { x0, y0, x1, y1, x2, y2, x3, y3 };
 
@@ -120,8 +124,10 @@ namespace ui
         // deactivate vertex arrays after drawing
         glDisableClientState(GL_VERTEX_ARRAY);
     }
+
 //// Color ////
-        /// Changes the way Processing interprets color data.
+
+    /// Changes the way Processing interprets color data.
     /// The colorMode() function is used to change the numerical range used for specifying colors and to switch color systems.
     void colorMode(int mode, int range1, int range2, int range3, int range4)
     {
@@ -131,8 +137,7 @@ namespace ui
         max3 = range3;
         maxa = range4;
     }
-    
-    // When changing just the color system, ranges are kept as is
+
     void colorMode(int mode, int range = -1)
     {
         if(range >= 0) colorMode(mode, range, range, range, range);
@@ -200,10 +205,9 @@ namespace ui
         glEnd();
     }
 
-    /// Draws a line segment in 3D
-    // @param x0, y0 : first vertex coordinates
-    // @param x1, y1: second vertex coordinates
-    void line3D (float x0, float y0, float z0, float x1, float y1, float z1)
+    /// Draws a line segment in 3D, given the coordinates of two vertices
+    void line3D(float x0, float y0, float z0,
+                float x1, float y1, float z1)
     {
         if(strokeColor.a <= 0) return; //fully transparent
 
@@ -214,14 +218,13 @@ namespace ui
         glEnd();
     }
 
-        /// Draws a filled triangle given the coordinates
-    /// of its vertices.
-    void triangle3D (float x0, float y0, float z0,
-                   float x1, float y1, float z1,
-                   float x2, float y2, float z2)
+    /// Draws a filled triangle in 3D-Space, given the coordinates of three vertices.
+    void triangle3D(float x0, float y0, float z0,
+                    float x1, float y1, float z1,
+                    float x2, float y2, float z2)
     {
+        GLfloat vertices[] = { x0, y0, z0, x1, y1, z1, x2, y2, z2};
 
-        GLfloat vertices[] = {    x0, y0, z0, x1, y1, z1, x2, y2, z2};
         // activate and specify pointer to vertex array
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(3, GL_FLOAT, 0, vertices);
