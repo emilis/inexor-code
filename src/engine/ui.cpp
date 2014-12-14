@@ -18,6 +18,50 @@ namespace ui
     static float max3 = 255;
     static float maxa = 255;
 
+    // Simple hsv to rgb conversion. Assumes components specified in range 0.0-1.0.
+    static void hsb_to_rgb (float h, float s, float v,
+                            float &r, float &g, float &b)
+    {
+        float tmp = h*5.9999;
+        int hi = int (tmp);
+        float f = tmp-hi;
+        float p = v * (1-s);
+        float q = v * (1-f*s);
+        float t = v * (1-(1-f)*s);
+        if (hi==0) {
+            r = v; g = t; b = p;
+        } else if (hi==1) {
+            r = q; g = v; b = p;
+        } else if (hi==2) {
+            r = p; g = v; b = t;
+        } else if (hi == 3) {
+            r = p; g = q; b = v;
+        } else if (hi == 4) {
+            r = t; g = p; b = v;
+        } else {
+            r = v; g = p; b = q;
+        }
+    }
+
+    //converts  colors from the set globcolormode to the internal mode( RGB and ranges 0-255 )
+    static inline vec4 internalmode(float v1, float v2, float v3, float a)
+    {
+        float r1 = clamp(v1* 1.0/max1 , 0.0, 1.0);
+        float r2 = clamp(v2* 1.0/max2 , 0.0, 1.0);
+        float r3 = clamp(v3* 1.0/max3 , 0.0, 1.0);
+        float ra = clamp(a * 1.0/maxa , 0.0, 1.0);
+        if(globcolormode == HSB)
+        {
+            hsb_to_rgb(r1, r2, r3, r1, r2, r3);
+        }
+        return vec4(r1, r2, r3, ra).mul(255.0);
+    }
+
+    static inline vec4 internalmode(vec4 input)
+    {
+        internalmode(input.x, input.y, input.z, input.a);
+    }
+
 //// Canvas Settings ////
 
     ///creates a Canvas of dimensions w and h
