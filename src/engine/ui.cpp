@@ -2,10 +2,17 @@
 
 namespace ui
 {
-    vec4 strokeColor( 0,112,25, 255);     ///< Line drawing color
-    vec4 fillColor( 255,255,255, 255);   ///< Area drawing color
-    int uiw = 0, uih = 0;
+    static int uiw = 0, uih = 0;
 
+    static vec4 strokeColor( 0,112,25, 255);     ///< Line drawing color
+    static vec4 fillColor( 255,255,255, 255);   ///< Area drawing color
+
+    static int globcolormode;    //RGB or HSB mode
+    enum { RGB = 25, HSB };
+    static int max1 = 255; //clamp colors
+    static int max2 = 255;
+    static int max3 = 255;
+    static int maxa = 255;
 
 //// Canvas Settings ////
 
@@ -114,13 +121,35 @@ namespace ui
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 //// Color ////
-
-    void stroke(int r, int g, int b, int a)
+        /// Changes the way Processing interprets color data.
+    /// The colorMode() function is used to change the numerical range used for specifying colors and to switch color systems.
+    void colorMode(int mode, int range1, int range2, int range3, int range4)
     {
-        strokeColor.r = r;
-        strokeColor.g = g;
-        strokeColor.b = b;
-        strokeColor.a = a;
+        if (mode == RGB || mode == HSB) globcolormode = mode;
+        max1 = range1;
+        max2 = range2;
+        max3 = range3;
+        maxa = range4;
+    }
+    
+    // When changing just the color system, ranges are kept as is
+    void colorMode(int mode)
+    {
+        if(mode == RGB || mode == HSB) globcolormode = mode;
+    }
+
+    //sets the outlinecolor
+    void stroke(int v1, int v2, int v3, int a = -1)
+    {
+        strokeColor.r = v1;
+        strokeColor.g = v2;
+        strokeColor.b = v3;
+        if(a>=0) strokeColor.a = a;
+    }
+
+    void stroke(int grey, int a = -1)
+    {
+        stroke(grey, grey, grey, a);
     }
 
 //// main drawing test ////
