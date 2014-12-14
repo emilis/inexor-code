@@ -13,15 +13,15 @@ namespace ui
 
     static int globcolormode;    //RGB or HSB mode
     enum { RGB = 25, HSB };
-    static int max1 = 255; //clamp colors
-    static int max2 = 255;
-    static int max3 = 255;
-    static int maxa = 255;
+    static float max1 = 255; //clamp colors
+    static float max2 = 255;
+    static float max3 = 255;
+    static float maxa = 255;
 
 //// Canvas Settings ////
 
     ///creates a Canvas of dimensions w and h
-    //it still will spawn over the whole screen, w and h are for your orientation
+    //it will spawn over the whole screen nonetheless, w and h are for your orientation
     void createCanvas(int w, int h)
     {
         glMatrixMode(GL_PROJECTION);
@@ -129,23 +129,23 @@ namespace ui
 
     /// Changes the way Processing interprets color data.
     /// The colorMode() function is used to change the numerical range used for specifying colors and to switch color systems.
-    void colorMode(int mode, int range1, int range2, int range3, int range4)
+    void colorMode(int mode, float range1, float range2, float range3, float rangea)
     {
         if (mode == RGB || mode == HSB) globcolormode = mode;
-        max1 = range1;
-        max2 = range2;
-        max3 = range3;
-        maxa = range4;
+        max1 = max(range1, 0.01f);
+        max2 = max(range2, 0.01f);
+        max3 = max(range3, 0.01f);
+        maxa = max(rangea, 0.01f);
     }
 
-    void colorMode(int mode, int range = -1)
+    void colorMode(int mode, float range = -1.0)
     {
         if(range >= 0) colorMode(mode, range, range, range, range);
         else if(mode == RGB || mode == HSB) globcolormode = mode;
     }
 
     //sets the outlinecolor
-    void stroke(int v1, int v2, int v3, int a = -1)
+    void stroke(float v1, float v2, float v3, float a = -1.0)
     {
         strokeColor.r = v1;
         strokeColor.g = v2;
@@ -153,7 +153,7 @@ namespace ui
         if(a>=0) strokeColor.a = a;
     }
 
-    void stroke(int grey, int a = -1)
+    void stroke(float grey, float a = -1)
     {
         stroke(grey, grey, grey, a);
     }
@@ -185,9 +185,12 @@ namespace ui
         triangle(posz, 500, posz, 1000, screenw, 0);
         rest();
     }
-//// 3D: ////
 
-//// 3D environment ////
+//
+//// 3D ////
+//
+
+//// 3D Canvas ////
 
 
 
