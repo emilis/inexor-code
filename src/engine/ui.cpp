@@ -188,18 +188,34 @@ namespace ui
         else if(mode == RGB || mode == HSB) globcolormode = mode;
     }
 
-    //sets the outlinecolor
-    void stroke(float v1, float v2, float v3, float a = -1.0)
+    /// Sets line color
+    void stroke(const float v1, const float v2, const float v3, const float a = -1.0)
     {
-        strokeColor.r = v1;
-        strokeColor.g = v2;
-        strokeColor.b = v3;
-        if(a>=0) strokeColor.a = a;
+        vec4 i = internalmode(v1, v2, v3, a);
+        strokeColor.r = i.r;
+        strokeColor.g = i.g;
+        strokeColor.b = i.b;
+        if(a>=0) strokeColor.a = i.a;
     }
 
-    void stroke(float grey, float a = -1)
+    void stroke(const float grey, const float a = -1)
     {
         stroke(grey, grey, grey, a);
+    }
+
+    /// Sets area color
+    void fill(const float v1, const float v2, const float v3, const float a = -1.0)
+    {
+        vec4 i = internalmode(v1, v2, v3, a);
+        fillColor.r = i.r;
+        fillColor.g = i.g;
+        fillColor.b = i.b;
+        if(a>=0) fillColor.a = i.a;
+    }
+
+    void fill(const float grey, const float a = -1)
+    {
+        fill(grey, grey, grey, a);
     }
 
 //// main drawing test ////
@@ -224,7 +240,6 @@ namespace ui
     {
         createCanvas(screenw, screenh);
         background(vec4(255,20,120, 255));
-        strokeColor.a = 255;
         line(screenw / 2, screenh/ 2, 40, 900);
         triangle(posz, 500, posz, 1000, screenw, 0);
         rest();
