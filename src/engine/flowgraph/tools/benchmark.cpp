@@ -48,6 +48,14 @@ void STimerNode::calc_average(void)
 	// tmp will be deleted from heap memory automaticly...
 }
 
+
+
+unsigned long long STimerNode::getlastdur(void)
+{
+	return durations[durations.size()-1].duration;
+}
+
+
 /* ---------------------------------------------------------------------------- */
 
 /**
@@ -89,6 +97,8 @@ CBenchmarking::CBenchmarking()
 
 	// set time to 0 
 	time = 0;
+	// Benchmark is NOT enabled at start!
+	benchmark_enabled = false;
 
 	/**
 	* We have a solution for this problem, but only for Microsoft Windows
@@ -99,6 +109,7 @@ CBenchmarking::CBenchmarking()
 	#endif
 }
 
+/* ---------------------------------------------------------------------------- */
 
 /**
 * Destructor
@@ -109,6 +120,49 @@ CBenchmarking::~CBenchmarking()
 	delete_node(root);
 }
 
+
+/* ---------------------------------------------------------------------------- */
+
+void CBenchmarking::StartBenchmarking(void)
+{
+	// Start benchmarking
+	benchmark_enabled = true;
+
+	// Get time (on MS Windows)
+	QueryPerformanceCounter((LARGE_INTEGER*)&time);
+
+	// Create temporal structure instance 
+	SInterval tmp;
+	tmp.begin = time;
+	tmp.end = 0;
+	tmp.duration = 0;
+
+	// append index to the end
+	timeregister["root"]->durations.push_back(tmp);
+	// remove index form beginning
+	timeregister["root"]->durations.pop_front();
+}
+
+/* ---------------------------------------------------------------------------- */
+
+void CBenchmarking::EndBenchmarking(void)
+{
+	// End benchmark
+	benchmark_enabled = false;
+	
+	// Get time (on MS Windows)
+	QueryPerformanceCounter((LARGE_INTEGER*)&time);
+
+	// Measure begin time of "root"
+	timeregister["root"]->durations.back().end = time;
+	
+	// EXPERIMENTAL!
+	timeregister["root"]->durations[timeregister["root"]->durations.size() -1].calcduration();
+
+	// Calculate average value here
+	calculate_average();
+}
+
 /* ---------------------------------------------------------------------------- */
 
 /**
@@ -116,6 +170,8 @@ CBenchmarking::~CBenchmarking()
 */
 int CBenchmarking::begin(char* name, char* group) 
 {
+	if(false == benchmark_enabled) return -1;
+	
 	if(name == nullptr || !strlen(name)) 
 	{
 		printf("tree error: name is invalid!\n");
@@ -201,6 +257,8 @@ int CBenchmarking::begin(char* name, char* group)
 */
 int CBenchmarking::end(char* name)
 {
+	if(false == benchmark_enabled) return -1;
+
 	if(timeregister.count(name) == 0) 
 	{
 		printf("this entry does not exist!\n");
@@ -320,38 +378,30 @@ void CBenchmarking::dumptreenode(STimerNode* node, unsigned int depth)
 	}
 }
 
-/**
-* Resolve nodes recursively
-*/
+/*
 void CBenchmarking::recursiveresolve(STimerNode* node)
 {
 	// It should stop at "root" I hope...
-	//if(node->parentnode == nullptr) return;
+	if(nullptr == node->parentnode) return;
 	
-	/**
-	* Add latest delay value to parent delay sum
-	*/
+	//Add latest delay value to parent delay sum
 	node->parentnode->durations.back().duration += node->durations.back().duration;
 	// increase sums of parent node
 	node->parentnode->sums_added++;
 
-	/**
-	* Only if the number of sub nodes matches the amount of added summands
-	* we will continue
-	*/
-	if(node->subnodes.size() >= node->sums_added)
+	//Only if the number of sub nodes matches the amount of added summands
+	//we will continue
+	unsigned int subnode_count = node->parentnode->subnodes.size();
+	if(subnode_count >= node->parentnode->sums_added)
 	{
 		// reset sum indicator
 		node->sums_added = 0;
+
 		// recursively resolve parent node
 		recursiveresolve(node->parentnode);
 	}
 }
 
-/**
-* Compile all times
-* sum up the binary tree backwards!
-*/
 void CBenchmarking::compile(void)
 {
 	// First step: find leaves!
@@ -360,22 +410,16 @@ void CBenchmarking::compile(void)
 		// This node does not have sub-nodes -> it is a leaf!
 		if(it->second->subnodes.size() == 0 && nullptr != it->second->parentnode)
 		{
-			/**
-			* Sum up the duration to the parent node
-			* This is important because the time which is needed in a "sub thing"
-			* also influences the time which is needed to do a "parent thing"...
-			*/
+			//Sum up the duration to the parent node
+			//This is important because the time which is needed in a "sub thing"
+			//also influences the time which is needed to do a "parent thing"...
 			it->second->parentnode->durations.back().duration += it->second->durations.back().duration;
 
-			/**
-			* Debug
-			*/
-			/*char test[1024];
+			char test[1024];
 			sprintf_s(test, 1024, "adding %ul units from node %s to parent node %s (now: %ul)",
 				it->second->durations.back().duration, it->second->name, 
 				it->second->parentnode->name, it->second->parentnode->durations.back().duration);
-			*/
-
+			
 			// increase value of added summands
 			it->second->sums_added++;
 			// recursively call sub node
@@ -383,11 +427,14 @@ void CBenchmarking::compile(void)
 		}
 	}
 }
-
+*/
 
 /**
 * return a pointer to the root node
 */
+
+
+
 STimerNode* CBenchmarking::getroot(void)
 {
 	return root;
@@ -395,44 +442,15 @@ STimerNode* CBenchmarking::getroot(void)
 
 /**
 * Calculate average
+* Does this include root?
 */
+// PRIVATE
 void CBenchmarking::calculate_average(void) 
 {
-	/**
-	* Calculate average of each index
-	*/
+	// loop through all nodes
 	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) 
 	{
 		// calculate average!
 		it->second->calc_average();
-	}
-}
-
-/**
-* ...
-*/
-void CBenchmarking::pushback_and_clear_node_sums(void)
-{
-	/**
-	* Find nodes, not leaves
-	*/
-	for(std::map<char*, STimerNode*>::iterator it = timeregister.begin();  it != timeregister.end();  it++) 
-	{
-		// find nodes
-		if(0 != it->second->subnodes.size())
-		{
-			// Create temporal structure instance 
-			SInterval tmp;
-			tmp.begin = 0;
-			tmp.end = 0;
-			tmp.duration = 0;
-
-			// append index to the end
-			it->second->durations.push_back(tmp);
-			// remove index form beginning
-			it->second->durations.pop_front();
-			// reset sum 
-			it->second->sums_added = 0;
-		}
 	}
 }

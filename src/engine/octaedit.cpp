@@ -492,9 +492,9 @@ void tryedit()
     extern int hidehud;
     if(!editmode || hidehud || mainmenu) return;
 	
-	//benchmark.begin("tryblendmap", "tryedit");
+	//bms.begin("tryblendmap", "tryedit");
     if(blendpaintmode) trypaintblendmap();
-	//benchmark.end("tryblendmap");
+	//bms.end("tryblendmap");
 }
 
 //////////// ready changes to vertex arrays ////////////

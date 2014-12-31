@@ -104,6 +104,11 @@ struct STimerNode
 	* Calculate average time
 	*/
 	void calc_average(void);
+
+	/**
+	* Get the last time
+	*/
+	unsigned long long getlastdur(void);
 };
 
 
@@ -118,6 +123,11 @@ class CBenchmarking
 	* Root of this tree
 	*/
 	STimerNode* root;
+
+	/**
+	* Is the system enabled or not?
+	*/
+	bool benchmark_enabled;
 
 	/**
 	* Node registration
@@ -157,6 +167,11 @@ class CBenchmarking
 	* Recursive resolve
 	*/
 	void recursiveresolve(STimerNode* node);
+	
+	/**
+	* Calculate average
+	*/
+	void calculate_average(void);
 
 
 	public:
@@ -201,17 +216,18 @@ class CBenchmarking
 	/**
 	* Calculate all times
 	*/
-	void compile(void);
-
-	/**
-	* Calculate average
-	*/
-	void calculate_average(void);
+	//void compile(void);
 
 	/**
 	* Push back node sums
 	*/
-	void pushback_and_clear_node_sums(void);
+	//void pushback_and_clear_node_sums(void);
+
+	/**
+	* Start/End benchmarking
+	*/
+	void StartBenchmarking(void);
+	void EndBenchmarking(void);
 };
 
 extern CBenchmarking bms;

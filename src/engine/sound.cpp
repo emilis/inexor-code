@@ -523,9 +523,9 @@ bool updatechannel(soundchannel &chan)
 
 void updatesounds()
 {
-	//benchmark.begin("updatemumble", "updatesounds");
+	//bms.begin("updatemumble", "updatesounds");
     updatemumble();
-	//benchmark.end("updatemumble");
+	//bms.end("updatemumble");
 
     if(nosound) return;
     if(minimized) stopsounds();

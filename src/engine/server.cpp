@@ -621,18 +621,18 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
 {
     if(!serverhost) 
     {
-        //////benchmark.begin("server::serverupdate", "serverslice");
+        ////bms.begin("server::serverupdate", "serverslice");
 		server::serverupdate();
-		//////benchmark.end("server::serverupdate");
+		////bms.end("server::serverupdate");
 		
-		//////benchmark.begin("server::sendpacket", "serverslice");
+		////bms.begin("server::sendpacket", "serverslice");
         server::sendpackets();
-        //////benchmark.end("server::sendpacket");
+        ////bms.end("server::sendpacket");
 		return;
     }
        
     // below is network only
-	////benchmark.begin("miscupdatetime", "serverslice");
+	////bms.begin("miscupdatetime", "serverslice");
     if(dedicated) 
     {
         int millis = (int)enet_time_get();
@@ -646,24 +646,24 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         totalmillis = millis;
         updatetime();
     }
-	////benchmark.end("miscupdatetime");
+	////bms.end("miscupdatetime");
 	
-	////benchmark.begin("server::serverupdate", "serverslice");
+	////bms.begin("server::serverupdate", "serverslice");
     server::serverupdate();
-	////benchmark.end("server::serverupdate");
+	////bms.end("server::serverupdate");
 
-	////benchmark.begin("flushmasteroutput", "serverslice");
+	////bms.begin("flushmasteroutput", "serverslice");
     flushmasteroutput();
-	////benchmark.end("flushmasteroutput");
+	////bms.end("flushmasteroutput");
 
-	////benchmark.begin("checkserversockets", "serverslice");
+	////bms.begin("checkserversockets", "serverslice");
     checkserversockets();
-	////benchmark.end("checkserversockets");
+	////bms.end("checkserversockets");
 
-	////benchmark.begin("updatemasterserver", "serverslice");
+	////bms.begin("updatemasterserver", "serverslice");
     if(!lastupdatemaster || totalmillis-lastupdatemaster>60*60*1000)       // send alive signal to masterserver every hour of uptime
         updatemasterserver();
-	////benchmark.end("updatemasterserver");
+	////bms.end("updatemasterserver");
     
 	// no benchmark needed
     if(totalmillis-laststatus>60*1000)   // display bandwidth stats, useful for server ops
@@ -673,7 +673,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         serverhost->totalSentData = serverhost->totalReceivedData = 0;
     }
 
-	////benchmark.begin("servicedloop", "serverslice");
+	////bms.begin("servicedloop", "serverslice");
     ENetEvent event;
     bool serviced = false;
     while(!serviced)
@@ -718,7 +718,7 @@ void serverslice(bool dedicated, uint timeout)   // main server update, called f
         }
     }
     if(server::sendpackets()) enet_host_flush(serverhost);
-	////benchmark.end("servicedloop");
+	////bms.end("servicedloop");
 }
 
 void flushserver(bool force)

@@ -7,7 +7,7 @@
 /**
 * Include benchmark library
 */
-#include "benchmark.h"
+#include "//bms.h"
 
 /**
 * Include SDL library
