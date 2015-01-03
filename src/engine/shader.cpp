@@ -1723,14 +1723,15 @@ void resetslotshader()
     curparams.shrink(0);
 }
 
-void setslotshader(Slot &s)
+void setslotshader(Slot &s, JSON *j)
 {
-    s.shader = curshader;
-    if(!s.shader)
+    if(!j)
     {
         s.shader = stdworldshader;
         return;
     }
+    setshader(j->valuestring); //todo optimize
+    s.shader = curshader;
     loopv(curparams) s.params.add(curparams[i]);
 }
 

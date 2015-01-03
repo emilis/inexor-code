@@ -612,7 +612,7 @@ struct Slot
     vector<ShaderParam> params;
     VSlot *variants;
     bool loaded;
-    uint texmask;
+    uint texmask; //which textures are stored
     char *autograss;
     Texture *grasstex, *thumbnail;
     char *layermaskname;
@@ -698,7 +698,7 @@ extern Shader *lookupshaderbyname(const char *name);
 extern Shader *useshaderbyname(const char *name);
 extern Texture *loadthumbnail(Slot &slot);
 extern void resetslotshader();
-extern void setslotshader(Slot &s);
+extern void setslotshader(Slot &s, JSON *j);
 extern void linkslotshader(Slot &s, bool load = true);
 extern void linkvslotshader(VSlot &s, bool load = true);
 extern void linkslotshaders();
