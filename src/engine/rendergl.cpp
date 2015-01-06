@@ -2712,34 +2712,30 @@ void RenderTriangle(float x, float y, float width, float height,
 
 VARP(showdebugvertical, 0, 0, 1);
 
-/**
-* Render tiles
-*/
+
+
+
+// Render tiles
+/*
 void RenderTileCharts(STimerNode* node, float x, float y, float width, float height, int depth)
 {	
 	// Debug message
-	/*char debug_test[1024];
+	char debug_test[1024];
 	strcpy_s(debug_test, 1024, "");
 	for(int hicks=0; hicks<depth+1; hicks++) sprintf_s(debug_test, 1024, "%s--", debug_test); // format depth
 	sprintf_s(debug_test, 1024, "%s%f %f %f %f, %s RenderTileCharts", debug_test, x, y, width, height, node->name);
 	conoutf(CON_DEBUG, debug_test);
-	*/
+	
 
-	/*
-	* Switch horizontal and vertical
-	* rendering depending on the depth.
-	*/
+	//Switch horizontal and vertical
+	//rendering depending on the depth.
 	bool render_horizontally = ( depth + showdebugvertical % 2 > 0);
 	int newdepth = depth + 1;
 	
-	/**
-	* THIS NODE does not have SUB NODES
-	*/
+	//THIS NODE does not have SUB NODES
 	if(node->subnodes.size() == 0 && nullptr != node->parentnode)
 	{
-		/**
-		* No sub nodes: no further calculations needed!
-		*/
+		//No sub nodes: no further calculations needed!
 
 		// Calculate weight of this tile
 		double Amount = 1.0;
@@ -2754,11 +2750,6 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 		// horizontal rendering
 		if(render_horizontally)
 		{
-			/*| | | | | | | | |
-			* | | | | | | | | |
-			* | | | | | | | | |
-			* | | | | | | | | |
-			*/
 			// no sub nodes, render triangle
 			RenderTriangle(x, y, width*Amount, height, 
 							newdepth, Amount, node->name, render_horizontally);
@@ -2766,11 +2757,6 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 		// vertical rendering
 		else 
 		{
-			/*________________
-			* ________________
-			* ________________
-			* ________________
-			*/
 			// no sub nodes, render triangle
 			RenderTriangle(x, y, width, height*Amount, 
 							newdepth, Amount, node->name, render_horizontally);
@@ -2778,18 +2764,14 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 	}
 	else if(node->subnodes.size() == 1)
 	{
-		/**
-		* THIS NODE does have exactly ONE NODE
-		* Analyse this sub node
-		*/
+		// THIS NODE does have exactly ONE NODE
+		// Analyse this sub node
 		RenderTileCharts(node->subnodes[0], x, y, width, height, newdepth);
 	}
 	else if(node->subnodes.size() > 1)
 	{
-		/**
-		* THIS NODE has more than 1 SUBNODE
-		* at least TWO SUB NODES!
-		*/
+		// THIS NODE has more than 1 SUBNODE
+		// at least TWO SUB NODES!
 		float offsetX = x; // not 0.0f!
 		float offsetY = y;
 		
@@ -2798,10 +2780,8 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 		{
 			// Create a new parameter variable to create a shorter name
 			STimerNode* subnode = node->subnodes[i];
-			
-			/**
-			* Calculate the "weight" of this node
-			*/
+
+			// Calculate the "weight" of this node
 			double self_performance = subnode->average;
 			double parent_performance = subnode->parentnode->average;
 			
@@ -2835,26 +2815,17 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 					{
 						width *= GroupAmount;
 					}
-					*/
 				}
 								
 				if(render_horizontally) 
 				{
-					/*
-					* | | | | | | | | | ->
-					* | | | | | | | | | ->
-					*/
 					// Redner sub nodes
-					RenderTileCharts(subnode, offsetX, y, width*GroupAmount/*Amount*/, height, newdepth);
+					RenderTileCharts(subnode, offsetX, y, width*GroupAmount, height, newdepth);
 				}
 				else 
 				{
-					/*________________
-					* ________________  |  |
-					* ________________  v  v
-					*/
 					// Render sub nodes 
-					RenderTileCharts(subnode, x, offsetY, width, height*GroupAmount/*Amount*/, newdepth);
+					RenderTileCharts(subnode, x, offsetY, width, height*GroupAmount, newdepth);
 				}
 			}
 			else 
@@ -2862,10 +2833,6 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 				// horizontal rendering
 				if(render_horizontally)
 				{
-					/*
-					* | | | | | | | | | ->
-					* | | | | | | | | | ->
-					*/
 					// no sub nodes, render triangle
 					RenderTriangle(offsetX, y, width*Amount, height, 
 									newdepth, Amount, subnode->name, render_horizontally);
@@ -2876,10 +2843,6 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 				// vertical rendering
 				else 
 				{
-					/*________________
-					* ________________  |  |
-					* ________________  v  v
-					*/
 					// no sub nodes, render triangle
 					RenderTriangle(x, offsetY, width, height*Amount, 
 									newdepth, Amount, subnode->name, render_horizontally);
@@ -2892,11 +2855,7 @@ void RenderTileCharts(STimerNode* node, float x, float y, float width, float hei
 	}
 }
 
-
-
-/**
-* Render trees
-*/
+// Render trees
 void RenderTree(STimerNode* node, int depth)
 {
 	if(node->subnodes.size() > 0)
@@ -2925,3 +2884,4 @@ void RenderTree(STimerNode* node, int depth)
 		conoutf(CON_DEBUG, debug_test);
 	}
 }
+*/

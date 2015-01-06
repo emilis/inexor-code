@@ -1016,12 +1016,6 @@ int getclockmillis()
 VAR(numcpus, 1, 1, 16);
 
 
-/**
-* Benchmarking
-*/
-CBenchmarking bms;
-
-
 // FIXME: WTF? - main is in macutils.mm?
 #ifdef __APPLE__
 int real_main(int argc, char **argv)
@@ -1235,28 +1229,23 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
-	/**
-	* Curve generation
-	*/
-
+	// Curve generation
 	// Set curve precision
 	dynamic_curve.SetPrecision(200.0f);
 	target_curve.SetPrecision(200.0f);
-
 	// initialise curve renderer
 	curve_renderer.SetCurve( &dynamic_curve);
 
     for(;;)
     {
-		// no benchmark needed
         static int frames = 0;
         int millis = getclockmillis();
 
-		limitfps(millis, totalmillis); // done
+		limitfps(millis, totalmillis);
 
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
-		int scaledtime = game::scaletime(elapsedtime) + timeerr; // done
+		int scaledtime = game::scaletime(elapsedtime) + timeerr;
 		curtime = scaledtime/100;
         timeerr = scaledtime%100;
 		if(!multiplayer(false) && curtime>200) curtime = 200;
@@ -1264,44 +1253,43 @@ int main(int argc, char **argv)
 		lastmillis += curtime;
         totalmillis = millis;
 
-		updatetime(); // done
-        checkinput(); // done
-		menuprocess(); // done
-		tryedit(); // done
+		updatetime();
+        checkinput();
+		menuprocess();
+		tryedit();
 
         if(lastmillis) 
 		{
-			game::updateworld(); // done
+			game::updateworld();
         }
 
-		checksleep(lastmillis); // done
-        serverslice(false, 0); // done
+		checksleep(lastmillis);
+        serverslice(false, 0);
 
         if(frames) 
 		{
-			updatefpshistory(elapsedtime); // done
+			updatefpshistory(elapsedtime);
         }
 		frames++;
 
 		// miscellaneous general game effects
-        recomputecamera(); // done
-        updateparticles(); // Uhm.. NO!
-		updatesounds(); // done
+        recomputecamera();
+        updateparticles();
+		updatesounds();
 
 		if(minimized) continue;
         inbetweenframes = false;
 		
         if(mainmenu) 
 		{
-			gl_drawmainmenu(screen->w, screen->h); // done
+			gl_drawmainmenu(screen->w, screen->h);
 		}
 		else {
 			gl_drawframe(screen->w, screen->h);
 		}
 
 		// Swapping buffers
-        swapbuffers(); // done
-
+        swapbuffers();
 		// no benchmark needed        
 		renderedframe = inbetweenframes = true;
     }
