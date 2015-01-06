@@ -313,6 +313,8 @@ extern bool havesel;
 int entlooplevel = 0;
 bool undonext = true;
 
+
+// Checks if player is in edit mode
 bool noentedit()
 {
     if(!editmode) { conoutf(CON_ERROR, "operation only allowed in edit mode"); return true; }
@@ -924,6 +926,7 @@ COMMAND(attachent, "");
 
 static int keepents = 0;
 
+// Here we create new entities
 extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3, int v4, int v5, int &idx)
 {
     vector<extentity *> &ents = entities::getents();
@@ -967,6 +970,7 @@ extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3,
     return &e;
 }
 
+// 2. Call for new entity
 void newentity(int type, int a1, int a2, int a3, int a4, int a5)
 {
     int idx;
@@ -979,6 +983,7 @@ void newentity(int type, int a1, int a2, int a3, int a4, int a5)
     entedit(idx, e.type = type);
 }
 
+// 1. Call for new entity
 void newent(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
 {
     if(noentedit()) return;
@@ -986,6 +991,14 @@ void newent(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
     if(type != ET_EMPTY)
         newentity(type, *a1, *a2, *a3, *a4, *a5);
 }
+
+
+// New entity system
+void ent(char* name, char* desc)
+{
+	conoutf(CON_DEBUG, "%s %s", name, desc);
+}
+
 
 int entcopygrid;
 vector<entity> entcopybuf;
@@ -1020,6 +1033,10 @@ void entpaste()
     int j = 0;
     groupeditundo(e.type = entcopybuf[j++].type;);
 }
+
+// New Entity system
+COMMAND(ent, "ss");
+
 
 COMMAND(newent, "siiiii");
 COMMAND(delent, "");
