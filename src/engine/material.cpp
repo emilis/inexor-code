@@ -156,7 +156,10 @@ const struct material
     {"noclip", MAT_NOCLIP},
     {"gameclip", MAT_GAMECLIP},
     {"death", MAT_DEATH},
-    {"alpha", MAT_ALPHA}
+    {"alpha", MAT_ALPHA},
+
+	// ADDED BY HANNI
+	{"area", MAT_AREA}
 };
 
 int findmaterial(const char *name)
@@ -682,12 +685,16 @@ void rendermaterials()
                 {
                     case MAT_WATER:    glColor3ub(255, 128,   0); break; // blue
                     case MAT_CLIP:     glColor3ub(  0, 255, 255); break; // red
-                    case MAT_GLASS:    glColor3ub(255,   0,   0); break; // cyan
+                    case MAT_GLASS:    glColor3ub(255, 127,  0); /*glColor3ub(255,   0,   0);*/ break; // cyan
                     case MAT_NOCLIP:   glColor3ub(255,   0, 255); break; // green
                     case MAT_LAVA:     glColor3ub(  0, 128, 255); break; // orange
                     case MAT_GAMECLIP: glColor3ub(  0,   0, 255); break; // yellow
                     case MAT_DEATH:    glColor3ub(192, 192, 192); break; // black
                     case MAT_ALPHA:    glColor3ub(  0, 255,   0); break; // pink
+					
+					// ADDED BY HANNI
+					case MAT_AREA:     glColor3ub(255, 127,  0); break; // orange
+
                     default: continue;
                 }
                 lastmat = m.material;

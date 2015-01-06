@@ -32,7 +32,11 @@ enum // cube empty-space materials
     MAT_GAMECLIP = 3 << MATF_CLIP_SHIFT,  // game specific clip material
 
     MAT_DEATH    = 1 << MATF_FLAG_SHIFT,  // force player suicide
-    MAT_ALPHA    = 4 << MATF_FLAG_SHIFT   // alpha blended
+
+	// ADDED BY HANNI
+	MAT_AREA     = 2 << MATF_FLAG_SHIFT,
+
+    MAT_ALPHA    = 4 << MATF_FLAG_SHIFT,   // alpha blended
 };
 
 #define isliquid(mat) ((mat)==MAT_WATER || (mat)==MAT_LAVA)

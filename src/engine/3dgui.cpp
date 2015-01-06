@@ -917,6 +917,8 @@ struct gui : g3d_gui
         scale = vec(aspect*scale.x*fit, scale.y*fit, 1);
     }
 
+
+
 	/* GUI render function found! 
 	   There it is Visual Studio, not in modelpreview:: !
 	*/
@@ -932,8 +934,11 @@ struct gui : g3d_gui
 
         basescale = initscale;
         if(layoutpass) scale.x = scale.y = scale.z = guifadein ? basescale*min((totalmillis-starttime)/300.0f, 1.0f) : basescale;
-        alpha = allowinput ? 0.80f : 0.60f;
-        passthrough = scale.x<basescale || !allowinput;
+
+		alpha = allowinput ? 0.80f : 0.60f;
+        //alpha = 1.0f;
+
+		passthrough = scale.x<basescale || !allowinput;
         curdepth = -1;
         curlist = -1;
         tpos = 0;
@@ -967,11 +972,13 @@ struct gui : g3d_gui
                 
 				/* Where to render this stuff...
 				    it works!
+				origin.x = 530;
+				origin.y = 530;
+				origin.z = 530;
 				*/
-				glTranslatef(origin.x, origin.y, origin.z);
-				//glTranslatef(530, 530, 530);
 
-                glRotatef(yaw/RAD-90, 0, 0, 1); 
+				glTranslatef(origin.x, origin.y, origin.z);
+				glRotatef(yaw/RAD-90, 0, 0, 1); 
                 glRotatef(-90, 1, 0, 0);
                 glScalef(-scale.x, scale.y, scale.z);
             
@@ -982,6 +989,7 @@ struct gui : g3d_gui
             }
 
             drawskin(curx-skinx[2]*SKIN_SCALE, cury-skiny[6]*SKIN_SCALE, xsize, ysize, 0, 9, gui2d ? 1 : 2, light, alpha);
+
 			if(!tcurrent) {
 				drawskin(curx-skinx[5]*SKIN_SCALE, cury-skiny[6]*SKIN_SCALE, xsize, 0, 9, 1, gui2d ? 1 : 2, light, alpha);
 			}

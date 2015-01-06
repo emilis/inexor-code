@@ -719,25 +719,18 @@ void clearchanges(int type)
 
 void menuprocess()
 {
-    //bms.begin("updatelater", "menuprocess");
 	processingmenu = true;
     int wasmain = mainmenu, level = guistack.length();
     loopv(updatelater) updatelater[i].run();
     updatelater.shrink(0);
-	//bms.end("updatelater");
 
-	//bms.begin("clearguis", "menuprocess");
     if(wasmain > mainmenu || clearlater)
     {
         if(wasmain > mainmenu || level==guistack.length()) clearguis(level); 
         clearlater = false;
     }
-	//bms.end("clearguis");
 
-	//bms.begin("showguimain", "menuprocess");
     if(mainmenu && !isconnected(true) && guistack.empty()) showgui("main");
-    //bms.end("showguimain");
-	
 	processingmenu = false;
 }
 

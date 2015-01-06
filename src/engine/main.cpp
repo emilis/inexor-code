@@ -821,7 +821,6 @@ void checkinput()
     int lasttype = 0, lastbut = 0;
     bool mousemoved = false; 
 
-	////bms.begin("pollevents", "checkinput");
     while(events.length() || pollevent(event))
     {
         if(events.length()) event = events.remove(0);
@@ -869,14 +868,11 @@ void checkinput()
                 break;
         }
     }
-	//bms.end("pollevents");
 
-	//bms.begin("resetmousemotion", "checkinput");
     if(mousemoved) 
 	{
 		resetmousemotion();
 	}
-	//bms.end("resetmousemotion");
 }
 
 void swapbuffers(bool overlay)
@@ -1239,6 +1235,9 @@ int main(int argc, char **argv)
     inputgrab(grabinput = true);
     ignoremousemotion();
 
+	/**
+	* Curve generation
+	*/
 
 	// Set curve precision
 	dynamic_curve.SetPrecision(200.0f);
@@ -1253,12 +1252,8 @@ int main(int argc, char **argv)
         static int frames = 0;
         int millis = getclockmillis();
 
-		////bms.begin("limitfps");
 		limitfps(millis, totalmillis); // done
-		//bms.end("limitfps");
 
-		// calculations
-		//bms.begin("miscmath");
         elapsedtime = millis - totalmillis;
         static int timeerr = 0;
 		int scaledtime = game::scaletime(elapsedtime) + timeerr; // done
@@ -1268,116 +1263,44 @@ int main(int argc, char **argv)
 		if(game::ispaused()) curtime = 0;
 		lastmillis += curtime;
         totalmillis = millis;
-        //bms.end("miscmath");
 
-		
-		//bms.begin("updatetime");
 		updatetime(); // done
-		//bms.end("updatetime");
-
-		//bms.begin("checkinput");
         checkinput(); // done
-		//bms.end("checkinput");
-
-		//bms.begin("menuprocess");
 		menuprocess(); // done
-		//bms.end("menuprocess");
-
-		// Initialize rabdomizer (do we need this?)
-		srand((unsigned)time(NULL) * 40*SDL_GetTicks());
-		
-		
-		// Start benchmarking
-		//bms.StartBenchmarking();
-
-
-		//bms.begin("zwei");
-			//bms.begin("unter1", "zwei");
-				Sleep(4);
-			//bms.end("unter1");
-			//bms.begin("unter2", "zwei");
-				//bms.begin("xx", "unter2");
-					Sleep(2);
-				//bms.end("xx");
-				//bms.begin("xx2", "unter2");
-
-
-					Sleep(2);
-				//bms.end("xx2");
-			//bms.end("unter2");
-		//bms.end("zwei");
-		
-		//bms.begin("eins");
-			Sleep(30);
-		//bms.end("eins");
-
-		/************************************************************************/
-
-		//bms.begin("tryedit");
 		tryedit(); // done
-		//bms.end("tryedit");
 
         if(lastmillis) 
 		{
-			//bms.begin("updateworld");
 			game::updateworld(); // done
-			//bms.end("updateworld");
         }
 
-		//bms.begin("checksleep");
 		checksleep(lastmillis); // done
-		//bms.end("checksleep");
-
-		//bms.begin("serverslice");
         serverslice(false, 0); // done
-		//bms.end("serverslice");
 
         if(frames) 
 		{
-			//bms.begin("updatefpshistory");
 			updatefpshistory(elapsedtime); // done
-			//bms.end("updatefpshistory");
         }
 		frames++;
 
 		// miscellaneous general game effects
-		//bms.begin("recomputecamera");
         recomputecamera(); // done
-		//bms.end("recomputecamera");
-		
-		//bms.begin("updateparticles");
         updateparticles(); // Uhm.. NO!
-		//bms.end("updateparticles");
-
-		//bms.begin("updatesounds");
 		updatesounds(); // done
-		//bms.end("updatesounds");
-		
-		/**
-		* Here we finally compile our profile!
-		*/
-		// FROM THE CURRENT CODE IT MUST BE FINISHED HERE!
-		//bms.EndBenchmarking();
 
 		if(minimized) continue;
         inbetweenframes = false;
 		
         if(mainmenu) 
-		{ 
-			//bms.begin("gl_drawmainmenu");
+		{
 			gl_drawmainmenu(screen->w, screen->h); // done
-			//bms.end("gl_drawmainmenu");
 		}
 		else {
-			//bms.begin("gl_drawframe");
 			gl_drawframe(screen->w, screen->h);
-			//bms.end("gl_drawframe");
 		}
 
 		// Swapping buffers
-		//bms.begin("swapbuffers");
         swapbuffers(); // done
-		//bms.end("swapbuffers");
 
 		// no benchmark needed        
 		renderedframe = inbetweenframes = true;

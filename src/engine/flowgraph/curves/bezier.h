@@ -1,40 +1,32 @@
-/**
-* A bezier curve (named after french mathematician Pierre Etienne Bezier) is a parametric curve
-* whose only purpose is to look nice, soft and elegant.
-* Sometimes it is not easy to create elegant and flexible objects with mathematics.
-* Bezier curves are FUNDAMENTAL curves and very essential in computer graphics and image processing
-* because it is used for interpolation, approximation...
-*
-* Computation
-* You pass a list of parameter points and the engine will calculate the final curve from it.
-* Unfortunately, curve computation needs a lot of resources. 
-* You can solve the problem either with RECUSION of BERNSTEIN POLYNOMS
-* 
-* Method 1: Recusion [De-Casteljau-Algorithm]
-* possibly needs a lot of heap memory for every sub-call (not sure about this by the way)
-* anyway it is MUCH SLOWER (but MORE FLEXIBLE) than the BERNSTEIN solution
-* 
-* Method 2: Bernstein Polynoms [named after russian mathematician Sergei Natanovich Bernstein]
-* In short, Bernstein polynoms replace recursion with a simple sum of interpolations
-* This engine will support both solutions.
-* Problems which need to be solved:
-*
-*  1) Should the curve be pre-computed or computed in realtime?
-*  2) Which solution is faster? Bernstein or De-Casteljau?
-*  3) Is it possible to derivate the curve to gain angle and rotation?
-*  4) Can we calculate the length of a curve?
-*  5) Can we calculate the required precision of a curve?
-*/
+/*
+	INTRODUCTION
+	A bezier curve (named after french mathematician PIERRE ETIENNE BEZIER) is a parametric curve
+	whose only purpose is to look soft and smooth. Bezier curves are all about elegance.
+	Those curves can be used to represent the path of a moving object (imagina a moving camera for example).
+	
+	Bezier curves are fast, flexible, beautiful and easy to compute. You just pass a bunch of parameter points to
+	your code and the final curve will be computed. Sometimes a chain of curves with 3-5 parameter points is used to
+	represent a path.
+	Bezier curves are ESSENTIAL AND FUNDAMENTAL in the field of computer graphics and image processing. Also can
+	they be used for approximation, interpolation and more.
 
+	COMPUTING
+	There are two ways to generate a bezier curves from a group of [n] points.
+	You can either write a code that uses recursion to solve the problem or use Bernstein Polynoms.
+	Both ways will be implemented in this engine.
 
-/**
-* In honor of:
-*
-*	Pierre etienne BEZIER   (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
-*   Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
-*	Sergei Natanovich BERNSTEIN   (March 5, 1880 - October 26, 1968), Russian mathematician
-*   Charles HERMITE   (December 24, 1822 - January 14, 1901), French mathematician
-*   Leonardo FIBONACCI  (~1170, ~1240), Italian mathematician
+		Method 1: Recursion [De-Casteljau-Algorithm]
+		-possibly needs a lot of memory for every sub-call (not sure)
+
+		Method 2: Bernstein Polynoms
+		-uses brilliant math to resolve the recursion and turn all the problems into more or less simple terms.
+
+	IN HONOR OF
+	Pierre Etienne BEZIER   (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
+	Paul de CASTELJAU   (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
+	Sergei Natanovich BERNSTEIN   (March 5, 1880 - October 26, 1968), Russian mathematician
+	Charles HERMITE   (December 24, 1822 - January 14, 1901), French mathematician
+	Leonardo FIBONACCI  (~1170, ~1240), Italian mathematician
 */
 
 
@@ -57,6 +49,7 @@
 
 /**
 * We need an own structure for weight as well
+* Should be replaced later (?)
 */
 struct SPoint 
 {
@@ -75,7 +68,7 @@ class CBezierCurve
 {
 	public:
 
-	// constructor: class initialisation
+	// constructor
 	CBezierCurve();
 	// destructor
 	~CBezierCurve();

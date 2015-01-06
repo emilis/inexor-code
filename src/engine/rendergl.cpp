@@ -2049,15 +2049,11 @@ VARP(showcurve, 0, 0, 1);
 
 void gl_drawframe(int w, int h)
 {
-	//bms.begin("drawtextures", "gl_drawframe");
     if(deferdrawtextures) drawtextures();
-	//bms.end("drawtextures");
 
     defaultshader->set();
 
-	//bms.begin("updatedynlights", "gl_drawframe");
     updatedynlights();
-	//bms.end("updatedynlights");
 
     // calculations
 	aspect = forceaspect ? forceaspect : w/float(h);
@@ -2076,9 +2072,7 @@ void gl_drawframe(int w, int h)
     }
     else fogmat = MAT_AIR;    
     
-	//bms.begin("setfog", "gl_drawframe");
 	setfog(fogmat, fogblend, abovemat);
-	//bms.end("setfog");
 
 	// calculations
     if(fogmat!=MAT_AIR)
@@ -2090,25 +2084,15 @@ void gl_drawframe(int w, int h)
 
     farplane = worldsize*2;
 
-	//bms.begin("project", "gl_drawframe");
     project(fovy, aspect, farplane);
-	//bms.end("project");
-    
-	//bms.begin("transplayer", "gl_drawframe");
+
 	transplayer();
-	//bms.end("transplayer");
 
-	//bms.begin("readmatrices", "gl_drawframe");
     readmatrices();
-	//bms.end("readmatrices");
 
-	//bms.begin("findorientation", "gl_drawframe");
     findorientation();
-	//bms.end("findorientation");
 
-	//bms.begin("setenvmatrix", "gl_drawframe");
     setenvmatrix();
-	//bms.end("setenvmatrix");
 
     glEnable(GL_FOG);
     glEnable(GL_CULL_FACE);
@@ -2121,62 +2105,36 @@ void gl_drawframe(int w, int h)
     {
         if(dopostfx)
         {
-			//bms.begin("drawglaretex", "gl_drawframe");
             drawglaretex();
-			//bms.end("drawglaretex");
-
-			//bms.begin("drawdepthfxtex", "gl_drawframe");
             drawdepthfxtex();
-			//bms.end("drawdepthfxtex");
-            
-			//bms.begin("drawreflections", "gl_drawframe");
 			drawreflections();
-			//bms.end("drawreflections");
         }
         else dopostfx = true;
     }
 
-	//bms.begin("visiblecubes", "gl_drawframe");
     visiblecubes();
-	//bms.end("visiblecubes");
-    
-	//bms.begin("rendershadowmap", "gl_drawframe");
+
     if(shadowmap && !hasFBO) rendershadowmap();
-	//bms.end("rendershadowmap");
 
     glClear(GL_DEPTH_BUFFER_BIT|(wireframe && editmode ? GL_COLOR_BUFFER_BIT : 0)|(hasstencil ? GL_STENCIL_BUFFER_BIT : 0));
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); 
 
-	//bms.begin("drawskybox", "gl_drawframe");
     if(limitsky()) drawskybox(farplane, true);
-	//bms.end("drawskybox");
 
-	//bms.begin("rendergeom", "gl_drawframe");
     rendergeom(causticspass);
-	//bms.end("rendergeom");
 
-	//bms.begin("renderoutline", "gl_drawframe");
     extern int outline;
     if(!wireframe && editmode && outline) renderoutline();
-	//bms.end("renderoutline");
 
-	//bms.begin("queryreflections", "gl_drawframe");
     queryreflections();
-	//bms.end("queryreflections");
 
-	//bms.begin("generatefrass", "gl_drawframe");
     generategrass();
-	//bms.end("generategrass");
 
-	//bms.begin("drawskybox", "gl_drawframe");
     if(!limitsky()) drawskybox(farplane, false);
-	//bms.end("drawskybox");
 
-	//bms.begin("renderdecals", "gl_drawframe");
     renderdecals(true);
-	//bms.end("renderdecals");
-	
+
 	/**
 	* Render curve
 	*/
@@ -2186,97 +2144,54 @@ void gl_drawframe(int w, int h)
 		curve_renderer.RenderCurve();
 	}
 
-
-	//bms.begin("rendermapmodels", "gl_drawframe");
     rendermapmodels();
-	//bms.end("rendermapmodels");
-
-	//bms.begin("rendergame", "gl_drawframe");
     rendergame(true);
-	//bms.end("rendergame");
 
-	//bms.begin("renderavatar", "gl_drawframe");
     if(!isthirdperson())
     {
         project(curavatarfov, aspect, farplane, false, false, false, avatardepth);
         game::renderavatar();
         project(fovy, aspect, farplane);
     }
-	//bms.end("renderavatar");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     if(hasFBO) 
     {
-		//bms.begin("drawglaretex2", "gl_drawframe");
         drawglaretex();
-		//bms.end("drawglaretex2");
-        
-		//bms.begin("drawdepthfxtex2", "gl_drawframe");
 		drawdepthfxtex();
-		//bms.end("drawdepthfxtex2");
-        
-		//bms.begin("drawreflections2", "gl_drawframe");
 		drawreflections();
-		//bms.end("drawreflections2");
     }
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    //bms.begin("renderwater", "gl_drawframe");
 	renderwater();
-	//bms.end("renderwater");
-
-	//bms.begin("rendergrass", "gl_drawframe");
     rendergrass();
-	//bms.end("rendergrass");
-
-	//bms.begin("rendermaterials", "gl_drawframe");
     rendermaterials();
-	//bms.end("rendermaterials");
-
-	//bms.begin("renderalphageom", "gl_drawframe");
     renderalphageom();
-	//bms.end("renderalphageom");
 
     if(wireframe && editmode) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	//bms.begin("renderparticles", "gl_drawframe");
     renderparticles(true);
-	//bms.end("renderparticles");
 
     glDisable(GL_FOG);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
 
-	//bms.begin("addmotionblur", "gl_drawframe");
     addmotionblur();
-	//bms.end("addmotionblur");
-
-	//bms.begin("addglare", "gl_drawframe");
     addglare();
-	//bms.end("addglare");
-    
-	//bms.begin("drawfogoverlay", "gl_drawframe");
 	if(isliquid(fogmat&MATF_VOLUME)) drawfogoverlay(fogmat, fogblend, abovemat);
-	//bms.end("drawfogoverlay");
 
-	//bms.begin("drawfogoverlay");
     renderpostfx();
-	//bms.end("drawfogoverlay");
 
     defaultshader->set();
-	
-	//bms.begin("g3d_render2", "gl_drawframe");
+
     g3d_render();
-	//bms.end("g3d_render2");
 
     glDisable(GL_TEXTURE_2D);
     notextureshader->set();
 
-	//bms.begin("gl_drawhud2", "gl_drawframe");
     gl_drawhud(w, h);
-	//bms.end("gl_drawhud2");
 
     renderedgame = false;
 }
@@ -2284,14 +2199,9 @@ void gl_drawframe(int w, int h)
 void gl_drawmainmenu(int w, int h)
 {
     xtravertsva = xtraverts = glde = gbatches = 0;
-
-	//bms.begin("renderbackground", "gl_drawmainmenu");
     renderbackground(NULL, NULL, NULL, NULL, true, true);
-	//bms.end("renderbackground");
 
-	//bms.begin("renderpostfx", "gl_drawmainmenu");
     renderpostfx();
-	//bms.end("renderpostfx");
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -2300,17 +2210,12 @@ void gl_drawmainmenu(int w, int h)
 
     defaultshader->set();
     glEnable(GL_TEXTURE_2D);
-    
-	//bms.begin("g3d_render", "gl_drawmainmenu");
 	g3d_render();
-	//bms.end("g3d_render");
 
     notextureshader->set();
     glDisable(GL_TEXTURE_2D);
 
-	//bms.begin("gl_drawhud", "gl_drawmainmenu");
     gl_drawhud(w, h);
-	//bms.end("gl_drawhud");
 }
 
 VARNP(damagecompass, usedamagecompass, 0, 1, 1);
