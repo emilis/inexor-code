@@ -2435,11 +2435,8 @@ VARP(showdebug, 0, 0, 1);
 * Pre define sub renderer
 */
 // REMOVE THIS LATER ON!
-void RenderTileCharts(STimerNode*, float, float, float, float, int);
-
-void RenderTree(STimerNode*, int);
-
-
+//void RenderTileCharts(STimerNode*, float, float, float, float, int);
+//void RenderTree(STimerNode*, int);
 
 void gl_drawhud(int w, int h)
 {
@@ -2640,7 +2637,7 @@ void gl_drawhud(int w, int h)
 	/**
 	* Render debug hud here
 	*/
-	if(showdebug) 
+	/*if(showdebug) 
 	{
 		// Start rendering
 		glPushMatrix();
@@ -2660,7 +2657,7 @@ void gl_drawhud(int w, int h)
 
 		// DELETEME
 		//RenderTree(//bms.getroot(), 1);
-	}
+	}*/
 }
 
 
