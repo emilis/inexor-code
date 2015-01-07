@@ -13,6 +13,58 @@ static const int MAXARGS = 25;
 
 VARN(numargs, _numargs, MAXARGS, 0, 0);
 
+
+#include <fstream>
+
+// Added by Hanni
+void print_idents(void)
+{
+	// create html5 file
+	std::ofstream datei_aus;
+	datei_aus.open("G:\\ident_list.html", std::ios_base::out);
+
+	// start header
+	char html5_header_out[] = "<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <title>Document</title></head> <style type=\"text/css\"> body { font-family:verdana, arial;} </style> <body>";
+	datei_aus.write(html5_header_out, strlen(html5_header_out)  );
+	
+	// create table
+	char html5_table_begin[] = "<table style=\"width:100%;\"><tr><td>Name</td> <td>ID type</td> <td>Usage</td></tr>\n";
+	datei_aus.write(html5_table_begin, strlen(html5_table_begin)  );
+
+	// enumerate idents
+	enumerate(idents, ident, i, 
+		char cOutput[1024];
+		char type[12];
+
+		switch(i.type)
+		{
+			// ID_VAR, ID_FVAR, ID_SVAR, ID_COMMAND, ID_ALIAS, ID_LOCAL
+			case ID_VAR: sprintf_s(type,12,"ID_TYPE"); break;
+			case ID_FVAR: sprintf_s(type,12,"ID_FVAR"); break;
+			case ID_SVAR: sprintf_s(type,12,"ID_SVAR"); break;
+			case ID_COMMAND: sprintf_s(type,12,"ID_COMMAND"); break;
+			case ID_ALIAS: sprintf_s(type,12,"ID_ALIAS"); break;
+			case ID_LOCAL: sprintf_s(type,12,"ID_LOCAL"); break;
+		}
+
+		sprintf_s(cOutput, 1024, "<tr><td>%s:</td> <td>%d</td> <td>usage</td></tr>\n", i.name, i.type);
+		datei_aus.write(cOutput, strlen(cOutput));
+	);
+	
+	// end table
+	char html5_table_end[] = "</table>\n";
+	datei_aus.write(html5_table_end, strlen(html5_table_end)  );
+	
+	// print html5 footer
+	char html5_footer_out[] = "</body></html>";
+	datei_aus.write(html5_footer_out, strlen(html5_footer_out)  );
+
+	// close file
+	datei_aus.close();
+}
+COMMAND(print_idents, "");
+
+
 static inline void freearg(tagval &v)
 {
     switch(v.type)

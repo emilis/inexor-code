@@ -507,23 +507,23 @@ COMMAND(screenres, "ii");
 
 CEntity ENTSYS("PARTIKEL");
 
-void ent_attrib(char* s, int *i)
+void setdata(char* s, int *i)
 {
 	ENTSYS.SetData(s, (int)*i);
 }
 
 // MODIFIED BY HANNI
-COMMAND(ent_attrib, "si");
+COMMAND(setdata, "si");
 
 
-void print_attrib(char* s)
+void getdata(char* s)
 {
 	int out;
 	ENTSYS.GetData(s, &out);
 	conoutf(CON_DEBUG, "%d", out);
 }
 
-COMMAND(print_attrib, "s");
+COMMAND(getdata, "s");
 
 
 

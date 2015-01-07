@@ -27,7 +27,8 @@ void boxs(int orient, vec o, const vec &s)
 void boxs3D(const vec &o, vec s, int g)
 {
 	// set custom color
-	glColor3f(58.0f/255.0f,173.0f/255.0f,255.0f/255.0f);
+	//glColor3f(58.0f/255.0f,173.0f/255.0f,255.0f/255.0f);
+	
 	glLineWidth(1);
 
     s.mul(g);
@@ -40,6 +41,8 @@ void boxs3D(const vec &o, vec s, int g)
 
 void boxsgrid(int orient, vec o, vec s, int g)
 {
+	return;
+
     int   d = dimension(orient),
           dc= dimcoord(orient);
     float ox = o[R[d]],
