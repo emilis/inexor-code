@@ -15,6 +15,7 @@ VARN(numargs, _numargs, MAXARGS, 0, 0);
 
 
 #include <fstream>
+#include <string>
 
 // Added by Hanni
 void print_idents(void)
@@ -24,11 +25,11 @@ void print_idents(void)
 	datei_aus.open("G:\\ident_list.html", std::ios_base::out);
 
 	// start header
-	char html5_header_out[] = "<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <title>Document</title></head> <style type=\"text/css\"> body { font-family:verdana, arial;} </style> <body>";
+	char html5_header_out[] = "<!DOCTYPE html> <html lang=\"en\"> <head> <meta charset=\"UTF-8\"> <title>Document</title></head> <style type=\"text/css\"> body { font-family:verdana, arial; font-size:25px;} </style> <body>";
 	datei_aus.write(html5_header_out, strlen(html5_header_out)  );
 	
 	// create table
-	char html5_table_begin[] = "<table style=\"width:100%;\"><tr><td>Name</td> <td>ID type</td> <td>Usage</td></tr>\n";
+	char html5_table_begin[] = "<table style=\"width:100%;\"><tr><td><h2>Name</h2></td> <td><h2>ID type</h2></td> <td><h2>Usage</h2></td></tr>\n";
 	datei_aus.write(html5_table_begin, strlen(html5_table_begin)  );
 
 	// enumerate idents
@@ -47,7 +48,7 @@ void print_idents(void)
 			case ID_LOCAL: sprintf_s(type,12,"ID_LOCAL"); break;
 		}
 
-		sprintf_s(cOutput, 1024, "<tr><td>%s:</td> <td>%d</td> <td>usage</td></tr>\n", i.name, i.type);
+		sprintf_s(cOutput, 1024, "<tr><td>%s</td> <td>%s</td> <td>usage</td></tr>\n", i.name, type);
 		datei_aus.write(cOutput, strlen(cOutput));
 	);
 	
