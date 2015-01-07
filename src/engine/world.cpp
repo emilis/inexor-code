@@ -576,7 +576,7 @@ VAR(showentradius, 0, 1, 1);
 void renderentring(const extentity &e, float radius, int axis)
 {
     if(radius <= 0) return;
-    /*glBegin(GL_LINE_LOOP);
+    glBegin(GL_LINE_LOOP);
     loopi(15)
     {
         vec p(e.o);
@@ -586,7 +586,6 @@ void renderentring(const extentity &e, float radius, int axis)
         glVertex3fv(p.v);
     }
     glEnd();
-	*/
 }
 
 void renderentsphere(const extentity &e, float radius)
@@ -725,6 +724,7 @@ void renderentselection(const vec &o, const vec &ray, bool entmoving)
 
     if(enthover >= 0)
     {
+		
         entfocus(enthover, entselectionbox(e, eo, es)); // also ensures enthover is back in focus
         boxs3D(eo, es, 1);
         if(entmoving && entmovingshadow==1)
@@ -735,8 +735,11 @@ void renderentselection(const vec &o, const vec &ray, bool entmoving)
             (a = eo).y = eo.y - fmod(eo.y, worldsize); (b = es).y = a.x + worldsize; boxs3D(a, b, 1);  
             (a = eo).z = eo.z - fmod(eo.z, worldsize); (b = es).z = a.x + worldsize; boxs3D(a, b, 1);
         }
-        glColor3ub(150,0,0);
-        glLineWidth(5);
+        
+		// set the color of the box
+		glColor3ub(58,173,255);
+		glLineWidth(2);
+
         boxs(entorient, eo, es);
         glLineWidth(1);
     }
@@ -992,12 +995,12 @@ void newent(char *what, int *a1, int *a2, int *a3, int *a4, int *a5)
         newentity(type, *a1, *a2, *a3, *a4, *a5);
 }
 
-
 // New entity system
 void ent(char* name, char* desc)
 {
 	conoutf(CON_DEBUG, "%s %s", name, desc);
 }
+
 
 
 int entcopygrid;
@@ -1036,7 +1039,6 @@ void entpaste()
 
 // New Entity system
 COMMAND(ent, "ss");
-
 
 COMMAND(newent, "siiiii");
 COMMAND(delent, "");

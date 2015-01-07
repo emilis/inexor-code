@@ -503,6 +503,30 @@ void screenres(int *w, int *h)
 
 COMMAND(screenres, "ii");
 
+
+
+CEntity ENTSYS("PARTIKEL");
+
+void ent_attrib(char* s, int *i)
+{
+	ENTSYS.SetData(s, (int)*i);
+}
+
+// MODIFIED BY HANNI
+COMMAND(ent_attrib, "si");
+
+
+void print_attrib(char* s)
+{
+	int out;
+	ENTSYS.GetData(s, &out);
+	conoutf(CON_DEBUG, "%d", out);
+}
+
+COMMAND(print_attrib, "s");
+
+
+
 static int curgamma = 100;
 VARFP(gamma, 30, 100, 300,
 {

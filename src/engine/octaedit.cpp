@@ -12,6 +12,9 @@ void boxs(int orient, vec o, const vec &s)
 
     glBegin(GL_LINE_LOOP);
 
+	// set the color of the box
+	//glColor3ub(255,0,0);
+
     glVertex3fv(o.v); o[R[d]] += s[R[d]];
     glVertex3fv(o.v); o[C[d]] += s[C[d]];
     glVertex3fv(o.v); o[R[d]] -= s[R[d]];
@@ -23,9 +26,16 @@ void boxs(int orient, vec o, const vec &s)
 
 void boxs3D(const vec &o, vec s, int g)
 {
+	// set custom color
+	glColor3f(58.0f/255.0f,173.0f/255.0f,255.0f/255.0f);
+	glLineWidth(1);
+
     s.mul(g);
     loopi(6)
         boxs(i, o, s);
+
+	// reset color
+	//glColor3ub(255,255,255);
 }
 
 void boxsgrid(int orient, vec o, vec s, int g)

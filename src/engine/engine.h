@@ -13,23 +13,15 @@
 #include "model.h"
 
 
-/**
-* Include flowgraph header file
-*/
-#include "flowgraph/flowgraph.h"
-/**
-* Include bezier curve header file
-*/
+// Include bezier curve header file
 #include "flowgraph/curves/bezier.h"
-/**
-* Include curve renderer
-*/
-#include "flowgraph/curves/curverenderer.h"
-/**
-* Include advanced benchmarking
-*/
-//#include "flowgraph/tools/benchmark.h"
 
+// Bezier curve and renderer
+#include "flowgraph/curves/bezier.h"
+#include "flowgraph/curves/curverenderer.h"
+
+// New entity system
+#include "flowgraph/entities/entity.h"
 
 
 // GL_ARB_multitexture
