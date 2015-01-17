@@ -135,12 +135,7 @@ if(OS_LINUX)
     add_definitions(-D_FILE_OFFSET_BITS=64)
     
     # Define where to move the binary by install
-    set(BIN_INSTALL_DIR_PARENT "bin/linux")
-    if(X64)
-        set(BIN_INSTALL_DIR "${BIN_INSTALL_DIR_PARENT}/x86_64")
-    else()
-        set(BIN_INSTALL_DIR "${BIN_INSTALL_DIR_PARENT}/x86")
-    endif()
+    set(BIN_INSTALL_DIR "bin/linux/${PROJECT_ARCH}")
 endif()
 
 
@@ -281,14 +276,16 @@ if(OS_WINDOWS)
         add_definitions(-DI_USE_ATL)
     endif()
     
-    # Define where to move the binary by install
-    set(BIN_INSTALL_DIR_PARENT "bin/windows")
+    # Rename project_arch from x86_64 to 64 and x86 to 32 on windows:
     if(X64)
-        set(BIN_INSTALL_DIR "${BIN_INSTALL_DIR_PARENT}/64")
+        set(PROJECT_ARCH "64")
     else()
-        set(BIN_INSTALL_DIR "${BIN_INSTALL_DIR_PARENT}/32")
+        set(PROJECT_ARCH "32")
     endif()
-    
+
+    # Define where to move the binary by install
+    set(BIN_INSTALL_DIR_PARENT "bin/windows/${PROJECT_ARCH}")
+
     # Submodule providing windows-specific build stuff (e.g. libs)
     set(PLATFORM_FILE "${CMAKE_SOURCE_DIR}/src/platform_windows")
 endif()
