@@ -1,7 +1,7 @@
 add_definitions(-DCLIENT)
 
 if(OS_WINDOWS)
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} ws2_32 winmm)
+    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} opengl32)
     if(GNU) 
         add_definitions(-mwindows)
     elseif(MSVC)

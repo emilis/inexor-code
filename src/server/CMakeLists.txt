@@ -1,9 +1,9 @@
 add_definitions(-DSERVER -DSTANDALONE)
 
 if(OS_WINDOWS)
-    set(EXTRA_LIBS ${EXTRA_LIBS} opengl32 ws2_32 winmm)
+
 elseif(OS_LINUX})
-    set(EXTRA_LIBS ${EXTRA_LIBS} dl -pthread)
+    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl -pthread)
 #elseif(${BUILD_TARGET_WINDOWS}) not
 #    set(EXTRA_LIBS ${EXTRA_LIBS} socket nsl)
 endif()

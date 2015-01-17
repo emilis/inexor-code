@@ -224,8 +224,8 @@ if(OS_WINDOWS)
     # /Gy                                   = Enable function-level linking
     # /GR-                                  = Disable run-time type information
     # /Zi                                   = Enable program database
-    # /W3                                   = Warning level 3
-    set(I_COMPILER_FLAGS          "/MP /Gy /GR- /Zi /W3")
+    # /W2                                   = Warning level 2
+    set(I_COMPILER_FLAGS          "/MP /Gy /GR- /Zi /W2")
     # /MTd                                  = Multithreaded debug runtime
     # /Od                                   = Disable optimizations
     # /RTC1                                 = Enable basic run-time checks
@@ -251,7 +251,7 @@ if(OS_WINDOWS)
     endif()
 
     # Configure use of the sandbox.
-    option(USE_SANDBOX "Enable or disable use of the sandbox." ON)
+    option(USE_SANDBOX "Enable or disable use of the sandbox. (VS 2013 or later required)" ON)
     if(USE_SANDBOX AND NOT MSVC_VERSION EQUAL 1800)
         # The I_sandbox.lib static library is currently built with VS2013. It will
         # not link successfully with other VS versions.

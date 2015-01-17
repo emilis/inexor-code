@@ -72,6 +72,7 @@ if(OS_WINDOWS)
     elseif(MINGW)
         set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} -static-libgcc)
     endif()
+	set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} kernel32 ws2_32 winmm)
 endif()
 
 # enet networking library
