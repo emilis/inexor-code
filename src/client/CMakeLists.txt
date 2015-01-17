@@ -158,7 +158,7 @@ elseif(OS_MACOSX)
 else()
     add_executable(${SB_CLIENT_BINARY} ${CLIENT_SOURCES})
 endif()
-
+set(CEF_LIBRARIES "libcef libcef_dll_wrapper")
 target_link_libraries(${SB_CLIENT_BINARY}
     ${ENET_LIBRARIES}
     ${SDL2_LIBRARIES}
