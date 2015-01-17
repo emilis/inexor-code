@@ -152,10 +152,6 @@ sb_msvc_build_source_groups(CLIENT engine fpsgame shared)
 set(SB_CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")
 
 if(OS_WINDOWS)
-    set(CLIENT_HEADERS
-    ${CLIENT_HEADERS_SHARED}
-    ${CLIENT_HEADERS_ENGINE}
-    ${CLIENT_HEADERS_FPSGAME})
     add_executable(${SB_CLIENT_BINARY} WIN32 ${CLIENT_SOURCES} ${CLIENT_HEADERS})
 elseif(OS_MACOSX)
     add_executable(${SB_CLIENT_BINARY} MACOSX_BUNDLE ${CLIENT_SOURCES})

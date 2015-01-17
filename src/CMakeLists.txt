@@ -57,7 +57,7 @@ if(OS_WINDOWS)
 
                 foreach(GROUP ${GROUPS})
                     set(SOURCE_GROUP_${GROUP} "")
-                    foreach(FILE "${${TARGET}_SOURCES_${GROUP}};${${TARGET}_HEADERS_${GROUP}}")
+                    foreach(FILE ${CLIENT_SOURCES_${GROUP}})
                         set(SOURCE_GROUP_${GROUP}
                             ${SOURCE_GROUP_${GROUP}}
                             ${FILE}.cpp
@@ -100,11 +100,11 @@ include_directories(
 if(${BUILD_CLIENT})
     add_subdirectory(client)
 else()
-    message(WARNING "not building the client")
+    message(STATUS "not building the client")
 endif()
 
 if(${BUILD_SERVER})
     add_subdirectory(server)
 else()
-    message(WARNING "not building the server")
+    message(STATUS "not building the server")
 endif()

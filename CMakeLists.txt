@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 2.8.12.2)
 cmake_policy(SET CMP0012 NEW) #whats that?
 
+### Different Configuration Types (Debug release)
+
+# Only generate Debug and Release configuration types.
+set(CMAKE_CONFIGURATION_TYPES Debug Release)
+
+# First choice is Release
+set(CMAKE_BUILD_TYPE Release)
+
+# CMAKE_BUILD_TYPE should be specified when using Unix Makefiles.
+if(NOT CMAKE_BUILD_TYPE AND ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+  
+  message(WARNING "No CMAKE_BUILD_TYPE value selected, using ${CMAKE_BUILD_TYPE}")
+endif()
+
 # Project Name
 project(Inexor)
 
@@ -44,18 +58,6 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(OS_WINDOWS 1)
   message(STATUS "Platform: Windows ${PROJECT_ARCH}")
-endif()
-
-### Different Configuration Types (Debug release)
-
-# Only generate Debug and Release configuration types.
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
-
-set(CMAKE_BUILD_TYPE Release)
-# CMAKE_BUILD_TYPE should be specified when using Unix Makefiles.
-if(NOT CMAKE_BUILD_TYPE AND ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-  
-  message(WARNING "No CMAKE_BUILD_TYPE value selected, using ${CMAKE_BUILD_TYPE}")
 endif()
 
 # Directory paths
