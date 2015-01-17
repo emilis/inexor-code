@@ -6,12 +6,9 @@ find_package(PkgConfig)
 option(BUILD_CLIENT "Build the client" ${OPENGL_FOUND})
 option(BUILD_SERVER "Build the server" 1)
 
-if(${BUILD_TARGET_WINDOWS} AND ${CMAKE_C_COMPILER} MATCHES "mingw")
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} -static-libgcc)
-endif()
-
 message(STATUS "Detecting SDL2...")
-if(NOT ${BUILD_TARGET_WINDOWS} AND NOT ${BUILD_TARGET_OSX})
+
+if(OS_LINUX)
     if(NOT BUILD_SDL2_LOCAL AND PKG_CONFIG_FOUND)
         message(STATUS "Using pkg-config to detect SDL2...")
         pkg_check_modules(SDL2 QUIET sdl2)
@@ -31,7 +28,9 @@ if(NOT ${BUILD_TARGET_WINDOWS} AND NOT ${BUILD_TARGET_OSX})
     endif()
     set(SDL2_LIBRARIES "${SDL2_LIBRARIES};SDL2_image;SDL2_mixer")
     add_definitions(-D_REENTRANT -D_THREAD_SAFE)
-elseif(${BUILD_TARGET_OSX})
+endif()
+
+if(OS_MACOSX)
     find_library(SDL2_LIBRARY SDL2)
     find_library(SDL2_IMAGE_LIBRARY SDL2_image)
     find_library(SDL2_MIXER_LIBRARY SDL2_mixer)
@@ -45,9 +44,37 @@ elseif(${BUILD_TARGET_OSX})
     find_path(SDL2_IMAGE_INCLUDE_DIR SDL2_image.h)
     find_path(SDL2_MIXER_INCLUDE_DIR SDL2_mixer.h)
     set(SDL2_INCLUDE_DIRS "${SDL2_INCLUDE_DIR};${SDL2_IMAGE_INCLUDE_DIR};${SDL2_MIXER_INCLUDE_DIR}")
-    #include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_MIXER_INCLUDE_DIR})
 endif()
 
+if(OS_WINDOWS)
+    if(MSVC)
+        # Visual Studio filter groups
+        function(sb_msvc_build_source_groups TARGET)
+            if(MSVC)
+                message(STATUS "Setting up source groups.")
+                string(TOUPPER "${TARGET}" TARGET)
+                string(TOUPPER "${ARGN}" GROUPS)
+
+                foreach(GROUP ${GROUPS})
+                    set(SOURCE_GROUP_${GROUP} "")
+                    foreach(FILE "${${TARGET}_SOURCES_${GROUP}};${${TARGET}_HEADERS_${GROUP}}")
+                        set(SOURCE_GROUP_${GROUP}
+                            ${SOURCE_GROUP_${GROUP}}
+                            ${FILE}.cpp
+                            ${FILE}.h)
+                        message(STATUS "Adding ${TARGET}_{SOURCES,HEADERS}_${GROUP} -> ${FILE}")
+                    endforeach(FILE)
+                    string(TOLOWER ${GROUP} GROUPNAME)
+                    source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}}})
+                endforeach(GROUP)
+            endif()
+        endfunction()
+    elseif(MINGW)
+        set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} -static-libgcc)
+    endif()
+endif()
+
+# enet networking library
 if(NOT DEFINED ENET_LIBRARIES AND NOT DEFINED LOCAL_ENET)
     set(LOCAL_ENET 1 CACHE INTERNAL "Use local enet library")
 elseif(DEFINED LOCAL_ENET)
@@ -67,35 +94,8 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/shared
     ${CMAKE_CURRENT_SOURCE_DIR}/engine
-    ${CMAKE_CURRENT_SOURCE_DIR}/game
+    ${CMAKE_CURRENT_SOURCE_DIR}/fpsgame
 )
-
-# Builds source groups for MSVC
-function(sb_msvc_build_source_groups TARGET)
-    if(MSVC)
-        message(STATUS "Setting up source groups.")
-
-        string(TOUPPER "${TARGET}" TARGET)
-        string(TOUPPER "${ARGN}" GROUPS)
-
-        foreach(GROUP ${GROUPS})
-            set(SOURCE_GROUP_${GROUP} "")
-            foreach(FILE "${${TARGET}_SOURCES_${GROUP}};${${TARGET}_HEADERS_${GROUP}}")
-                set(SOURCE_GROUP_${GROUP}
-                    ${SOURCE_GROUP_${GROUP}}
-                    ${FILE}.cpp
-                    ${FILE}.h)
-                message(STATUS "Adding ${TARGET}_{SOURCES,HEADERS}_${GROUP} -> ${FILE}")
-            endforeach(FILE)
-            string(SUBSTRING ${GROUP} 0 1 GROUPNAME1)
-            string(TOLOWER ${GROUP} GROUPNAME)
-            if(GROUP_NAME_CAMEL_CASE)
-                string(REGEX REPLACE "^.(.*)" "${GROUPNAME1}\\1" GROUPNAME "${GROUPNAME}")
-            endif()
-            source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}}})
-        endforeach(GROUP)
-    endif()
-endfunction()
 
 if(${BUILD_CLIENT})
     add_subdirectory(client)

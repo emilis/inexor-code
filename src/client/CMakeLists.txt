@@ -1,16 +1,16 @@
 add_definitions(-DCLIENT)
 
-if(${BUILD_TARGET_WINDOWS})
+if(OS_WINDOWS)
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} ws2_32 winmm)
     if(GNU) 
         add_definitions(-mwindows)
     elseif(MSVC)
         set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dbghelp)
     endif()
-elseif(${BUILD_TARGET_LINUX})
+elseif(OS_LINUX)
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl rt)
-elseif(${BUILD_TARGET_SOLARIS})
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} socket nsl)
+#elseif(${BUILD_TARGET_SOLARIS})
+ #   set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} socket nsl)
 endif()
 
 set(CLIENT_SOURCES_SHARED
@@ -128,11 +128,11 @@ set(CLIENT_SOURCES
     ${CLIENT_SOURCES_ENGINE}
     ${CLIENT_SOURCES_FPSGAME})
 
-if(${BUILD_TARGET_OSX})
+if(OS_MACOSX)
     set(CLIENT_SOURCES
         ${CLIENT_SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/../engine/macutils.mm)
-elseif(${BUILD_TARGET_WINDOWS})
+elseif(OS_WINDOWS)
     option(CLIENT_USE_WINDRES "Add icon to executable." 0)
 
     if(${CLIENT_USE_WINDRES})
@@ -151,9 +151,13 @@ sb_msvc_build_source_groups(CLIENT engine fpsgame shared)
 
 set(SB_CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")
 
-if(WIN32)
-    add_executable(${SB_CLIENT_BINARY} WIN32 ${CLIENT_SOURCES})
-elseif(APPLE)
+if(OS_WINDOWS)
+    set(CLIENT_HEADERS
+    ${CLIENT_HEADERS_SHARED}
+    ${CLIENT_HEADERS_ENGINE}
+    ${CLIENT_HEADERS_FPSGAME})
+    add_executable(${SB_CLIENT_BINARY} WIN32 ${CLIENT_SOURCES} ${CLIENT_HEADERS})
+elseif(OS_MACOSX)
     add_executable(${SB_CLIENT_BINARY} MACOSX_BUNDLE ${CLIENT_SOURCES})
 else()
     add_executable(${SB_CLIENT_BINARY} ${CLIENT_SOURCES})
@@ -171,8 +175,8 @@ if(MSVC)
     set_property(TARGET ${SB_CLIENT_BINARY} PROPERTY FOLDER "executables")
 endif()
 
-install(TARGETS
-    ${SB_CLIENT_BINARY}
-    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
-    ARCHIVE DESTINATION ${INSTALL_ARCHIVE_DIR})
+#install(TARGETS
+ #   ${SB_CLIENT_BINARY}
+  #  RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
+  #  LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
+  #  ARCHIVE DESTINATION ${INSTALL_ARCHIVE_DIR})
