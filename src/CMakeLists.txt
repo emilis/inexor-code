@@ -6,8 +6,9 @@ find_package(PkgConfig)
 option(BUILD_CLIENT "Build the client" ${OPENGL_FOUND})
 option(BUILD_SERVER "Build the server" 1)
 
-message(STATUS "Detecting SDL2...")
+message(STATUS "Detecting Libs...")
 
+# Linux Libraries for Server AND Client
 if(OS_LINUX)
     if(NOT BUILD_SDL2_LOCAL AND PKG_CONFIG_FOUND)
         message(STATUS "Using pkg-config to detect SDL2...")
@@ -30,6 +31,7 @@ if(OS_LINUX)
     add_definitions(-D_REENTRANT -D_THREAD_SAFE)
 endif()
 
+# MACOSX Libraries for Server AND Client
 if(OS_MACOSX)
     find_library(SDL2_LIBRARY SDL2)
     find_library(SDL2_IMAGE_LIBRARY SDL2_image)
@@ -46,30 +48,9 @@ if(OS_MACOSX)
     set(SDL2_INCLUDE_DIRS "${SDL2_INCLUDE_DIR};${SDL2_IMAGE_INCLUDE_DIR};${SDL2_MIXER_INCLUDE_DIR}")
 endif()
 
+# Windows Libraries for Server AND Client
 if(OS_WINDOWS)
-    if(MSVC)
-        # Visual Studio filter groups
-        function(sb_msvc_build_source_groups TARGET)
-            if(MSVC)
-                message(STATUS "Setting up source groups.")
-                string(TOUPPER "${TARGET}" TARGET)
-                string(TOUPPER "${ARGN}" GROUPS)
-
-                foreach(GROUP ${GROUPS})
-                    set(SOURCE_GROUP_${GROUP} "")
-                    foreach(FILE ${CLIENT_SOURCES_${GROUP}})
-                        set(SOURCE_GROUP_${GROUP}
-                            ${SOURCE_GROUP_${GROUP}}
-                            ${FILE}.cpp
-                            ${FILE}.h)
-                        message(STATUS "Adding ${TARGET}_{SOURCES,HEADERS}_${GROUP} -> ${FILE}")
-                    endforeach(FILE)
-                    string(TOLOWER ${GROUP} GROUPNAME)
-                    source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}}})
-                endforeach(GROUP)
-            endif()
-        endfunction()
-    elseif(MINGW)
+    if(MINGW)
         set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} -static-libgcc)
     endif()
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} kernel32 ws2_32 winmm)
@@ -88,6 +69,53 @@ if(${LOCAL_ENET})
     message(STATUS "Building local ENet")
     add_subdirectory(libraries/enet)
 endif()
+
+# Set names of Source Files (prepend correct path)
+function(create_names TARGET)
+    message(STATUS "Appending names")
+    string(TOUPPER "${TARGET}" TARGET)
+    string(TOUPPER "${ARGN}" GROUPS)
+
+    foreach(GROUP ${GROUPS})
+        
+        # Sources:
+        set(SOURCE_GROUP_${GROUP} "")
+        foreach(FILE ${${TARGET}_SOURCES_${GROUP}})
+            set(SOURCE_GROUP_${GROUP}
+                ${SOURCE_GROUP_${GROUP}}
+                ${CMAKE_CURRENT_SOURCE_DIR}/${FILE})
+            message(STATUS "Prepend path for ${TARGET}_{SOURCES}_${GROUP} -> ${FILE}")
+        endforeach(FILE)
+        
+        # Replace old Array
+        set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}}) 
+        
+        # For Visual Studio create filter groups as well
+        if(MSVC)
+            message(STATUS "Setting up source groups.")
+            
+            # Prepended .cpp Extension needed
+       #     foreach(FILE ${SOURCE_GROUP_${GROUP}})
+       #         set()
+       #     endforeach()
+            
+            string(TOLOWER ${GROUP} GROUPNAME)
+            source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}}})
+            
+            # We furthermore want the Header files in our Solution Explorer:
+            
+            set(HEADER_GROUP_${GROUP} "")
+            foreach(FILE ${${TARGET}_HEADERS_${GROUP}})
+                set(HEADER_GROUP_${GROUP}
+                    ${HEADER_GROUP_${GROUP}}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.h)
+                message(STATUS "Set sourcegroup for ${TARGET}_{HEADERS}_${GROUP} -> ${FILE}")
+            endforeach(FILE)
+            source_group(${GROUPNAME} FILES ${HEADER_GROUP_${GROUP}}})
+        endif()
+
+    endforeach(GROUP)
+endfunction()
 
 include_directories(
     ${ENET_INCLUDE_DIRS}
