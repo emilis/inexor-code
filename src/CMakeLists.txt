@@ -83,35 +83,37 @@ function(create_names TARGET)
         foreach(FILE ${${TARGET}_SOURCES_${GROUP}})
             set(SOURCE_GROUP_${GROUP}
                 ${SOURCE_GROUP_${GROUP}}
-                ${CMAKE_CURRENT_SOURCE_DIR}/${FILE})
-            message(STATUS "Prepend path for ${TARGET}_{SOURCES}_${GROUP} -> ${FILE}")
+                ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE})
+            message(STATUS "Prepend path for ${FILE} -> ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE}")
         endforeach(FILE)
         
-        # Replace old Array
-        set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}}) 
+        # Replace old Source Array
+        set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}} PARENT_SCOPE)
         
         # For Visual Studio create filter groups as well
         if(MSVC)
             message(STATUS "Setting up source groups.")
             
             # Prepended .cpp Extension needed
-       #     foreach(FILE ${SOURCE_GROUP_${GROUP}})
-       #         set()
-       #     endforeach()
-            
-            string(TOLOWER ${GROUP} GROUPNAME)
-            source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}}})
-            
-            # We furthermore want the Header files in our Solution Explorer:
-            
+            set(SOURCE_GROUP_${GROUP}__ "")
+            foreach(FILE ${SOURCE_GROUP_${GROUP}})
+                set(SOURCE_GROUP_${GROUP}__ ${SOURCE_GROUP_${GROUP}__} "${FILE}.cpp")
+            endforeach()
+
+            # We want the Header files in our Solution Explorer as well:
             set(HEADER_GROUP_${GROUP} "")
             foreach(FILE ${${TARGET}_HEADERS_${GROUP}})
                 set(HEADER_GROUP_${GROUP}
                     ${HEADER_GROUP_${GROUP}}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/${FILE}.h)
-                message(STATUS "Set sourcegroup for ${TARGET}_{HEADERS}_${GROUP} -> ${FILE}")
+                    ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE}.h)
             endforeach(FILE)
-            source_group(${GROUPNAME} FILES ${HEADER_GROUP_${GROUP}}})
+
+            # Replace old Header Array
+            set(${TARGET}_HEADERS_${GROUP} ${HEADER_GROUP_${GROUP}} PARENT_SCOPE)
+ 
+            # Create filter:
+            string(TOLOWER ${GROUP} GROUPNAME)
+            source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}__} ${HEADER_GROUP_${GROUP}})
         endif()
 
     endforeach(GROUP)

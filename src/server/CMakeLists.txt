@@ -49,6 +49,14 @@ set(SERVER_SOURCES
     ${SERVER_SOURCES_ENGINE}
     ${SERVER_SOURCES_FPSGAME})
 
+# Add headers to the VS filter groups on windows
+if(MSVC)
+    set(SERVER_HEADERS
+        ${SERVER_HEADERS_SHARED}
+        ${SERVER_HEADERS_ENGINE}
+        ${SERVER_HEADERS_FPSGAME})
+endif()
+
 # Linux Libraries and Configuration
 if(OS_LINUX})
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl -pthread)
@@ -62,7 +70,7 @@ add_definitions(-DSERVER -DSTANDALONE)
 
 # Assemble executable in specific mode
 if(OS_WINDOWS)
-    add_executable(${SB_SERVER_BINARY} WIN32 ${SERVER_SOURCES})
+    add_executable(${SB_SERVER_BINARY} WIN32 ${SERVER_SOURCES} ${SERVER_HEADERS})
 elseif(OS_MACOSX)
     add_executable(${SB_SERVER_BINARY} MACOSX_BUNDLE ${SERVER_SOURCES})
 else()

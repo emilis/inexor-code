@@ -125,6 +125,8 @@ set(CLIENT_SOURCES
     ${CLIENT_SOURCES_ENGINE}
     ${CLIENT_SOURCES_FPSGAME})
 
+
+
 # Set Client definition
 add_definitions(-DCLIENT)
 
@@ -146,6 +148,11 @@ if(OS_WINDOWS)
 
     if(MSVC)
         set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dbghelp)
+        
+        set(CLIENT_HEADERS # just needed for the VS-filters
+            ${CLIENT_HEADERS_SHARED}
+            ${CLIENT_HEADERS_ENGINE}
+            ${CLIENT_HEADERS_FPSGAME})
     else()
         add_definitions(-mwindows) 
     endif()
