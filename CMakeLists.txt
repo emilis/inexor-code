@@ -78,6 +78,7 @@ if(OS_LINUX)
     set(I_LIBTYPE                 SHARED)
     # -fomit-frame-pointer            = Don't keep the frame pointer for functions that don't need one
     # -fno-strict-aliasing            = Avoid assumptions regarding non-aliasing of objects of different types
+    # -fsigned-char                   = Let the type char be signed, like signed char.
     # -fPIC                           = Generate position-independent code for shared libraries
     # -fstack-protector               = Protect some vulnerable functions from stack-smashing (security feature)
     # -funwind-tables                 = Support stack unwinding for backtrace()
@@ -86,15 +87,15 @@ if(OS_LINUX)
     # -pipe                           = Use pipes rather than temporary files for communication between build stages
     # -pthread                        = Use the pthread library
     # -Wall                           = Enable all warnings
-    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -pthread -Wall")
+    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -pthread -Wall")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
     # -fno-exceptions                 = Disable exceptions
     # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -fvisibility-inlines-hidden     = Give hidden visibility to inlined class member functions
-    # -std=gnu++11                    = Use the C++11 language standard including GNU extensions
-    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden -std=gnu++11")
+    ## -std=gnu++11                    = Use the C++11 language standard including GNU extensions
+    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden") # -std=gnu++11")
     # -Og                             = Enable optimizations that do not interfere with debugging
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
@@ -163,7 +164,7 @@ if(OS_MACOSX)
     # -std=gnu++11                    = Use the C++11 language standard including GNU extensions
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -Wno-narrowing -Wsign-compare") # -std=gnu++11 
+    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -std=gnu++11 -Wno-narrowing -Wsign-compare")
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
