@@ -262,7 +262,7 @@ if(OS_WINDOWS)
     endif()
 
     # Configure use of ATL (Active Template Library)
-    option(USE_ATL "Enable or disable use of ATL." ON)
+    option(USE_ATL "Enable or disable use of ATL." OFF)
     if(USE_ATL)
         # Determine if the Visual Studio install supports ATL.
         get_filename_component(VC_BIN_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
