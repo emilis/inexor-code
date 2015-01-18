@@ -163,7 +163,7 @@ if(OS_MACOSX)
     # -std=gnu++11                    = Use the C++11 language standard including GNU extensions
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -std=gnu++11 -Wno-narrowing -Wsign-compare")
+    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -Wno-narrowing -Wsign-compare") # -std=gnu++11 
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
@@ -339,7 +339,7 @@ if(EXISTS ${PLATFORM_FILE})
     add_subdirectory(${PLATFORM_FILE})
     link_directories(${PLATFORM_LINK_DIRECTORIES})
     include_directories(${PLATFORM_INCLUDE_DIRECTORIES})
-else()
+elseif(NOT OS_LINUX)
     message(WARNING "Could not find platform definition. (${PLATFORM_FILE})")
 endif()
 
