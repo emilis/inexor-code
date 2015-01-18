@@ -321,11 +321,7 @@ file(MAKE_DIRECTORY        ${BUILD_TEMP_INCLUDE_DIR})
 # Install paths
 
 if(NOT BUILD_INSTALL_DIR)
-    if(${RELEASE_BUILD})
-        set(BUILD_INSTALL_DIR ${PROJECT_SOURCE_DIR})
-    else()
-        set(BUILD_INSTALL_DIR ${PROJECT_SOURCE_DIR})
-    endif()
+    set(BUILD_INSTALL_DIR ${PROJECT_SOURCE_DIR})
 endif()
 
 if(NOT BUILD_INSTALL_BIN_DIR)
@@ -347,4 +343,18 @@ else()
     message(WARNING "Could not find platform definition. (${PLATFORM_FILE})")
 endif()
 
+# Go for the next folder:
 add_subdirectory(src)
+
+# Install command:
+if(OS_WINDOWS)
+    set(ADDITIONAL_FILES readme.md inexor.bat server.bat server-init.cfg)
+elseif(OS_MACOSX)
+    set(ADDITIONAL_FILES readme.md)
+else()
+    set(ADDITIONAL_FILES readme.md inexor_unix server-init.cfg)
+endif()
+
+install(
+    FILES ${ADDITIONAL_FILES}
+    DESTINATION ${BUILD_INSTALL_DIR})
