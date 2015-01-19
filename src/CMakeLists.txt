@@ -100,6 +100,9 @@ function(create_names TARGET)
                 set(SOURCE_GROUP_${GROUP}__ ${SOURCE_GROUP_${GROUP}__} "${FILE}.cpp")
             endforeach()
 
+            # Since we add the headers as well, tell the parent to use those extensions (replace parent array)
+            set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}__} PARENT_SCOPE)
+
             # We want the Header files in our Solution Explorer as well:
             set(HEADER_GROUP_${GROUP} "")
             foreach(FILE ${${TARGET}_HEADERS_${GROUP}})
