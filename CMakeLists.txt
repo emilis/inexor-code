@@ -219,7 +219,8 @@ if(OS_WINDOWS)
     # /GR-                                  = Disable run-time type information
     # /Zi                                   = Enable program database
     # /W2                                   = Warning level 2
-    set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2")
+    # /wd"4305"                             = Ignore "truncation from 'double' to 'float'" warning
+    set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2 -wd\"4305\"")
     # /MTd                                  = Multithreaded debug runtime
     # /Od                                   = Disable optimizations
     # /RTC1                                 = Enable basic run-time checks
