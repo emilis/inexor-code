@@ -1,4 +1,4 @@
-
+# Client Project Definitions
 
 set( SERVER_SOURCES_SHARED
     shared/crypto
@@ -40,6 +40,12 @@ set( SERVER_HEADERS_FPSGAME
     fpsgame/game
     fpsgame/hideandseek )
 
+# Set Binary name
+set(SERVER_BINARY server CACHE INTERNAL "Server binary name.")
+
+# Set Server Definition
+add_definitions(-DSERVER -DSTANDALONE)
+
 # Prepend source folder to name 
 # For VS create filters as well
 create_names(SERVER engine fpsgame shared)
@@ -62,34 +68,28 @@ if(OS_LINUX})
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl -pthread)
 endif()
 
-# Set Binary name
-set(SB_SERVER_BINARY server CACHE INTERNAL "Server binary name.")
-
-# Set Server Definition
-add_definitions(-DSERVER -DSTANDALONE)
-
 # Assemble executable in specific mode
 if(OS_WINDOWS)
-    add_executable(${SB_SERVER_BINARY} WIN32 ${SERVER_SOURCES} ${SERVER_HEADERS})
+    add_executable(${SERVER_BINARY} WIN32 ${SERVER_SOURCES} ${SERVER_HEADERS})
 elseif(OS_MACOSX)
-    add_executable(${SB_SERVER_BINARY} MACOSX_BUNDLE ${SERVER_SOURCES})
+    add_executable(${SERVER_BINARY} MACOSX_BUNDLE ${SERVER_SOURCES})
 else()
-    add_executable(${SB_SERVER_BINARY} ${SERVER_SOURCES})
+    add_executable(${SERVER_BINARY} ${SERVER_SOURCES})
 endif()
 
-target_link_libraries(${SB_SERVER_BINARY}
+target_link_libraries(${SERVER_BINARY}
     ${ENET_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${EXTRA_LIBS})
     
 if(MSVC)
-    set_property(TARGET ${SB_SERVER_BINARY} PROPERTY FOLDER "executables")
+    set_property(TARGET ${SERVER_BINARY} PROPERTY FOLDER "executables")
 endif()
 
 # Install Binary
-install(TARGETS
-    ${SB_SERVER_BINARY}
-    RUNTIME DESTINATION ${BUILD_INSTALL_BIN_DIR}
-    LIBRARY DESTINATION ${BUILD_INSTALL_BIN_DIR}
-    ARCHIVE DESTINATION ${BUILD_INSTALL_BIN_DIR})
+#install(TARGETS
+ #   ${SERVER_BINARY}
+  #  RUNTIME DESTINATION ${BUILD_INSTALL_BIN_DIR}
+  #  LIBRARY DESTINATION ${BUILD_INSTALL_BIN_DIR}
+  #  ARCHIVE DESTINATION ${BUILD_INSTALL_BIN_DIR})

@@ -1,3 +1,5 @@
+## Definitions for both the Client and the Server
+
 find_package(ZLIB REQUIRED)
 
 find_package(OpenGL)
@@ -56,7 +58,7 @@ if(OS_WINDOWS)
     set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} kernel32 ws2_32 winmm)
 endif()
 
-# enet networking library
+# ENet networking library
 if(NOT DEFINED ENET_LIBRARIES AND NOT DEFINED LOCAL_ENET)
     set(LOCAL_ENET 1 CACHE INTERNAL "Use local enet library")
 elseif(DEFINED LOCAL_ENET)
@@ -83,8 +85,8 @@ function(create_names TARGET)
         foreach(FILE ${${TARGET}_SOURCES_${GROUP}})
             set(SOURCE_GROUP_${GROUP}
                 ${SOURCE_GROUP_${GROUP}}
-                ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE})
-            message(STATUS "Prepend path for ${FILE} -> ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE}")
+                ${SOURCE_DIR}/${FILE})
+            message(STATUS "Prepend path for ${FILE} (becoming ${SOURCE_DIR}/${FILE})")
         endforeach(FILE)
         
         # Replace old Source Array
@@ -92,7 +94,7 @@ function(create_names TARGET)
         
         # For Visual Studio create filter groups as well
         if(MSVC)
-            message(STATUS "Setting up source groups.")
+            message(STATUS "Setting up filter groups.")
             
             # Prepended .cpp Extension needed
             set(SOURCE_GROUP_${GROUP}__ "")
@@ -108,7 +110,7 @@ function(create_names TARGET)
             foreach(FILE ${${TARGET}_HEADERS_${GROUP}})
                 set(HEADER_GROUP_${GROUP}
                     ${HEADER_GROUP_${GROUP}}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/../${FILE}.h)
+                    ${SOURCE_DIR}/${FILE}.h)
             endforeach(FILE)
 
             # Replace old Header Array

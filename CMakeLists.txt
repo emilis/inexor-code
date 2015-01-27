@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8.7)
-cmake_policy(SET CMP0012 NEW) #whats that?
 
 ### Different Configuration Types (Debug release)
 
@@ -18,16 +17,19 @@ endif()
 # Project Name
 project(Inexor)
 
-# Warning if paths arent set well
-get_filename_component(SRCDIR "${CMAKE_SOURCE_DIR}" REALPATH)
-get_filename_component(BINDIR "${CMAKE_BINARY_DIR}" REALPATH) 
-
-if(${SRCDIR} STREQUAL ${BINDIR})
-    message(FATAL_ERROR "Keep your directories clean, don't generate the project-files in the main directory! ${SRCDIR} ${BINDIR}")
-endif()
-
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
+
+# Warning if paths arent set well
+get_filename_component(MAINDIR "${CMAKE_SOURCE_DIR}" REALPATH)  # Main inexor folder
+get_filename_component(BINDIR "${CMAKE_BINARY_DIR}" REALPATH)  # Where it generates the projects into
+
+if(${MAINDIR} STREQUAL ${BINDIR})
+    message(FATAL_ERROR "Keep your directories clean, don't generate the project-files in the main directory! ${MAINDIR} ${BINDIR}")
+endif()
+
+# Set the path to inexor/src/ explicitly to simplify some following definitions
+set(SOURCE_DIR ${MAINDIR}/src)
 
 ### Platform Detection:
 
@@ -59,10 +61,6 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set(OS_WINDOWS 1)
   message(STATUS "Platform: Windows ${PROJECT_ARCH}")
 endif()
-
-# Directory paths
-set(BINDIR_DEBUG    "${BINDIR}/Debug")
-set(BINDIR_RELEASE  "${BINDIR}/Release")
 
 # Allow C++ programs to use stdint.h macros specified in the C99 standard that
 # aren't in the C++ standard (e.g. UINT8_MAX, INT64_MIN, etc).
@@ -136,7 +134,7 @@ if(OS_LINUX)
     add_definitions(-D_FILE_OFFSET_BITS=64)
     
     # Define where to move the binary by install
-    set(BIN_INSTALL_DIR "bin/linux/${PROJECT_ARCH}")
+    set(EXE_SUB_DIR "bin/linux/${PROJECT_ARCH}")
 endif()
 
 
@@ -203,10 +201,10 @@ if(OS_MACOSX)
     endif()
     
     # Define where to move the binary by install
-    set(BIN_INSTALL_DIR "bin/mac/${CMAKE_OSX_ARCHITECTURES}")
+    set(EXE_SUB_DIR "bin/mac/${CMAKE_OSX_ARCHITECTURES}")
     
     # Submodule providing osx-specific build stuff (e.g. libs)
-    set(PLATFORM_FILE "${CMAKE_SOURCE_DIR}/src/platform_mac")
+    set(PLATFORM_FILE "${SOURCE_DIR}/platform_mac")
 endif()
 
 
@@ -241,24 +239,25 @@ if(OS_WINDOWS)
     # -DWIN32 -D_WIN32 -D_WINDOWS           = Windows platform
     # -DNOMINMAX                            = Use the standard's templated min/max
     # -D_HAS_EXCEPTIONS=0                   = Disable exceptions
-    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DNOMINMAX -D_HAS_EXCEPTIONS=0)
+    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DWINDOWS -DNOMINMAX -D_HAS_EXCEPTIONS=0)
     if(X64)
         add_definitions(-DWIN64)
     endif()
 
     # Configure use of the sandbox.
-    option(USE_SANDBOX "Enable or disable use of the sandbox. (VS 2013 or later required)" ON)
-    if(USE_SANDBOX AND NOT MSVC_VERSION EQUAL 1800)
+    set(USE_SANDBOX OFF)
+    if(MSVC_VERSION EQUAL 1800)
         # The I_sandbox.lib static library is currently built with VS2013. It will
         # not link successfully with other VS versions.
-        set(USE_SANDBOX OFF)
+        set(USE_SANDBOX ON)
+        option(USE_SANDBOX "Enable or disable use of the sandbox. (VS 2013 or later required)" ON)
     endif()
 
     if(USE_SANDBOX)
-        # Definition required by I_sandbox.lib.
+        # Definition required by CEF_sandbox.lib.
         add_definitions(-DPSAPI_VERSION=1)
         # Definition used by apps to test if the sandbox is enabled.
-        add_definitions(-DI_USE_SANDBOX)
+        add_definitions(-DCEF_USE_SANDBOX)
     endif()
 
     # Configure use of ATL (Active Template Library)
@@ -285,10 +284,10 @@ if(OS_WINDOWS)
     endif()
 
     # Define where to move the binary by install
-    set(BIN_INSTALL_DIR_PARENT "bin/windows/${PROJECT_ARCH}")
+    set(EXE_SUB_DIR "bin/windows/${PROJECT_ARCH}")
 
     # Submodule providing windows-specific build stuff (e.g. libs)
-    set(PLATFORM_FILE "${CMAKE_SOURCE_DIR}/src/platform_windows")
+    set(PLATFORM_FILE "${SOURCE_DIR}/platform_windows")
 endif()
 
 # Merge compiler/linker flags.
@@ -313,27 +312,16 @@ message(STATUS "EXE_LINKER_FLAGS:               ${CMAKE_EXE_LINKER_FLAGS}")
 message(STATUS "EXE_LINKER_FLAGS_DEBUG:         ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
 message(STATUS "EXE_LINKER_FLAGS_RELEASE:       ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
-# Temp file directories
-set(BUILD_TEMP_DIR         ${CMAKE_BINARY_DIR}/tmp)
-set(BUILD_TEMP_INCLUDE_DIR ${BUILD_TEMP_DIR}/include)
-file(MAKE_DIRECTORY        ${BUILD_TEMP_DIR})
-file(MAKE_DIRECTORY        ${BUILD_TEMP_INCLUDE_DIR})
+### Install paths
 
-# Install paths
+# Set output path for the compiled executable
+set(EXE_DIR "${PROJECT_SOURCE_DIR}/${EXE_SUB_DIR}")
 
-if(NOT BUILD_INSTALL_DIR)
-    set(BUILD_INSTALL_DIR ${PROJECT_SOURCE_DIR})
-endif()
+set(INSTALL_RESOURCES_DIR   ${BUILD_INSTALL_DIR}/resources  CACHE INTERNAL "")
 
-if(NOT BUILD_INSTALL_BIN_DIR)
-    set(BUILD_INSTALL_BIN_DIR "${BUILD_INSTALL_DIR}/${BIN_INSTALL_DIR}")
+message(STATUS "Generating Project-Files to ${CMAKE_CURRENT_BINARY_DIR}")
+message(STATUS " - Resulting Executable goes to ${EXE_SUB_DIR}") 
 
-    set(INSTALL_HEADER_DIR      ${BUILD_TEMP_INCLUDE_DIR})
-
-    set(INSTALL_RESOURCES_DIR   ${BUILD_INSTALL_DIR}/resources  CACHE INTERNAL "")
-
-    message(STATUS "Installing to ${BIN_INSTALL_DIR} (bin: ${CMAKE_CURRENT_BINARY_DIR}, resources: ${INSTALL_RESOURCES_DIR}, header: ${INSTALL_HEADER_DIR})")
-endif()
 
 if(EXISTS ${PLATFORM_FILE})
     message(STATUS "Found platform definition. (${PLATFORM_FILE})")
@@ -356,6 +344,6 @@ else()
     set(ADDITIONAL_FILES readme.md inexor_unix server-init.cfg)
 endif()
 
-install(
-    FILES ${ADDITIONAL_FILES}
-    DESTINATION ${BUILD_INSTALL_DIR})
+#install(
+#    FILES ${ADDITIONAL_FILES}
+#    DESTINATION ${PROJECT_SOURCE_DIR})
