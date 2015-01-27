@@ -1,5 +1,10 @@
 ## Definitions for both the Client and the Server
 
+# Wrong folder: User attempted to generate from src instead of the main-inexor folder
+if(NOT DEFINED PROJECT_ARCH)
+    message(FATAL_ERROR "You are building from the wrong folder! ${MAINDIR} should point to the Main directory of Inexor")
+endif()
+
 find_package(ZLIB REQUIRED)
 
 find_package(OpenGL)
