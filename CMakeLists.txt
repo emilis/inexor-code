@@ -219,21 +219,21 @@ if(OS_WINDOWS)
     # /GR-                                  = Disable run-time type information
     # /Zi                                   = Enable program database
     # /W2                                   = Warning level 2
-    set(I_COMPILER_FLAGS          "/MP /Gy /GR- /Zi /W2")
+    set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2")
     # /MTd                                  = Multithreaded debug runtime
     # /Od                                   = Disable optimizations
     # /RTC1                                 = Enable basic run-time checks
-    set(I_COMPILER_FLAGS_DEBUG    "/MTd /RTC1 /Od")
+    set(I_COMPILER_FLAGS_DEBUG    "-MTd -RTC1 -Od")
     # /MT                                   = Multithreaded release runtime
     # /O2                                   = Optimize for maximum speed
     # /Ob2                                  = Inline any suitable function
     # /GF                                   = Enable string pooling
     # /D NDEBUG /D _NDEBUG                  = Not a debug build
-    set(I_COMPILER_FLAGS_RELEASE  "/MT /O2 /Ob2 /GF /D NDEBUG /D _NDEBUG")
+    set(I_COMPILER_FLAGS_RELEASE  "-MT -O2 -Ob2 -GF -DNDEBUG -D_NDEBUG")
     # /DEBUG                                = Generate debug information
-    set(I_LINKER_FLAGS_DEBUG      "/DEBUG")
+    set(I_LINKER_FLAGS_DEBUG      "-DEBUG")
     # /MANIFEST:NO                          = No default manifest
-    set(I_EXE_LINKER_FLAGS        "/MANIFEST:NO")
+    set(I_EXE_LINKER_FLAGS        "-MANIFEST:NO")
 
     # Standard definitions
     # -DWIN32 -D_WIN32 -D_WINDOWS           = Windows platform
@@ -320,7 +320,7 @@ set(EXE_DIR "${PROJECT_SOURCE_DIR}/${EXE_SUB_DIR}")
 set(INSTALL_RESOURCES_DIR   ${BUILD_INSTALL_DIR}/resources  CACHE INTERNAL "")
 
 message(STATUS "Generating Project-Files to ${CMAKE_CURRENT_BINARY_DIR}")
-message(STATUS " - Resulting Executable goes to ${EXE_SUB_DIR}") 
+message(STATUS " - Resulting Executable goes to ${EXE_DIR}")
 
 
 if(EXISTS ${PLATFORM_FILE})
