@@ -345,6 +345,6 @@ else()
     set(ADDITIONAL_FILES readme.md inexor_unix server-init.cfg)
 endif()
 
-#install(
-#    FILES ${ADDITIONAL_FILES}
-#    DESTINATION ${PROJECT_SOURCE_DIR})
+install(
+    FILES ${ADDITIONAL_FILES}
+    DESTINATION ${PROJECT_SOURCE_DIR})
