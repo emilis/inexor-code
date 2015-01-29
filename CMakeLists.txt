@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 # CMAKE_BUILD_TYPE should be specified when using Unix Makefiles.
 if(NOT CMAKE_BUILD_TYPE AND ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-  
+
   message(WARNING "No CMAKE_BUILD_TYPE value selected, using ${CMAKE_BUILD_TYPE}")
 endif()
 
@@ -124,7 +124,7 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
 
     # Allow the Large File Support (LFS) interface to replace the old interface.
     add_definitions(-D_FILE_OFFSET_BITS=64)
-    
+
     # Define where to move the binary by install
     set(EXE_SUB_DIR "bin/linux/${PROJECT_ARCH}")
 endif()
@@ -160,7 +160,7 @@ if(OS_MACOSX)
     # -O3                             = Optimize for maximum speed plus a few extras
     set(I_COMPILER_FLAGS_RELEASE  "-O3")
     # -Wl,-search_paths_first         = Search for static or shared library versions in the same pass
-    # -Wl,-ObjC                       = Support creation of creation of ObjC static libraries 
+    # -Wl,-ObjC                       = Support creation of creation of ObjC static libraries
     # -Wl,-pie                        = Generate position-independent code suitable for executables only
     set(I_LINKER_FLAGS            "-Wl,-search_paths_first -Wl,-ObjC -Wl,-pie")
     # -Wl,-dead_strip                 = Strip dead code
@@ -189,10 +189,10 @@ if(OS_MACOSX)
     else()
         set(CMAKE_OSX_ARCHITECTURES "i386")
     endif()
-    
+
     # Define where to move the binary by install
     set(EXE_SUB_DIR "bin/mac/${CMAKE_OSX_ARCHITECTURES}")
-    
+
     # Submodule providing osx-specific build stuff (e.g. libs)
     set(PLATFORM_FILE "${SOURCE_DIR}/platform_mac")
 endif()
@@ -200,10 +200,10 @@ endif()
 
 #
 # Windows configuration.
-# 
+#
 
 if(OS_WINDOWS)
-    
+
     ## Cross compilation flags already set
     if(MSVC)
         set(I_LIBTYPE                 STATIC)
@@ -270,7 +270,7 @@ if(OS_WINDOWS)
         # Definition used by apps to test if ATL support is enabled.
         add_definitions(-DI_USE_ATL)
     endif()
-    
+
     # Rename project_arch from x86_64 to 64 and x86 to 32 on windows:
     if(X64)
         set(PROJECT_ARCH "64")

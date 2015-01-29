@@ -6,7 +6,7 @@ set( SERVER_SOURCES_SHARED
     shared/stream
     shared/tools
     shared/zip )
-    
+
 set( SERVER_SOURCES_ENGINE
     engine/server
     engine/command
@@ -46,7 +46,7 @@ set(SERVER_BINARY server CACHE INTERNAL "Server binary name.")
 # Set Server Definition
 add_definitions(-DSERVER -DSTANDALONE)
 
-# Prepend source folder to name 
+# Prepend source folder to name
 # For VS create filters as well
 create_names(SERVER engine fpsgame shared)
 
@@ -82,7 +82,7 @@ target_link_libraries(${SERVER_BINARY}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${BUILD_EXTRA_LIBS})
-    
+
 if(MSVC)
     set_property(TARGET ${SERVER_BINARY} PROPERTY FOLDER "executables")
 endif()

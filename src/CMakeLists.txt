@@ -48,7 +48,7 @@ if(OS_MACOSX)
     find_library(COCOA_LIBRARY Cocoa)
 
     set(SDL2_LIBRARIES "${SDL2_LIBRARY};${SDL2_MIXER_LIBRARY};${SDL2_IMAGE_LIBRARY};${CORESERVICES_LIBRARY};${COCOA_LIBRARY}")
-    
+
     find_path(SDL2_INCLUDE_DIR SDL.h)
     find_path(SDL2_IMAGE_INCLUDE_DIR SDL2_image.h)
     find_path(SDL2_MIXER_INCLUDE_DIR SDL2_mixer.h)
@@ -84,7 +84,7 @@ function(create_names TARGET)
     string(TOUPPER "${ARGN}" GROUPS)
 
     foreach(GROUP ${GROUPS})
-        
+
         # Sources:
         set(SOURCE_GROUP_${GROUP} "")
         foreach(FILE ${${TARGET}_SOURCES_${GROUP}})
@@ -93,14 +93,14 @@ function(create_names TARGET)
                 ${SOURCE_DIR}/${FILE})
             message(STATUS "Prepend path for ${FILE} (becoming ${SOURCE_DIR}/${FILE})")
         endforeach(FILE)
-        
+
         # Replace old Source Array
         set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}} PARENT_SCOPE)
-        
+
         # For Visual Studio create filter groups as well
         if(MSVC)
             message(STATUS "Setting up filter groups.")
-            
+
             # Prepended .cpp Extension needed
             set(SOURCE_GROUP_${GROUP}__ "")
             foreach(FILE ${SOURCE_GROUP_${GROUP}})
@@ -120,7 +120,7 @@ function(create_names TARGET)
 
             # Replace old Header Array
             set(${TARGET}_HEADERS_${GROUP} ${HEADER_GROUP_${GROUP}} PARENT_SCOPE)
- 
+
             # Create filter:
             string(TOLOWER ${GROUP} GROUPNAME)
             source_group(${GROUPNAME} FILES ${SOURCE_GROUP_${GROUP}__} ${HEADER_GROUP_${GROUP}})

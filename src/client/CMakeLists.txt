@@ -48,10 +48,10 @@ set(CLIENT_SOURCES_ENGINE
     engine/glare
     engine/blob
     )
-    
+
 set( CLIENT_SOURCES_FPSGAME
     fpsgame/ai
-    fpsgame/client       
+    fpsgame/client
     fpsgame/entities
     fpsgame/fps
     fpsgame/monster
@@ -122,7 +122,7 @@ set(CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")
 # Set Client definition
 add_definitions(-DCLIENT)
 
-# Prepend source folder to name 
+# Prepend source folder to name
 # For VS create filters as well
 create_names(CLIENT engine fpsgame shared)
 
@@ -155,7 +155,7 @@ if(OS_WINDOWS)
             ${CLIENT_HEADERS_ENGINE}
             ${CLIENT_HEADERS_FPSGAME})
     else()
-        add_definitions(-mwindows) 
+        add_definitions(-mwindows)
     endif()
 endif()
 
