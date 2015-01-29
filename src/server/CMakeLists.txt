@@ -1,81 +1,92 @@
+# Client Project Definitions
+
+set( SERVER_SOURCES_SHARED
+    shared/crypto
+    shared/geom
+    shared/stream
+    shared/tools
+    shared/zip )
+
+set( SERVER_SOURCES_ENGINE
+    engine/server
+    engine/command
+    engine/worldio )
+
+set( SERVER_SOURCES_FPSGAME
+    fpsgame/server
+    fpsgame/entities )
+
+# MSVC Filter groups need headers:
+set( SERVER_HEADERS_SHARED
+    shared/command
+    shared/cube
+    shared/ents
+    shared/geom
+    shared/iengine
+    shared/igame
+    shared/tools )
+
+set( SERVER_HEADERS_ENGINE
+    engine/engine
+    engine/world )
+
+set( SERVER_HEADERS_FPSGAME
+    fpsgame/aiman
+    fpsgame/bomb
+    fpsgame/capture
+    fpsgame/collect
+    fpsgame/ctf
+    fpsgame/extinfo
+    fpsgame/game
+    fpsgame/hideandseek )
+
+# Set Binary name
+set(SERVER_BINARY server CACHE INTERNAL "Server binary name.")
+
+# Set Server Definition
 add_definitions(-DSERVER -DSTANDALONE)
 
-if(${BUILD_TARGET_WINDOWS})
-    set(EXTRA_LIBS ${EXTRA_LIBS} opengl32 ws2_32 winmm)
-elseif(${BUILD_TARGET_WINDOWS})
-    set(EXTRA_LIBS ${EXTRA_LIBS} dl -pthread)
-elseif(${BUILD_TARGET_WINDOWS})
-    set(EXTRA_LIBS ${EXTRA_LIBS} socket nsl)
-endif()
-
-set(SERVER_SOURCES_SHARED
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/crypto
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/stream
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/zip)
-
-set(SERVER_HEADERS_SHARED
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/command
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/cube
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/ents
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/iengine
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/igame
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools)
-
-set(SERVER_SOURCES_ENGINE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/command
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/worldio)
-
-set(SERVER_HEADERS_ENGINE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/engine
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/world)
-
-set(SERVER_SOURCES_FPSGAME
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/entities)
-
-set(SERVER_HEADERS_FPSGAME
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/aiman
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/bomb
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/capture
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/collect
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ctf
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/extinfo
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/game
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/hideandseek)
+# Prepend source folder to name
+# For VS create filters as well
+create_names(SERVER engine fpsgame shared)
 
 set(SERVER_SOURCES
     ${SERVER_SOURCES_SHARED}
     ${SERVER_SOURCES_ENGINE}
     ${SERVER_SOURCES_FPSGAME})
 
-sb_msvc_build_source_groups(ENGINE engine fpsgame shared)
-
-set(SB_SERVER_BINARY server CACHE INTERNAL "Server binary name.")
-
-if(WIN32)
-    add_executable(${SB_SERVER_BINARY} WIN32 ${SERVER_SOURCES})
-elseif(APPLE)
-    add_executable(${SB_SERVER_BINARY} MACOSX_BUNDLE ${SERVER_SOURCES})
-else()
-    add_executable(${SB_SERVER_BINARY} ${SERVER_SOURCES})
+# Add headers to the VS filter groups on windows
+if(MSVC)
+    set(SERVER_HEADERS
+        ${SERVER_HEADERS_SHARED}
+        ${SERVER_HEADERS_ENGINE}
+        ${SERVER_HEADERS_FPSGAME})
 endif()
 
-target_link_libraries(${SB_SERVER_BINARY}
+# Linux Libraries and Configuration
+if(OS_LINUX})
+    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl -pthread)
+endif()
+
+# Assemble executable in specific mode
+if(OS_WINDOWS)
+    add_executable(${SERVER_BINARY} WIN32 ${SERVER_SOURCES} ${SERVER_HEADERS})
+elseif(OS_MACOSX)
+    add_executable(${SERVER_BINARY} MACOSX_BUNDLE ${SERVER_SOURCES})
+else()
+    add_executable(${SERVER_BINARY} ${SERVER_SOURCES})
+endif()
+
+target_link_libraries(${SERVER_BINARY}
     ${ENET_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${EXTRA_LIBS})
-    
+    ${BUILD_EXTRA_LIBS})
+
 if(MSVC)
-    set_property(TARGET ${SB_SERVER_BINARY} PROPERTY FOLDER "executables")
+    set_property(TARGET ${SERVER_BINARY} PROPERTY FOLDER "executables")
 endif()
 
-install(TARGETS
-    ${SB_SERVER_BINARY}
-    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
-    ARCHIVE DESTINATION ${INSTALL_ARCHIVE_DIR})
+# Install Binary
+install(TARGETS ${SERVER_BINARY}
+        DESTINATION ${EXE_DIR})
