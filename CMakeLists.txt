@@ -106,12 +106,11 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -U_FORTIFY_SOURCE               = Undefine _FORTIFY_SOURCE in case it was previously defined
     # -D_FORTIFY_SOURCE=2             = Add memory and string function protection (security feature, related to stack-protector)
     set(I_COMPILER_FLAGS_RELEASE  "-O3 -fdata-sections -ffunction-sections -fno-ident -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2")
-    # -Wl,--disable-new-dtags         = Don't generate new-style dynamic tags in ELF
     # -Wl,-rpath,.                    = Set rpath so that libraries can be placed next to the executable
     # -Wl,-z,noexecstack              = Mark the stack as non-executable (security feature)
     # -Wl,-z,now                      = Resolve symbols on program start instead of on first use (security feature)
     # -Wl,-z,relro                    = Mark relocation sections as read-only (security feature)
-    set(I_LINKER_FLAGS            "-fPIC -pthread -Wl,--disable-new-dtags -Wl,-rpath,. -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro")
+    set(I_LINKER_FLAGS            "--disable-new-dtags -Wl,-rpath,. -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro")
     # -Wl,-O1                         = Enable linker optimizations
     # -Wl,--as-needed                 = Only link libraries that export symbols used by the binary
     # -Wl,--gc-sections               = Remove unused code resulting from -fdata-sections and -function-sections
@@ -177,7 +176,7 @@ if(OS_MACOSX)
     set(I_LINKER_FLAGS_RELEASE    "-Wl,-dead_strip")
 
     # Standard libraries.
-    set(I_STANDARD_LIBS "-lpthread" "-framework Cocoa" "-framework AppKit")
+    set(I_STANDARD_LIBS "-framework Cocoa" "-framework AppKit")
 
     # Find the newest available base SDK.
     execute_process(COMMAND xcode-select --print-path OUTPUT_VARIABLE XCODE_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -341,15 +340,4 @@ endif()
 # Go for the next folder:
 add_subdirectory(src)
 
-# Install command:
-if(OS_WINDOWS)
-    set(ADDITIONAL_FILES readme.md inexor.bat server.bat server-init.cfg)
-elseif(OS_MACOSX)
-    set(ADDITIONAL_FILES readme.md)
-else()
-    set(ADDITIONAL_FILES readme.md inexor_unix server-init.cfg)
-endif()
-
-install(
-    FILES ${ADDITIONAL_FILES}
-    DESTINATION ${PROJECT_SOURCE_DIR})
+####
