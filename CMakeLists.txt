@@ -88,12 +88,11 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -Wall -fdiagnostics-show-option ")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
-    # -fno-exceptions                 = Disable exceptions
     # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -fvisibility-inlines-hidden     = Give hidden visibility to inlined class member functions
-    ## -std=gnu++11                    = Use the C++11 language standard including GNU extensions
-    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden") # -std=gnu++11")
+    # -std=c++11                    = Use the C++11 language standard
+    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden -std=c++11")
     # -Og                             = Enable optimizations that do not interfere with debugging
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
@@ -112,9 +111,6 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -Wl,--as-needed                 = Only link libraries that export symbols used by the binary
     # -Wl,--gc-sections               = Remove unused code resulting from -fdata-sections and -function-sections
     set(I_LINKER_FLAGS_RELEASE    "-Wl,-O1 -Wl,--as-needed -Wl,--gc-sections")
-
-    #include(CheckCCompilerFlag)
-    #include(CheckCXXCompilerFlag)
 
     if(X64)
         # 64-bit architecture.
@@ -143,22 +139,20 @@ if(OS_MACOSX)
     set(I_LIBTYPE                 SHARED)
     # -fomit-frame-pointer            = Don't keep the frame pointer for functions that don't need one
     # -fno-strict-aliasing            = Avoid assumptions regarding non-aliasing of objects of different types
-    # -fstack-protector               = Protect some vulnerable functions from stack-smashing (security feature)
     # -funwind-tables                 = Support stack unwinding for backtrace()
     # -fvisibility=hidden             = Give hidden visibility to declarations that are not explicitly marked as visible
     # -Wall                           = Enable all warnings
-    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fstack-protector -funwind-tables -fvisibility=hidden -Wall")
+    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -funwind-tables -fvisibility=hidden -Wall")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
-    # -fno-exceptions                 = Disable exceptions
     # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -fobjc-call-cxx-cdtors          = Call the constructor/destructor of C++ instance variables in ObjC objects
     # -fvisibility-inlines-hidden     = Give hidden visibility to inlined class member functions
-    # -std=gnu++11                    = Use the C++11 language standard including GNU extensions
+    # -std=c++11                    = Use the C++11 language standard including
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-exceptions -fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -std=gnu++11 -Wno-narrowing -Wsign-compare")
+    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -std=c++11 -Wno-narrowing -Wsign-compare")
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
@@ -240,8 +234,7 @@ if(OS_WINDOWS)
     # Standard definitions
     # -DWIN32 -D_WIN32 -D_WINDOWS           = Windows platform
     # -DNOMINMAX                            = Use the standard's templated min/max
-    # -D_HAS_EXCEPTIONS=0                   = Disable exceptions
-    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DWINDOWS -DNOMINMAX -D_HAS_EXCEPTIONS=0)
+    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DWINDOWS -DNOMINMAX)
     if(X64)
         add_definitions(-DWIN64)
     endif()
