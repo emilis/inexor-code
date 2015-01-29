@@ -83,9 +83,8 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -fvisibility=hidden             = Give hidden visibility to declarations that are not explicitly marked as visible
     # --param=ssp-buffer-size=4       = Set the minimum buffer size protected by SSP (security feature, related to stack-protector)
     # -pipe                           = Use pipes rather than temporary files for communication between build stages
-    # -pthread                        = Use the pthread library
     # -Wall                           = Enable all warnings
-    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -pthread -Wall")
+    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -Wall")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
     # -fno-exceptions                 = Disable exceptions
@@ -110,7 +109,7 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -Wl,-z,noexecstack              = Mark the stack as non-executable (security feature)
     # -Wl,-z,now                      = Resolve symbols on program start instead of on first use (security feature)
     # -Wl,-z,relro                    = Mark relocation sections as read-only (security feature)
-    set(I_LINKER_FLAGS            "--disable-new-dtags -Wl,-rpath,. -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro")
+    set(I_LINKER_FLAGS            "-Wl,-rpath,. -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro")
     # -Wl,-O1                         = Enable linker optimizations
     # -Wl,--as-needed                 = Only link libraries that export symbols used by the binary
     # -Wl,--gc-sections               = Remove unused code resulting from -fdata-sections and -function-sections
