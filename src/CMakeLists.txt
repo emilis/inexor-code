@@ -66,6 +66,8 @@ endif()
 # ENet networking library
 if(NOT DEFINED ENET_LIBRARIES AND NOT DEFINED LOCAL_ENET)
     set(LOCAL_ENET 1 CACHE INTERNAL "Use local enet library")
+elseif(DEFINED LOCAL_ENET)
+    set(LOCAL_ENET ${LOCAL_ENET} CACHE INTERNAL "Use local enet library")
 else()
     set(LOCAL_ENET 0 CACHE INTERNAL "Use local enet library")
 endif()
