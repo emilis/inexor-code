@@ -70,9 +70,9 @@ add_definitions(-D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS)
 ### Platform-specific compiler/linker flags.
 
 #
-# Linux configuration.
+# Linux configuration. Or Cross Compilation for Windows
 #
-if(OS_LINUX)
+if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     set(I_LIBTYPE                 SHARED)
     # -fomit-frame-pointer            = Don't keep the frame pointer for functions that don't need one
     # -fno-strict-aliasing            = Avoid assumptions regarding non-aliasing of objects of different types
@@ -210,31 +210,36 @@ endif()
 
 #
 # Windows configuration.
-#
+# 
 
 if(OS_WINDOWS)
-    set(I_LIBTYPE                 STATIC)
-    # /MP                                   = Multiprocess compilation
-    # /Gy                                   = Enable function-level linking
-    # /GR-                                  = Disable run-time type information
-    # /Zi                                   = Enable program database
-    # /W2                                   = Warning level 2
-    # /wd"4305"                             = Ignore "truncation from 'double' to 'float'" warning
-    set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2 -wd\"4305\"")
-    # /MTd                                  = Multithreaded debug runtime
-    # /Od                                   = Disable optimizations
-    # /RTC1                                 = Enable basic run-time checks
-    set(I_COMPILER_FLAGS_DEBUG    "-MTd -RTC1 -Od")
-    # /MT                                   = Multithreaded release runtime
-    # /O2                                   = Optimize for maximum speed
-    # /Ob2                                  = Inline any suitable function
-    # /GF                                   = Enable string pooling
-    # /D NDEBUG /D _NDEBUG                  = Not a debug build
-    set(I_COMPILER_FLAGS_RELEASE  "-MT -O2 -Ob2 -GF -DNDEBUG -D_NDEBUG")
-    # /DEBUG                                = Generate debug information
-    set(I_LINKER_FLAGS_DEBUG      "-DEBUG")
-    # /MANIFEST:NO                          = No default manifest
-    set(I_EXE_LINKER_FLAGS        "-MANIFEST:NO")
+    
+    ## Cross compilation flags already set
+    if(MSVC)
+        set(I_LIBTYPE                 STATIC)
+        # /MP                                   = Multiprocess compilation
+        # /Gy                                   = Enable function-level linking
+        # /GR-                                  = Disable run-time type information
+        # /Zi                                   = Enable program database
+        # /W2                                   = Warning level 2
+        # /wd"4305"                             = Ignore "truncation from 'double' to 'float'" warning
+        set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2 -wd\"4305\"")
+        # /MTd                                  = Multithreaded debug runtime
+        # /Od                                   = Disable optimizations
+        # /RTC1                                 = Enable basic run-time checks
+        # -D_DEBUG                              = Debug build
+        set(I_COMPILER_FLAGS_DEBUG    "-MTd -RTC1 -Od -D_DEBUG")
+        # /MT                                   = Multithreaded release runtime
+        # /O2                                   = Optimize for maximum speed
+        # /Ob2                                  = Inline any suitable function
+        # /GF                                   = Enable string pooling
+        # /D NDEBUG /D _NDEBUG                  = Not a debug build
+        set(I_COMPILER_FLAGS_RELEASE  "-MT -O2 -Ob2 -GF -DNDEBUG -D_NDEBUG")
+        # /DEBUG                                = Generate debug information
+        set(I_LINKER_FLAGS_DEBUG      "-DEBUG")
+        # /MANIFEST:NO                          = No default manifest
+        set(I_EXE_LINKER_FLAGS        "-MANIFEST:NO")
+    endif()
 
     # Standard definitions
     # -DWIN32 -D_WIN32 -D_WINDOWS           = Windows platform
