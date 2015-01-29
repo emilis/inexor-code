@@ -247,22 +247,6 @@ if(OS_WINDOWS)
         add_definitions(-DCEF_USE_SANDBOX)
     endif()
 
-    # Configure use of ATL (Active Template Library)
-    option(USE_ATL "Enable or disable use of ATL." OFF)
-    if(USE_ATL)
-        # Determine if the Visual Studio install supports ATL.
-        get_filename_component(VC_BIN_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
-        get_filename_component(VC_DIR ${VC_BIN_DIR} DIRECTORY)
-        if(NOT IS_DIRECTORY "${VC_DIR}/atlmfc")
-          set(USE_ATL OFF)
-        endif()
-    endif()
-
-    if(USE_ATL)
-        # Definition used by apps to test if ATL support is enabled.
-        add_definitions(-DI_USE_ATL)
-    endif()
-
     # Rename project_arch from x86_64 to 64 and x86 to 32 on windows:
     if(X64)
         set(PROJECT_ARCH "64")
