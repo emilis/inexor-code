@@ -91,8 +91,8 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -fvisibility-inlines-hidden     = Give hidden visibility to inlined class member functions
-    # -std=c++11                    = Use the C++11 language standard
-    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden -std=c++11")
+    ## -std=c++11                    = Use the C++11 language standard
+    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fvisibility-inlines-hidden") # -std=c++11")
     # -Og                             = Enable optimizations that do not interfere with debugging
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
@@ -152,7 +152,7 @@ if(OS_MACOSX)
     # -std=c++11                    = Use the C++11 language standard including
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -std=c++11 -Wno-narrowing -Wsign-compare")
+    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -fvisibility-inlines-hidden -Wno-narrowing -Wsign-compare") # -std=c++11 
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
