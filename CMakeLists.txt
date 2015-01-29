@@ -84,7 +84,8 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # --param=ssp-buffer-size=4       = Set the minimum buffer size protected by SSP (security feature, related to stack-protector)
     # -pipe                           = Use pipes rather than temporary files for communication between build stages
     # -Wall                           = Enable all warnings
-    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -Wall")
+    # -fdiagnostics-show-option       = Show Warning IDs
+    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -fPIC -fstack-protector -funwind-tables -fvisibility=hidden --param=ssp-buffer-size=4 -pipe -Wall -fdiagnostics-show-option ")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
     # -fno-exceptions                 = Disable exceptions
