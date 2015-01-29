@@ -199,9 +199,10 @@ if(OS_WINDOWS)
         # /Gy                                   = Enable function-level linking
         # /GR-                                  = Disable run-time type information
         # /Zi                                   = Enable program database
+        # /EHsc                                 = assume extern C stuff never throws exceptions
         # /W2                                   = Warning level 2
         # /wd"4305"                             = Ignore "truncation from 'double' to 'float'" warning
-        set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -W2 -wd\"4305\"")
+        set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -EHsc -W2 -wd\"4305\"")
         # /MTd                                  = Multithreaded debug runtime
         # /Od                                   = Disable optimizations
         # /RTC1                                 = Enable basic run-time checks
