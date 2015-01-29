@@ -81,7 +81,7 @@ target_link_libraries(${SERVER_BINARY}
     ${ENET_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${EXTRA_LIBS})
+    ${BUILD_EXTRA_LIBS})
     
 if(MSVC)
     set_property(TARGET ${SERVER_BINARY} PROPERTY FOLDER "executables")
