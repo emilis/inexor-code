@@ -88,5 +88,5 @@ if(MSVC)
 endif()
 
 # Install Binary
-install(TARGETS ${CLIENT_BINARY}
+install(TARGETS ${SERVER_BINARY}
         DESTINATION ${EXE_DIR})
