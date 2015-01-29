@@ -5,13 +5,9 @@ cmake_minimum_required(VERSION 2.8.7)
 # Only generate Debug and Release configuration types.
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
-# First choice is Release
-set(CMAKE_BUILD_TYPE Release)
-
-# CMAKE_BUILD_TYPE should be specified when using Unix Makefiles.
-if(NOT CMAKE_BUILD_TYPE AND ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
-
-  message(WARNING "No CMAKE_BUILD_TYPE value selected, using ${CMAKE_BUILD_TYPE}")
+# First choice is Debug
+if(NOT DEFINED CMAKE_BUILD_TYPE) 
+    set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 # Project Name
@@ -22,7 +18,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 
 # Warning if paths arent set well
 get_filename_component(MAINDIR "${CMAKE_SOURCE_DIR}" REALPATH)  # Main inexor folder
-get_filename_component(BINDIR "${CMAKE_BINARY_DIR}" REALPATH)  # Where it generates the projects into
+get_filename_component(BINDIR "${CMAKE_BINARY_DIR}" REALPATH)   # Where it generates the projects into
 
 if(${MAINDIR} STREQUAL ${BINDIR})
     message(FATAL_ERROR "Keep your directories clean, don't generate the project-files in the main directory! ${MAINDIR} ${BINDIR}")
