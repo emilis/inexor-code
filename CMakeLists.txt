@@ -103,13 +103,10 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -fno-ident                      = Ignore the #ident directive
     # -DNDEBUG                        = Not a debug build
     # -U_FORTIFY_SOURCE               = Undefine _FORTIFY_SOURCE in case it was previously defined
-    # -D_FORTIFY_SOURCE=2             = Add memory and string function protection (security feature, related to stack-protector)
-    set(I_COMPILER_FLAGS_RELEASE  "-O3 -fdata-sections -ffunction-sections -fno-ident -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2")
+    # -D_FORTIFY_SOURCE=1             = Add memory and string function protection (security feature)
+    set(I_COMPILER_FLAGS_RELEASE  "-O3 -fdata-sections -ffunction-sections -fno-ident -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1")
     # -Wl,-rpath,.                    = Set rpath so that libraries can be placed next to the executable
-    # -Wl,-z,noexecstack              = Mark the stack as non-executable (security feature)
-    # -Wl,-z,now                      = Resolve symbols on program start instead of on first use (security feature)
-    # -Wl,-z,relro                    = Mark relocation sections as read-only (security feature)
-    set(I_LINKER_FLAGS            "-Wl,-rpath,. -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro")
+    set(I_LINKER_FLAGS            "-Wl,-rpath,.")
     # -Wl,-O1                         = Enable linker optimizations
     # -Wl,--as-needed                 = Only link libraries that export symbols used by the binary
     # -Wl,--gc-sections               = Remove unused code resulting from -fdata-sections and -function-sections
