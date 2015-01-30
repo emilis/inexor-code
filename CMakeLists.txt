@@ -75,9 +75,9 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     # -fsigned-char                   = Let the type char be signed, like signed char.
     # -pipe                           = Use pipes rather than temporary files for communication between build stages
     # -Wall                           = Enable all warnings
-    # -Wnoswitch                      = Execpt Warnings for missing switch cases
+    # -Wno-switch                     = Execpt Warnings for missing switch cases
     # -fdiagnostics-show-option       = Show Warning IDs
-    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -pipe -Wall -Wnoswitch -fdiagnostics-show-option ")
+    set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -pipe -Wall -Wno-switch -fdiagnostics-show-option ")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
     # -fno-rtti                       = Disable real-time type information
