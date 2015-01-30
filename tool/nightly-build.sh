@@ -20,7 +20,7 @@ else
     mkdir nightly
 fi
 
-cp -r ./bin_* nightly
+cp -r ./bin* nightly
 cp ./inexor_unix nightly
 cp ./inexor.bat nightly
 cp ./server.bat nightly
