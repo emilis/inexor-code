@@ -259,6 +259,17 @@ if(OS_WINDOWS)
     set(PLATFORM_FILE "${SOURCE_DIR}/platform_windows")
 endif()
 
+# Ability to use your environment own cflags/ldflags.. as well
+if(NOT MSVC)
+    option( USE_ENVFLAGS "Enable or Disable Use of environment own Compiler/Linker-Flags" ON)
+
+    if(USE_ENVFLAGS)
+        set(I_C_COMPILER_FLAGS      "${I_C_COMPILER_FLAGS} $ENV{CFLAGS}")
+        set(I_CXX_COMPILER_FLAGS    "${I_CXX_COMPILER_FLAGS} $ENV{CXXFLAGS}")
+        set(I_LINKER_FLAGS          "${I_LINKER_FLAGS} $ENV{LDLAGS}")
+    endif()
+endif()
+
 # Merge compiler/linker flags.
 set(CMAKE_C_FLAGS                     "${I_COMPILER_FLAGS} ${I_C_COMPILER_FLAGS}")
 set(CMAKE_CXX_FLAGS                   "${I_COMPILER_FLAGS} ${I_CXX_COMPILER_FLAGS}")
