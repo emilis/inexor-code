@@ -158,7 +158,7 @@ function(create_names TARGET)
             set(SOURCE_GROUP_${GROUP}
                 ${SOURCE_GROUP_${GROUP}}
                 ${SOURCE_DIR}/${FILE})
-            message(STATUS "Prepend path for ${FILE} (becoming ${SOURCE_DIR}/${FILE})")
+            #message(STATUS "Prepend path for ${FILE} (becoming ${SOURCE_DIR}/${FILE})")
         endforeach(FILE)
 
         # Replace old Source Array
@@ -166,23 +166,14 @@ function(create_names TARGET)
 
         # For Visual Studio create filter groups as well
         if(MSVC)
-            message(STATUS "Setting up filter groups.")
-
-            # Prepended .cpp Extension needed
-            set(SOURCE_GROUP_${GROUP}__ "")
-            foreach(FILE ${SOURCE_GROUP_${GROUP}})
-                set(SOURCE_GROUP_${GROUP}__ ${SOURCE_GROUP_${GROUP}__} "${FILE}.cpp")
-            endforeach()
-
-            # Since we add the headers as well, tell the parent to use those extensions (replace parent array)
-            set(${TARGET}_SOURCES_${GROUP} ${SOURCE_GROUP_${GROUP}__} PARENT_SCOPE)
+            message(STATUS "Setting up Filter group ${GROUP}")
 
             # We want the Header files in our Solution Explorer as well:
             set(HEADER_GROUP_${GROUP} "")
             foreach(FILE ${${TARGET}_HEADERS_${GROUP}})
                 set(HEADER_GROUP_${GROUP}
                     ${HEADER_GROUP_${GROUP}}
-                    ${SOURCE_DIR}/${FILE}.h)
+                    ${SOURCE_DIR}/${FILE})
             endforeach(FILE)
 
             # Replace old Header Array

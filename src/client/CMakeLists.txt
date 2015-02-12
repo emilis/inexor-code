@@ -1,169 +1,173 @@
 # Client project definition
 
 set(CLIENT_SOURCES_SHARED
-    shared/crypto
-    shared/geom
-    shared/json
-    shared/stream
-    shared/tools
-    shared/zip
+    shared/crypto.cpp
+    shared/geom.cpp
+    shared/json.cpp
+    shared/stream.cpp
+    shared/tools.cpp
+    shared/zip.cpp
     )
 
 set(CLIENT_SOURCES_MUPARSER
-    libraries/muparser/src/muParser
-    libraries/muparser/src/muParserBase
-    libraries/muparser/src/muParserBytecode
-    libraries/muparser/src/muParserCallback
-    libraries/muparser/src/muParserError
-    libraries/muparser/src/muParserInt
-    libraries/muparser/src/muParserTokenReader
+    libraries/muparser/src/muParser.cpp
+    libraries/muparser/src/muParserBase.cpp
+    libraries/muparser/src/muParserBytecode.cpp
+    libraries/muparser/src/muParserCallback.cpp
+    libraries/muparser/src/muParserError.cpp
+    libraries/muparser/src/muParserInt.cpp
+    libraries/muparser/src/muParserTokenReader.cpp
     )
 
 set(CLIENT_SOURCES_ENGINE
-    engine/3dgui
-    engine/bih
-    engine/blend
-    engine/client
-    engine/command
-    engine/console
-    engine/decal
-    engine/dynlight
-    engine/grass
-    engine/main
-    engine/material
-    engine/menus
-    engine/movie
-    engine/normal
-    engine/octa
-    engine/octaedit
-    engine/octarender
-    engine/physics
-    engine/pvs
-    engine/rendergl
-    engine/rendermodel
-    engine/renderparticles
-    engine/rendersky
-    engine/rendertext
-    engine/renderva
-    engine/server
-    engine/shader
-    engine/sound
-    engine/texture
-    engine/water
-    engine/world
-    engine/worldio
-    engine/serverbrowser
-    engine/shadowmap
-    engine/lightmap
-    engine/glare
-    engine/blob
+    engine/3dgui.cpp
+    engine/bih.cpp
+    engine/blend.cpp
+    engine/client.cpp
+    engine/command.cpp
+    engine/console.cpp
+    engine/decal.cpp
+    engine/dynlight.cpp
+    engine/grass.cpp
+    engine/main.cpp
+    engine/material.cpp
+    engine/menus.cpp
+    engine/movie.cpp
+    engine/normal.cpp
+    engine/octa.cpp
+    engine/octaedit.cpp
+    engine/octarender.cpp
+    engine/physics.cpp
+    engine/pvs.cpp
+    engine/rendergl.cpp
+    engine/rendermodel.cpp
+    engine/renderparticles.cpp
+    engine/rendersky.cpp
+    engine/rendertext.cpp
+    engine/renderva.cpp
+    engine/server.cpp
+    engine/shader.cpp
+    engine/sound.cpp
+    engine/texture.cpp
+    engine/water.cpp
+    engine/world.cpp
+    engine/worldio.cpp
+    engine/serverbrowser.cpp
+    engine/shadowmap.cpp
+    engine/lightmap.cpp
+    engine/glare.cpp
+    engine/blob.cpp
     )
 
 set( CLIENT_SOURCES_FPSGAME
-    fpsgame/ai
-    fpsgame/client
-    fpsgame/entities
-    fpsgame/fps
-    fpsgame/monster
-    fpsgame/movable
-    fpsgame/render
-    fpsgame/scoreboard
-    fpsgame/server
-    fpsgame/waypoint
-    fpsgame/weapon
+    fpsgame/ai.cpp
+    fpsgame/client.cpp
+    fpsgame/entities.cpp
+    fpsgame/fps.cpp
+    fpsgame/monster.cpp
+    fpsgame/movable.cpp
+    fpsgame/render.cpp
+    fpsgame/scoreboard.cpp
+    fpsgame/server.cpp
+    fpsgame/waypoint.cpp
+    fpsgame/weapon.cpp
     )
 
 set( CLIENT_SOURCES_RPC
     rpc/inexor_service.pb.cc
-    rpc/InexorServiceImpl
-    rpc/MCRpcServer
-    rpc/rpc )
+    rpc/InexorServiceImpl.cpp
+    rpc/MCRpcServer.cpp
+    rpc/rpc.cpp
+    )
 
 set( CLIENT_SOURCES_NET
-    net/MCHub
-    net/MCByteBuffer )
+    net/MCHub.cpp
+    net/MCByteBuffer.cpp
+    )
 
 # Only used for MSVC
 set(CLIENT_HEADERS_SHARED
-    shared/command
-    shared/cube
-    shared/ents
-    shared/geom
-    shared/iengine
-    shared/igame
-    shared/json
-    shared/tools
+    shared/command.h
+    shared/cube.h
+    shared/ents.h
+    shared/geom.h
+    shared/iengine.h
+    shared/igame.h
+    shared/json.h
+    shared/tools.h
     )
 
 set(CLIENT_HEADERS_MUPARSER
-    libraries/muparser/include/muParser
-    libraries/muparser/include/muParserBase
-    libraries/muparser/include/muParserBytecode
-    libraries/muparser/include/muParserCallback
-    libraries/muparser/include/muParserDef
-    libraries/muparser/include/muParserError
-    libraries/muparser/include/muParserFixes
-    libraries/muparser/include/muParserStack
-    libraries/muparser/include/muParserToken
-    libraries/muparser/include/muParserTokenReader
+    libraries/muparser/include/muParser.h
+    libraries/muparser/include/muParserBase.h
+    libraries/muparser/include/muParserBytecode.h
+    libraries/muparser/include/muParserCallback.h
+    libraries/muparser/include/muParserDef.h
+    libraries/muparser/include/muParserError.h
+    libraries/muparser/include/muParserFixes.h
+    libraries/muparser/include/muParserStack.h
+    libraries/muparser/include/muParserToken.h
+    libraries/muparser/include/muParserTokenReader.h
     )
 
 set(CLIENT_HEADERS_ENGINE
-    engine/animmodel
-    engine/bih
-    engine/depthfx
-    engine/engine
-    engine/explosion
-    engine/iqm
-    engine/lensflare
-    engine/lightmap
-    engine/lightning
-    engine/md2
-    engine/md3
-    engine/md5
-    engine/model
-    engine/mpr
-    engine/obj
-    engine/octa
-    engine/ragdoll
-    engine/rendertarget
-    engine/scale
-    engine/skelmodel
-    engine/smd
-    engine/textedit
-    engine/texture
-    engine/varray
-    engine/vertmodel
-    engine/world
+    engine/animmodel.h
+    engine/bih.h
+    engine/depthfx.h
+    engine/engine.h
+    engine/explosion.h
+    engine/iqm.h
+    engine/lensflare.h
+    engine/lightmap.h
+    engine/lightning.h
+    engine/md2.h
+    engine/md3.h
+    engine/md5.h
+    engine/model.h
+    engine/mpr.h
+    engine/obj.h
+    engine/octa.h
+    engine/ragdoll.h
+    engine/rendertarget.h
+    engine/scale.h
+    engine/skelmodel.h
+    engine/smd.h
+    engine/textedit.h
+    engine/texture.h
+    engine/varray.h
+    engine/vertmodel.h
+    engine/world.h
     )
 
 set( CLIENT_HEADERS_FPSGAME
-    fpsgame/ai
-    fpsgame/aiman
-    fpsgame/bomb
-    fpsgame/capture
-    fpsgame/collect
-    fpsgame/ctf
-    fpsgame/extinfo
-    fpsgame/game
-    fpsgame/hideandseek
+    fpsgame/ai.h
+    fpsgame/aiman.h
+    fpsgame/bomb.h
+    fpsgame/capture.h
+    fpsgame/collect.h
+    fpsgame/ctf.h
+    fpsgame/extinfo.h
+    fpsgame/game.h
+    fpsgame/hideandseek.h
     )
 
 set( CLIENT_HEADERS_RPC
     rpc/inexor_service.pb.hh
-    rpc/InexorServiceImpl
-    rpc/MCRpcServer
-    rpc/rpc 
-    rpc/rpc_sb_compat )
+    rpc/InexorServiceImpl.h
+    rpc/MCRpcServer.h
+    rpc/rpc.h
+    rpc/rpc_sb_compat.h 
+    )
 
 set( CLIENT_HEADERS_NET
-    net/MCByteBuffer
-    net/MCHub
-    net/MCServer 
-    net/MCSocket
+    net/MCByteBuffer.h
+    net/MCHub.h
+    net/MCServer.h
+    net/MCSocket.h
     net/MCSocketServer
-    net/MessageConnect
-    net/net )
+    net/MessageConnect.h
+    net/net.h 
+    )
 
 # Set Binary name
 set(CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")

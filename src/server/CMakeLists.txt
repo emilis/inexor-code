@@ -1,70 +1,70 @@
 # Client Project Definitions
 
 set( SERVER_SOURCES_SHARED
-    shared/crypto
-    shared/geom
-    shared/stream
-    shared/tools
-    shared/zip )
+    shared/crypto.cpp
+    shared/geom.cpp
+    shared/stream.cpp
+    shared/tools.cpp
+    shared/zip.cpp )
 
 set( SERVER_SOURCES_ENGINE
-    engine/server
-    engine/command
-    engine/worldio )
+    engine/server.cpp
+    engine/command.cpp
+    engine/worldio.cpp )
 
 set( SERVER_SOURCES_FPSGAME
-    fpsgame/server
-    fpsgame/entities )
+    fpsgame/server.cpp
+    fpsgame/entities.cpp )
 
 set( SERVER_SOURCES_RPC
     rpc/inexor_service.pb.cc
-    rpc/InexorServiceImpl
-    rpc/MCRpcServer
-    rpc/rpc )
+    rpc/InexorServiceImpl.cpp
+    rpc/MCRpcServer.cpp
+    rpc/rpc.cpp )
 
 set( SERVER_SOURCES_NET
-    net/MCHub
-    net/MCByteBuffer )
+    net/MCHub.cpp
+    net/MCByteBuffer.cpp )
 
 # MSVC Filter groups need headers:
 set( SERVER_HEADERS_SHARED
-    shared/command
-    shared/cube
-    shared/ents
-    shared/geom
-    shared/iengine
-    shared/igame
-    shared/tools )
+    shared/command.h
+    shared/cube.h
+    shared/ents.h
+    shared/geom.h
+    shared/iengine.h
+    shared/igame.h
+    shared/tools.h )
 
 set( SERVER_HEADERS_ENGINE
-    engine/engine
-    engine/world )
+    engine/engine.h
+    engine/world.h )
 
 set( SERVER_HEADERS_FPSGAME
-    fpsgame/aiman
-    fpsgame/bomb
-    fpsgame/capture
-    fpsgame/collect
-    fpsgame/ctf
-    fpsgame/extinfo
-    fpsgame/game
-    fpsgame/hideandseek )
+    fpsgame/aiman.h
+    fpsgame/bomb.h
+    fpsgame/capture.h
+    fpsgame/collect.h
+    fpsgame/ctf.h
+    fpsgame/extinfo.h
+    fpsgame/game.h
+    fpsgame/hideandseek.h )
 
 set( SERVER_HEADERS_RPC
     rpc/inexor_service.pb.hh
-    rpc/InexorServiceImpl
-    rpc/MCRpcServer
-    rpc/rpc 
-    rpc/rpc_sb_compat )
+    rpc/InexorServiceImpl.h
+    rpc/MCRpcServer.h
+    rpc/rpc.h
+    rpc/rpc_sb_compat.h )
 
 set( SERVER_HEADERS_NET
-    net/MCByteBuffer
-    net/MCHub
-    net/MCServer 
-    net/MCSocket
-    net/MCSocketServer
-    net/MessageConnect
-    net/net )
+    net/MCByteBuffer.h
+    net/MCHub.h
+    net/MCServer .h
+    net/MCSocket.h
+    net/MCSocketServer.h
+    net/MessageConnect.h
+    net/net.h )
 
 # Generate the protobuf c++ header
 set_source_files_properties(
