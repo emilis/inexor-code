@@ -1,151 +1,179 @@
-add_definitions(-DCLIENT)
-
-if(${BUILD_TARGET_WINDOWS})
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} ws2_32 winmm)
-    if(GNU)
-        add_definitions(-mwindows)
-    elseif(MSVC)
-        set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dbghelp)
-    endif()
-elseif(${BUILD_TARGET_LINUX})
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl rt)
-elseif(${BUILD_TARGET_SOLARIS})
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} socket nsl)
-endif()
+# Client project definition
 
 set(CLIENT_SOURCES_SHARED
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/crypto
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/json
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/stream
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/zip)
+    shared/crypto
+    shared/geom
+    shared/json
+    shared/stream
+    shared/tools
+    shared/zip
+    )
+
+set(CLIENT_SOURCES_MUPARSER
+    libraries/muparser/src/muParser
+    libraries/muparser/src/muParserBase
+    libraries/muparser/src/muParserBytecode
+    libraries/muparser/src/muParserCallback
+    libraries/muparser/src/muParserError
+    libraries/muparser/src/muParserInt
+    libraries/muparser/src/muParserTokenReader
+    )
+
+set(CLIENT_SOURCES_ENGINE
+    engine/3dgui
+    engine/bih
+    engine/blend
+    engine/client
+    engine/command
+    engine/console
+    engine/decal
+    engine/dynlight
+    engine/grass
+    engine/main
+    engine/material
+    engine/menus
+    engine/movie
+    engine/normal
+    engine/octa
+    engine/octaedit
+    engine/octarender
+    engine/physics
+    engine/pvs
+    engine/rendergl
+    engine/rendermodel
+    engine/renderparticles
+    engine/rendersky
+    engine/rendertext
+    engine/renderva
+    engine/server
+    engine/shader
+    engine/sound
+    engine/texture
+    engine/water
+    engine/world
+    engine/worldio
+    engine/serverbrowser
+    engine/shadowmap
+    engine/lightmap
+    engine/glare
+    engine/blob
+    )
+
+set( CLIENT_SOURCES_FPSGAME
+    fpsgame/ai
+    fpsgame/client
+    fpsgame/entities
+    fpsgame/fps
+    fpsgame/monster
+    fpsgame/movable
+    fpsgame/render
+    fpsgame/scoreboard
+    fpsgame/server
+    fpsgame/waypoint
+    fpsgame/weapon
+    )
+
+set( CLIENT_SOURCES_RPC
+    rpc/inexor_service.pb.cc
+    rpc/InexorServiceImpl
+    rpc/MCRpcServer
+    rpc/rpc )
+
+set( CLIENT_SOURCES_NET
+    net/MCHub
+    net/MCByteBuffer )
 
 # Only used for MSVC
 set(CLIENT_HEADERS_SHARED
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/command
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/cube
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/ents
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/geom
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/iengine
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/igame
-	${CMAKE_CURRENT_SOURCE_DIR}/../shared/json
-    ${CMAKE_CURRENT_SOURCE_DIR}/../shared/tools)
+    shared/command
+    shared/cube
+    shared/ents
+    shared/geom
+    shared/iengine
+    shared/igame
+    shared/json
+    shared/tools
+    )
 
-set(CLIENT_SOURCES_ENGINE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/3dgui
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/bih
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/blend
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/client
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/command
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/console
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/decal
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/dynlight
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/grass
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/main
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/material
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/menus
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/movie
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/normal
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/octa
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/octaedit
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/octarender
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/physics
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/pvs
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/rendergl
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/rendermodel
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/renderparticles
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/rendersky
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/rendertext
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/renderva
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/shader
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/sound
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/texture
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/water
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/world
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/worldio
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/serverbrowser
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/shadowmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/lightmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/glare
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/blob)
+set(CLIENT_HEADERS_MUPARSER
+    libraries/muparser/include/muParser
+    libraries/muparser/include/muParserBase
+    libraries/muparser/include/muParserBytecode
+    libraries/muparser/include/muParserCallback
+    libraries/muparser/include/muParserDef
+    libraries/muparser/include/muParserError
+    libraries/muparser/include/muParserFixes
+    libraries/muparser/include/muParserStack
+    libraries/muparser/include/muParserToken
+    libraries/muparser/include/muParserTokenReader
+    )
 
 set(CLIENT_HEADERS_ENGINE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/animmodel
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/bih
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/depthfx
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/engine
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/explosion
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/iqm
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/lensflare
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/lightmap
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/lightning
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/md2
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/md3
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/md5
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/model
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/mpr
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/obj
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/octa
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/ragdoll
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/rendertarget
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/scale
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/skelmodel
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/smd
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/textedit
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/texture
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/varray
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/vertmodel
-    ${CMAKE_CURRENT_SOURCE_DIR}/../engine/world)
-    
-set(CLIENT_SOURCES_FPSGAME
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ai
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/client
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/entities
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/fps
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/monster
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/movable
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/render
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/scoreboard
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/server
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/waypoint
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/weapon)
+    engine/animmodel
+    engine/bih
+    engine/depthfx
+    engine/engine
+    engine/explosion
+    engine/iqm
+    engine/lensflare
+    engine/lightmap
+    engine/lightning
+    engine/md2
+    engine/md3
+    engine/md5
+    engine/model
+    engine/mpr
+    engine/obj
+    engine/octa
+    engine/ragdoll
+    engine/rendertarget
+    engine/scale
+    engine/skelmodel
+    engine/smd
+    engine/textedit
+    engine/texture
+    engine/varray
+    engine/vertmodel
+    engine/world
+    )
 
-set(CLIENT_SOURCES_RPC
-    ${CMAKE_BINARY_DIR}/src/rpc/inexor_service.pb.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/../rpc/InexorServiceImpl
-    ${CMAKE_CURRENT_SOURCE_DIR}/../rpc/MCRpcServer
-    ${CMAKE_CURRENT_SOURCE_DIR}/../rpc/rpc)
+set( CLIENT_HEADERS_FPSGAME
+    fpsgame/ai
+    fpsgame/aiman
+    fpsgame/bomb
+    fpsgame/capture
+    fpsgame/collect
+    fpsgame/ctf
+    fpsgame/extinfo
+    fpsgame/game
+    fpsgame/hideandseek
+    )
 
-set_source_files_properties(
-    ${CMAKE_BINARY_DIR}/src/rpc/inexor_service.pb.cc
-    PROPERTIES GENERATED TRUE)
+set( CLIENT_HEADERS_RPC
+    rpc/inexor_service.pb.hh
+    rpc/InexorServiceImpl
+    rpc/MCRpcServer
+    rpc/rpc 
+    rpc/rpc_sb_compat )
 
-set(CLIENT_SOURCES_NET
-  ${CMAKE_CURRENT_SOURCE_DIR}/../net/MCHub
-  ${CMAKE_CURRENT_SOURCE_DIR}/../net/MCByteBuffer)
+set( CLIENT_HEADERS_NET
+    net/MCByteBuffer
+    net/MCHub
+    net/MCServer 
+    net/MCSocket
+    net/MCSocketServer
+    net/MessageConnect
+    net/net )
 
-set(CLIENT_HEADERS_FPSGAME
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ai
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/aiman
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/bomb
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/capture
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/collect
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/ctf
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/extinfo
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/game
-    ${CMAKE_CURRENT_SOURCE_DIR}/../fpsgame/hideandseek)
+# Set Binary name
+set(CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")
 
-set(CLIENT_SOURCES_MUPARSER
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParser
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserBase
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserBytecode
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserCallback
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserError
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserInt
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/muparser/src/muParserTokenReader
-)
+# Set Client definition
+add_definitions(-DCLIENT)
+
+# Prepend source folder to name
+# For VS create filters as well
+create_names(CLIENT engine fpsgame shared muparser rpc net)
 
 set(CLIENT_SOURCES
     ${CLIENT_SOURCES_SHARED}
@@ -155,38 +183,48 @@ set(CLIENT_SOURCES
     ${CLIENT_SOURCES_NET}
     ${CLIENT_SOURCES_RPC})
 
-if(${BUILD_TARGET_OSX})
+# Linux Libraries and Configuration
+if(OS_LINUX)
+    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl rt)
+endif()
+
+# MACOSX Libraries and Configuration
+if(OS_MACOSX)
     set(CLIENT_SOURCES
         ${CLIENT_SOURCES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../engine/macutils.mm)
-elseif(${BUILD_TARGET_WINDOWS})
-    option(CLIENT_USE_WINDRES "Add icon to executable." 0)
+        engine/macutils.mm)
+endif()
 
-    if(${CLIENT_USE_WINDRES})
-        set(CLIENT_SOURCES
-            ${CLIENT_SOURCES}
-            ${CMAKE_CURRENT_SOURCE_DIR}/../vcpp/rr.rc
-        )
+# Windows Libraries and Configuration
+if(OS_WINDOWS)
+    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} opengl32)
 
-        set(CMAKE_RC_COMPILER_INIT windres)
-        ENABLE_LANGUAGE(RC)
-        SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -I ${CMAKE_CURRENT_SOURCE_DIR}/.. -i <SOURCE> -o <OBJECT>")
+    if(MSVC)
+        set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dbghelp)
+
+        set(CLIENT_HEADERS # just needed for the VS-filters
+            ${CLIENT_HEADERS_SHARED}
+            ${CLIENT_HEADERS_ENGINE}
+            ${CLIENT_HEADERS_FPSGAME}
+            ${CLIENT_HEADERS_MUPARSER}
+            ${CLIENT_HEADERS_RPC}
+            ${CLIENT_HEADERS_NET})
+    else()
+        add_definitions(-mwindows)
     endif()
 endif()
 
 
-set(SB_CLIENT_BINARY inexor CACHE INTERNAL "Client binary name.")
-sb_msvc_build_source_groups(CLIENT engine fpsgame shared)
-
-if(WIN32)
-    add_executable(${SB_CLIENT_BINARY} WIN32 ${CLIENT_SOURCES})
-elseif(APPLE)
-    add_executable(${SB_CLIENT_BINARY} MACOSX_BUNDLE ${CLIENT_SOURCES})
+# Assemble executable in specific mode
+if(OS_WINDOWS)
+    add_executable(${CLIENT_BINARY} WIN32 ${CLIENT_SOURCES} ${CLIENT_HEADERS})
+elseif(OS_MACOSX)
+    add_executable(${CLIENT_BINARY} MACOSX_BUNDLE ${CLIENT_SOURCES})
 else()
-    add_executable(${SB_CLIENT_BINARY} ${CLIENT_SOURCES})
+    add_executable(${CLIENT_BINARY} ${CLIENT_SOURCES})
 endif()
 
-target_link_libraries(${SB_CLIENT_BINARY}
+target_link_libraries(${CLIENT_BINARY}
     ${ENET_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${OPENGL_LIBRARIES}
@@ -195,14 +233,13 @@ target_link_libraries(${SB_CLIENT_BINARY}
     ${PROTOBUF_LIBRARIES}
 )
 
+# generate protobuf c++ headers/sources first
+add_dependencies(${CLIENT_BINARY} inexor_rpc_protobuf)
+
 if(MSVC)
-    set_property(TARGET ${SB_CLIENT_BINARY} PROPERTY FOLDER "executables")
+    set_property(TARGET ${CLIENT_BINARY} PROPERTY FOLDER "executables")
 endif()
 
-add_dependencies(${SB_CLIENT_BINARY} inexor_rpc_protobuf)
-
-install(TARGETS
-    ${SB_CLIENT_BINARY}
-    RUNTIME DESTINATION ${INSTALL_RUNTIME_DIR}
-    LIBRARY DESTINATION ${INSTALL_LIBRARY_DIR}
-    ARCHIVE DESTINATION ${INSTALL_ARCHIVE_DIR})
+# Install Binary
+install(TARGETS ${CLIENT_BINARY}
+        DESTINATION ${EXE_DIR})
