@@ -51,7 +51,7 @@ set( SERVER_HEADERS_FPSGAME
     fpsgame/hideandseek.h )
 
 set( SERVER_HEADERS_RPC
-    rpc/inexor_service.pb.hh
+    rpc/inexor_service.pb.h
     rpc/InexorServiceImpl.h
     rpc/MCRpcServer.h
     rpc/rpc.h
@@ -60,7 +60,7 @@ set( SERVER_HEADERS_RPC
 set( SERVER_HEADERS_NET
     net/MCByteBuffer.h
     net/MCHub.h
-    net/MCServer .h
+    net/MCServer.h
     net/MCSocket.h
     net/MCSocketServer.h
     net/MessageConnect.h

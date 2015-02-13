@@ -152,7 +152,7 @@ set( CLIENT_HEADERS_FPSGAME
     )
 
 set( CLIENT_HEADERS_RPC
-    rpc/inexor_service.pb.hh
+    rpc/inexor_service.pb.h
     rpc/InexorServiceImpl.h
     rpc/MCRpcServer.h
     rpc/rpc.h

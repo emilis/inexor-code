@@ -117,9 +117,12 @@ if (NOT DEFINED PROTOC_EXE)
   set(PROTOC_EXE "protoc")
 endif()
 
+execute_process(COMMAND ${PROTOC_EXE} -I=${SOURCE_DIR}/rpc/ --cpp_out=${SOURCE_DIR}/rpc/ ${SOURCE_DIR}/rpc/inexor_service.proto
+               WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_custom_command(
   OUTPUT rpc/inexor_service.pb.h rpc/inexor_service.pb.cc
-  COMMAND ${PROTOC_EXE} --proto_path=${CMAKE_CURRENT_SOURCE_DIR} --cpp_out=${SOURCE_DIR}/ ${SOURCE_DIR}/rpc/inexor_service.proto
+  COMMAND ${PROTOC_EXE} --proto_path=${SOURCE_DIR}/rpc/ --cpp_out=${SOURCE_DIR}/rpc/ ${SOURCE_DIR}/rpc/inexor_service.proto
   DEPENDS rpc/inexor_service.proto
 )
 
