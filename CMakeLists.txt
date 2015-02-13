@@ -141,7 +141,7 @@ if(OS_MACOSX)
     # -std=c++11                    = Use the C++11 language standard including
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -Wno-narrowing -Wsign-compare -std=c++11"); 
+    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -Wno-narrowing -Wsign-compare -std=c++11")
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
