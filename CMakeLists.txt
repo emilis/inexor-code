@@ -80,22 +80,22 @@ if(OS_LINUX OR (OS_WINDOWS AND NOT MSVC))
     set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -fsigned-char -pipe -Wall -Wno-switch -fdiagnostics-show-option ")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
-    # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -std=c++11                      = Use the C++11 language standard
-    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -std=c++11")
+    set(I_CXX_COMPILER_FLAGS      "-fno-threadsafe-statics -std=c++11")
     # -Og                             = Enable optimizations that do not interfere with debugging
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
     set(I_COMPILER_FLAGS_DEBUG    "-Og -g -D_DEBUG")
     # -O3                             = Optimize for maximum speed
+    # -fno-rtti                       = Disable run-time type information
     # -fdata-sections                 = Enable linker optimizations to improve locality of reference for data sections
     # -ffunction-sections             = Enable linker optimizations to improve locality of reference for function sections
     # -fno-ident                      = Ignore the #ident directive
     # -DNDEBUG                        = Not a debug build
     # -U_FORTIFY_SOURCE               = Undefine _FORTIFY_SOURCE in case it was previously defined
     # -D_FORTIFY_SOURCE=1             = Add memory and string function protection (security feature)
-    set(I_COMPILER_FLAGS_RELEASE  "-O3 -fdata-sections -ffunction-sections -fno-ident -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1")
+    set(I_COMPILER_FLAGS_RELEASE  "-O3 -fno-rtti -fdata-sections -ffunction-sections -fno-ident -DNDEBUG -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1")
     # -Wl,-rpath,.                    = Set rpath so that libraries can be placed next to the executable
     set(I_LINKER_FLAGS            "-Wl,-rpath,.")
     # -Wl,-O1                         = Enable linker optimizations
@@ -135,19 +135,19 @@ if(OS_MACOSX)
     set(I_COMPILER_FLAGS          "-fomit-frame-pointer -fno-strict-aliasing -funwind-tables -Wall")
     # -std=c99                        = Use the C99 language standard
     set(I_C_COMPILER_FLAGS        "-std=c99")
-    # -fno-rtti                       = Disable real-time type information
     # -fno-threadsafe-statics         = Don't generate thread-safe statics
     # -fobjc-call-cxx-cdtors          = Call the constructor/destructor of C++ instance variables in ObjC objects
     # -std=c++11                    = Use the C++11 language standard including
     # -Wno-narrowing                  = Don't warn about type narrowing
     # -Wsign-compare                  = Warn about mixed signed/unsigned type comparisons
-    set(I_CXX_COMPILER_FLAGS      "-fno-rtti -fno-threadsafe-statics -fobjc-call-cxx-cdtors -Wno-narrowing -Wsign-compare -std=c++11")
+    set(I_CXX_COMPILER_FLAGS      "-fno-threadsafe-statics -fobjc-call-cxx-cdtors -Wno-narrowing -Wsign-compare -std=c++11")
     # -O0                             = Disable optimizations
     # -g                              = Generate debug information
     # -D_DEBUG                        = Debug build
     set(I_COMPILER_FLAGS_DEBUG    "-O0 -g -D_DEBUG")
     # -O3                             = Optimize for maximum speed plus a few extras
-    set(I_COMPILER_FLAGS_RELEASE  "-O3")
+    # -fno-rtti                       = Disable real-time type information
+    set(I_COMPILER_FLAGS_RELEASE  "-O3 -fno-rtti ")
     # -Wl,-search_paths_first         = Search for static or shared library versions in the same pass
     # -Wl,-ObjC                       = Support creation of creation of ObjC static libraries
     # -Wl,-pie                        = Generate position-independent code suitable for executables only
