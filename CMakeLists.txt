@@ -204,11 +204,11 @@ if(OS_WINDOWS)
         # /W2                                   = Warning level 2
         # /wd"4305"                             = Ignore "truncation from 'double' to 'float'" warning
         set(I_COMPILER_FLAGS          "-MP -Gy -GR- -Zi -EHsc -W2 -wd\"4305\"")
-        # /MTd                                  = Multithreaded debug runtime
+        # /MT                                   = Multithreaded release runtime used
         # /Od                                   = Disable optimizations
         # /RTC1                                 = Enable basic run-time checks
         # -D_DEBUG                              = Debug build
-        set(I_COMPILER_FLAGS_DEBUG    "-MTd -RTC1 -Od -D_DEBUG")
+        set(I_COMPILER_FLAGS_DEBUG    "-MT -RTC1 -Od -D_DEBUG")
         # /MT                                   = Multithreaded release runtime
         # /O2                                   = Optimize for maximum speed
         # /Ob2                                  = Inline any suitable function
@@ -222,9 +222,10 @@ if(OS_WINDOWS)
     endif()
 
     # Standard definitions
+    # -D_WIN32_WINNT=0x0501                 = Target Windows XP
     # -DWIN32 -D_WIN32 -D_WINDOWS           = Windows platform
     # -DNOMINMAX                            = Use the standard's templated min/max
-    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DWINDOWS -DNOMINMAX)
+    add_definitions(-DWIN32 -D_WIN32 -D_WINDOWS -DWINDOWS -DNOMINMAX -D_WIN32_WINNT=0x0501)
     if(X64)
         add_definitions(-DWIN64)
     endif()
