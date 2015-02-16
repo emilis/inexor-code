@@ -237,6 +237,8 @@ if(OS_WINDOWS)
         # not link successfully with other VS versions.
         set(USE_SANDBOX ON)
         option(USE_SANDBOX "Enable or disable use of the sandbox. (VS 2013 or later required)" ON)
+    elseif(MSVC)
+        message(WARNING "Use Visual Studio 2013 in order to compile Inexor. (Otherwise you would need to recompile the dependencies yourself)")
     endif()
 
     if(USE_SANDBOX)
