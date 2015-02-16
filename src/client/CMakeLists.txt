@@ -189,7 +189,7 @@ set(CLIENT_SOURCES
 
 # Linux Libraries and Configuration
 if(OS_LINUX)
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl rt)
+    set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} dl rt)
 endif()
 
 # MACOSX Libraries and Configuration
@@ -201,10 +201,10 @@ endif()
 
 # Windows Libraries and Configuration
 if(OS_WINDOWS)
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} opengl32)
+    set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} opengl32)
 
     if(MSVC)
-        set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dbghelp)
+        set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} dbghelp)
 
         set(CLIENT_HEADERS # just needed for the VS-filters
             ${CLIENT_HEADERS_SHARED}
@@ -233,9 +233,25 @@ target_link_libraries(${CLIENT_BINARY}
     ${SDL2_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${BUILD_EXTRA_LIBS}
+    ${ADDITIONAL_LIBRARIES}
     ${PROTOBUF_LIBRARIES}
 )
+
+# C++ Libraries depending on the stdlib are NOT binary compatible for different VS versions. 
+# Also a debug .lib is incompatible to Inexor in releasemode then.
+if(MSVC)
+    target_link_libraries(${CLIENT_BINARY} debug ${PROTOBUF_LIBRARIES_MSVC_DEBUG})
+    target_link_libraries(${CLIENT_BINARY} optimized ${PROTOBUF_LIBRARIES_MSVC_RELEASE})
+endif()
+
+# Status Message
+message(STATUS "ENET_LIBRARIES:                 ${ENET_LIBRARIES}")
+message(STATUS "SDL2_LIBRARIES:                 ${SDL2_LIBRARIES}")
+message(STATUS "OPENGL_LIBRARIES:               ${OPENGL_LIBRARIES}")
+message(STATUS "ZLIB_LIBRARIES:                 ${ZLIB_LIBRARIES}")
+message(STATUS "PROTOBUF_LIBRARIES:             ${PROTOBUF_LIBRARIES}")
+message(STATUS "ADDITIONAL_LIBRARIES:           ${ADDITIONAL_LIBRARIES}")
+
 
 # generate protobuf c++ headers/sources first
 add_dependencies(${CLIENT_BINARY} inexor_rpc_protobuf)

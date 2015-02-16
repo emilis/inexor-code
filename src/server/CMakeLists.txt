@@ -88,6 +88,7 @@ set(SERVER_SOURCES
     ${SERVER_SOURCES_RPC}
     ${SERVER_SOURCES_NET})
 
+
 # Add headers to the VS filter groups on windows
 if(MSVC)
     set(SERVER_HEADERS
@@ -100,7 +101,7 @@ endif()
 
 # Linux Libraries and Configuration
 if(OS_LINUX})
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} dl -pthread)
+    set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} dl -pthread)
 endif()
 
 # Assemble executable in specific mode
@@ -116,9 +117,23 @@ target_link_libraries(${SERVER_BINARY}
     ${ENET_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${BUILD_EXTRA_LIBS}
     ${PROTOBUF_LIBRARIES}
+    ${ADDITIONAL_LIBRARIES}
 )
+
+# C++ Libraries depending on the stdlib are NOT binary compatible for different VS versions. 
+# Also a debug .lib is incompatible to Inexor in releasemode then.
+if(MSVC)
+    target_link_libraries(${SERVER_BINARY} debug ${PROTOBUF_LIBRARIES_MSVC_DEBUG})
+    target_link_libraries(${SERVER_BINARY} optimized ${PROTOBUF_LIBRARIES_MSVC_RELEASE})
+endif()
+
+# Status Message
+message(STATUS "ENET_LIBRARIES:                 ${ENET_LIBRARIES}")
+message(STATUS "OPENGL_LIBRARIES:               ${OPENGL_LIBRARIES}")
+message(STATUS "ZLIB_LIBRARIES:                 ${ZLIB_LIBRARIES}")
+message(STATUS "PROTOBUF_LIBRARIES:             ${PROTOBUF_LIBRARIES}")
+message(STATUS "ADDITIONAL_LIBRARIES:           ${ADDITIONAL_LIBRARIES}")
 
 # generate protobuf c++ headers/sources first
 add_dependencies(${SERVER_BINARY} inexor_rpc_protobuf)

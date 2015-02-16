@@ -106,9 +106,9 @@ endif()
 # Windows Libraries for Server AND Client
 if(OS_WINDOWS)
     if(NOT MSVC)
-        set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} -static-libgcc -static-libstdc++)
+        set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} -static-libgcc -static-libstdc++)
     endif()
-    set(BUILD_EXTRA_LIBS ${BUILD_EXTRA_LIBS} kernel32 ws2_32 winmm)
+    set(ADDITIONAL_LIBRARIES ${ADDITIONAL_LIBRARIES} kernel32 ws2_32 winmm)
     
     add_definitions(-DASIO_STANDALONE)
 endif()
