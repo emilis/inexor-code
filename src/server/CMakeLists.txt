@@ -126,6 +126,7 @@ target_link_libraries(${SERVER_BINARY}
 if(MSVC)
     target_link_libraries(${SERVER_BINARY} debug ${PROTOBUF_LIBRARIES_MSVC_DEBUG})
     target_link_libraries(${SERVER_BINARY} optimized ${PROTOBUF_LIBRARIES_MSVC_RELEASE})
+    add_definitions(-DPROTOBUF_USE_DLLS)
 endif()
 
 # Status Message
