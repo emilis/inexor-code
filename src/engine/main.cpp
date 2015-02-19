@@ -1206,7 +1206,7 @@ int main(int argc, char **argv)
     //atexit((void (__cdecl *)(void))_CrtDumpMemoryLeaks);
     #ifndef _DEBUG
     #ifndef __GNUC__
-    __try {
+    //__try {
     #endif
     #endif
     #endif
@@ -1290,7 +1290,7 @@ int main(int argc, char **argv)
 
     logoutf("init: cef: fork process (%dpx x %dpx)", scr_w, scr_h);
     cef_app = new InexorCefApp(scr_w, scr_h);
-    CefMainArgs main_args(argc, argv);
+	CefMainArgs main_args(GetModuleHandle(NULL));
     int exit_code = CefExecuteProcess(main_args, cef_app.get(), NULL);
     if (exit_code >= 0) {
         logoutf("cef exit_code: %d", exit_code);
@@ -1470,6 +1470,6 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
 
     #if defined(WIN32) && !defined(_DEBUG) && !defined(__GNUC__)
-    } __except(stackdumper(0, GetExceptionInformation()), EXCEPTION_CONTINUE_SEARCH) { return 0; }
+    //} __except(stackdumper(0, GetExceptionInformation()), EXCEPTION_CONTINUE_SEARCH) { return 0; }
     #endif
 }
