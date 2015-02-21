@@ -257,7 +257,7 @@ enum
 
     SHADER_INVALID    = 1<<8,
     SHADER_DEFERRED   = 1<<9
-};
+}; /// Shader Types
 
 #define MAXSHADERDETAIL 3
 #define MAXVARIANTROWS 5
@@ -286,8 +286,17 @@ struct Shader
 {
     static Shader *lastshader;
 
+    enum {
+        SHADER_STATUS_INIT,         // Initialized, not yet touched, not ready yet
+        SHADER_STATUS_COMPILING,    // Currently Compiling
+        SHADER_STATUS_COMPILED,     // Successfully compiled
+        SHADER_STATUS_LINKING,      // Currently linking
+        SHADER_STATUS_READY,        // Succesfully linked and ready to use
+        SHADER_STATUS_ERRORED       // An Error has occured
+    };
+
     char *name, *vsstr, *psstr, *defer;
-    int type;
+    int type, status;
     GLuint vs, ps;
     GLuint program, vsobj, psobj;
     vector<LocalShaderParamState> defaultparams;
@@ -301,7 +310,7 @@ struct Shader
     vector<UniformLoc> uniformlocs;
     vector<AttribLoc> attriblocs;
 
-    Shader() : name(NULL), vsstr(NULL), psstr(NULL), defer(NULL), type(SHADER_DEFAULT), vs(0), ps(0), program(0), vsobj(0), psobj(0), detailshader(NULL), variantshader(NULL), altshader(NULL), standard(false), forced(false), used(false), native(true), reusevs(NULL), reuseps(NULL), numextparams(0), extparams(NULL), extvertparams(NULL), extpixparams(NULL)
+    Shader() : name(NULL), vsstr(NULL), psstr(NULL), defer(NULL), type(SHADER_DEFAULT), status(SHADER_STATUS_INIT), vs(0), ps(0), program(0), vsobj(0), psobj(0), detailshader(NULL), variantshader(NULL), altshader(NULL), standard(false), forced(false), used(false), native(true), reusevs(NULL), reuseps(NULL), numextparams(0), extparams(NULL), extvertparams(NULL), extpixparams(NULL)
     {
         loopi(MAXSHADERDETAIL) fastshader[i] = this;
     }
@@ -391,9 +400,25 @@ struct Shader
         lastshader->setslotparams(slot, vslot);
     }
 
-    bool compile();
+    /// Compile the Shader Source
+    /// Usage is: compile all Shader, getcompilestatus of all Shader, link() for all Shader and finally finish() for all Shader (this will multithread Glshader compilation)
+    void compile();
+
+    /// Get Compilation Status of this Shader
+    /// Do not execute directly after compile() for each shader otherwise it will counteract multithreading
+    /// @Returns true if compiled successfully
+    bool getcompilestatus();
+
+    /// Link the GlProgram
+    void link();
+
+    /// Checks if linking was successfully and finishes linking/remaining other stuff
+    /// Do not execute directly after link for each Shader except you are willing to yield up multithreading, but thats not really a performance issue at this point
+    /// @Returns true if ready to use
+    bool finish();
+
     void cleanup(bool invalid = false);
-    
+
     static int uniformlocversion();
 };
 

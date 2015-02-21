@@ -64,21 +64,29 @@ Shader *lookupshaderbyname(const char *name)
     return s && s->detailshader ? s : NULL;
 }
 
-static bool compileasmshader(GLenum type, GLuint &idx, const char *def, const char *tname, const char *name, bool msg = true, bool nativeonly = false)
+/// Compile deprecated openGL Assembly Shader
+static void compileasmshader(GLenum type, GLuint &idx, const char *def)
 {
     glGenProgramsARB_(1, &idx);
     glBindProgramARB_(type, idx);
     def += strspn(def, " \t\r\n");
     glProgramStringARB_(type, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(def), def);
+}
+
+/// Retrieve compilation status of deprecated Assembly Shader and conout error message
+static bool checkcompilestatusasmshader(GLenum type, GLuint &idx, const char *def, const char *tname, const char *name, bool msg = true, bool nativeonly = false)
+{
+    glBindProgramARB_(type, idx);
+    def += strspn(def, " \t\r\n");
     GLint err = -1, native = 1;
     glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &err);
     extern int apple_vp_bug;
-    if(type!=GL_VERTEX_PROGRAM_ARB || !apple_vp_bug)
+    if(type != GL_VERTEX_PROGRAM_ARB || !apple_vp_bug)
         glGetProgramivARB_(type, GL_PROGRAM_UNDER_NATIVE_LIMITS_ARB, &native);
-    if(msg && err!=-1)
+    if(msg && err != -1)
     {
         conoutf(CON_ERROR, "COMPILE ERROR (%s:%s) - %s", tname, name, glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-        if(err>=0 && err<(int)strlen(def))
+        if(err >= 0 && err<(int)strlen(def))
         {
             FILE *l = getlogfile();
             if(l)
@@ -92,12 +100,12 @@ static bool compileasmshader(GLenum type, GLuint &idx, const char *def, const ch
     }
     else if(msg && !native) conoutf(CON_ERROR, "%s:%s EXCEEDED NATIVE LIMITS", tname, name);
     glBindProgramARB_(type, 0);
-    if(err!=-1 || (!native && nativeonly))
+    if(err != -1 || (!native && nativeonly))
     {
         glDeleteProgramsARB_(1, &idx);
         idx = 0;
     }
-    return native!=0;
+    return native != 0;
 }
 
 static void showglslinfo(GLenum type, GLuint obj, const char *name, const char *source)
@@ -128,22 +136,29 @@ static void showglslinfo(GLenum type, GLuint obj, const char *name, const char *
     }
 }
 
-static void compileglslshader(GLenum type, GLuint &obj, const char *def, const char *name, bool msg = true) 
+/// Compile GLSL Shader
+static void compileglslshader(GLenum type, GLuint &obj, const char *def) 
 {
     const GLchar *source = (const GLchar *)(def + strspn(def, " \t\r\n")); 
     obj = glCreateShader_(type);
     glShaderSource_(obj, 1, &source, NULL);
     glCompileShader_(obj);
+}
+
+/// Retrieve Shader compilation status and conout error message
+static void checkcompilestatusglslshader(GLenum type, GLuint &obj, const char *def, const char *name, bool msg = true)
+{
+    const GLchar *source = (const GLchar *)(def + strspn(def, " \t\r\n"));
     GLint success;
     glGetShaderiv_(obj, GL_COMPILE_STATUS, &success);
-    if(!success) 
+    if (!success)
     {
-        if(msg) showglslinfo(type, obj, name, source);
+        if (msg) showglslinfo(type, obj, name, source);
         glDeleteShader_(obj);
         obj = 0;
     }
-    else if(dbgshader > 1 && msg) showglslinfo(type, obj, name, source);
-}  
+    else if (dbgshader > 1 && msg) showglslinfo(type, obj, name, source);
+}
 
 VAR(dbgubo, 0, 0, 1);
 
@@ -193,10 +208,10 @@ static void bindglsluniform(Shader &s, UniformLoc &u)
     }
 }
 
-static void linkglslprogram(Shader &s, bool msg = true)
+/// Links a GLSL program
+static void linkglslprogram(Shader &s)
 {
     s.program = s.vsobj && s.psobj ? glCreateProgram_() : 0;
-    GLint success = 0;
     if(s.program)
     {
         glAttachShader_(s.program, s.vsobj);
@@ -207,6 +222,15 @@ static void linkglslprogram(Shader &s, bool msg = true)
             glBindAttribLocation_(s.program, a.loc, a.name);
         }
         glLinkProgram_(s.program);
+    }
+}
+
+/// Check if errors occured and finishes linking of a GLSL program
+static void finishlinkglslprogram(Shader &s, bool msg = true)
+{
+    GLint success = 0;
+    if(s.program)
+    {
         glGetProgramiv_(s.program, GL_LINK_STATUS, &success);
     }
     if(success)
@@ -729,28 +753,75 @@ VARFN(shaders, useshaders, -1, -1, 1, initwarning("shaders"));
 VARF(shaderprecision, 0, 0, 2, initwarning("shader quality"));
 VARF(forceglsl, -1, -1, 1, initwarning("shaders"));
 
-bool Shader::compile()
+void Shader::compile()
 {
+    if(status == SHADER_STATUS_READY) return; //do not recompile
+
     if(type & SHADER_GLSLANG)
     {
         if(!vsstr) vsobj = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vsobj;
-        else compileglslshader(GL_VERTEX_SHADER,   vsobj, vsstr, name, dbgshader || !variantshader);
+        else compileglslshader(GL_VERTEX_SHADER, vsobj, vsstr);
         if(!psstr) psobj = !reuseps || reuseps->type&SHADER_INVALID ? 0 : reuseps->psobj;
-        else compileglslshader(GL_FRAGMENT_SHADER, psobj, psstr, name, dbgshader || !variantshader);
-        linkglslprogram(*this, !variantshader);
-        return program!=0;
+        else compileglslshader(GL_FRAGMENT_SHADER, psobj, psstr);
     }
-    else
+    else if(renderpath == R_ASMSHADER || renderpath == R_ASMGLSLANG)
     {
-        if(renderpath!=R_ASMSHADER && renderpath!=R_ASMGLSLANG) return false;
         if(!vsstr) vs = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vs;
-        else if(!compileasmshader(GL_VERTEX_PROGRAM_ARB, vs, vsstr, "VS", name, dbgshader || !variantshader, variantshader!=NULL))
+        else compileasmshader(GL_VERTEX_PROGRAM_ARB, vs, vsstr);
+
+        if(!psstr) ps = !reuseps || reuseps->type&SHADER_INVALID ? 0 : reuseps->ps;
+        else compileasmshader(GL_FRAGMENT_PROGRAM_ARB, ps, psstr);
+    }
+
+    status = SHADER_STATUS_COMPILING;
+}
+
+bool Shader::getcompilestatus()
+{
+    if(status == SHADER_STATUS_ERRORED) return false;
+
+    if(type & SHADER_GLSLANG)
+    {
+        if(!vsstr) vsobj = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vsobj;
+        else checkcompilestatusglslshader(GL_VERTEX_SHADER, vsobj, vsstr, name, dbgshader || !variantshader);
+        if(!psstr) psobj = !reuseps || reuseps->type&SHADER_INVALID ? 0 : reuseps->psobj;
+        else checkcompilestatusglslshader(GL_FRAGMENT_SHADER, psobj, psstr, name, dbgshader || !variantshader);
+        status = program != 0 ? SHADER_STATUS_COMPILED : SHADER_STATUS_ERRORED;
+    }
+    else if(renderpath == R_ASMSHADER || renderpath == R_ASMGLSLANG)
+    {
+        if(!vsstr) vs = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vs;
+        else if(!checkcompilestatusasmshader(GL_VERTEX_PROGRAM_ARB, vs, vsstr, "VS", name, dbgshader || !variantshader, variantshader != NULL))
             native = false;
         if(!psstr) ps = !reuseps || reuseps->type&SHADER_INVALID ? 0 : reuseps->ps;
-        else if(!compileasmshader(GL_FRAGMENT_PROGRAM_ARB, ps, psstr, "PS", name, dbgshader || !variantshader, variantshader!=NULL))
+        else if(!checkcompilestatusasmshader(GL_FRAGMENT_PROGRAM_ARB, ps, psstr, "PS", name, dbgshader || !variantshader, variantshader != NULL))
             native = false;
-        return vs && ps && (!variantshader || native);
+
+        status = vs && ps && (!variantshader || native) ? SHADER_STATUS_COMPILED : SHADER_STATUS_ERRORED;
     }
+    return status == SHADER_STATUS_COMPILED;
+}
+
+void Shader::link()
+{
+    if(status == SHADER_STATUS_ERRORED) return;
+
+    if(type & SHADER_GLSLANG) linkglslprogram(*this);
+    status = SHADER_STATUS_LINKING;
+}
+
+bool Shader::finish()
+{
+    if(status == SHADER_STATUS_ERRORED) return false;
+
+    if(type & SHADER_GLSLANG)
+    {
+        finishlinkglslprogram(*this, !variantshader);
+        status = program != 0 ? SHADER_STATUS_READY : SHADER_STATUS_ERRORED;
+    }
+    else status = SHADER_STATUS_READY;
+
+    return status == SHADER_STATUS_READY;
 }
 
 void Shader::cleanup(bool invalid)
