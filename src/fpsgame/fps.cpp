@@ -153,7 +153,7 @@ namespace game
     bool detachcamera()
     {
         fpsent *d = hudplayer();
-        return d->state==CS_DEAD;
+        return false; // d->state==CS_DEAD;
     }
 
     bool collidecamera()
@@ -365,6 +365,7 @@ namespace game
 
     bool canjump()
     {
+		//conoutf(CON_DEBUG, "canjump");
         if(!intermission) respawn(gamemode);
         return player1->state!=CS_DEAD && !intermission;
     }
@@ -410,6 +411,8 @@ namespace game
 
     void deathstate(fpsent *d, bool restore)
     {
+		conoutf(CON_DEBUG, "Hallo Werld");
+
         d->state = CS_DEAD;
         d->lastpain = lastmillis;
         if(!restore) gibeffect(max(-d->health, 0), d->vel, d);
@@ -785,7 +788,7 @@ namespace game
         {
             case CS_EDITING:
             case CS_SPECTATOR:
-                return 1;
+                return 1*3;
             default:
                 return 1650.0f/1800.0f;
         }

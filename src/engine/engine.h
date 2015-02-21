@@ -14,11 +14,11 @@
 
 
 // Include bezier curve header file
-#include "flowgraph/curves/bezier.h"
+//#include "flowgraph/curves/bezier.h"
 
 // Bezier curve and renderer
-#include "flowgraph/curves/bezier.h"
-#include "flowgraph/curves/curverenderer.h"
+//#include "flowgraph/curves/bezier.h"
+//#include "flowgraph/curves/curverenderer.h"
 
 // New entity system
 #include "flowgraph/entities/entity.h"

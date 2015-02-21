@@ -576,16 +576,18 @@ VAR(showentradius, 0, 1, 1);
 void renderentring(const extentity &e, float radius, int axis)
 {
     if(radius <= 0) return;
-    glBegin(GL_LINE_LOOP);
-    loopi(15)
-    {
-        vec p(e.o);
-        const vec2 &sc = sincos360[i*(360/15)];
-        p[axis>=2 ? 1 : 0] += radius*sc.x;
-        p[axis>=1 ? 2 : 1] += radius*sc.y;
-        glVertex3fv(p.v);
-    }
-    glEnd();
+	glBegin(GL_LINE_LOOP);
+
+	loopi(50)
+	{
+		vec p(e.o);
+		const vec2 &sc = sincos360[i*(360/50)];
+		p[axis>=2 ? 1 : 0] += radius*sc.x;
+		p[axis>=1 ? 2 : 1] += radius*sc.y;
+		glVertex3fv(p.v);
+	}
+
+	glEnd();
 }
 
 void renderentsphere(const extentity &e, float radius)
@@ -627,6 +629,46 @@ void renderentarrow(const extentity &e, const vec &dir, float radius)
     glEnd();
 }
 
+
+// Hanni
+// BUGGY!
+void renderarrow(const vec &pos, const vec &dir, float radius)
+{
+    if(radius <= 0) return;
+    float arrowsize = min(radius/8, 0.5f);
+    vec target = vec(dir).mul(radius).add(pos), arrowbase = vec(dir).mul(radius - arrowsize).add(pos), spoke;
+    spoke.orthogonal(dir);
+    spoke.normalize();
+    spoke.mul(arrowsize);
+
+    glBegin(GL_LINES);
+	glPushMatrix();
+
+    glVertex3fv(pos.v);
+    glVertex3fv(target.v);
+
+	glPopMatrix();
+    glEnd();
+    glBegin(GL_TRIANGLE_FAN);
+	glPushMatrix();
+
+    glVertex3fv(target.v);
+    loopi(5)
+    {
+        vec p(spoke);
+        p.rotate(2*M_PI*i/4.0f, dir);
+        p.add(arrowbase);
+        glVertex3fv(p.v);
+    }
+
+	glPopMatrix();
+    glEnd();
+}
+
+
+
+
+// Hanni
 void renderentcone(const extentity &e, const vec &dir, float radius, float angle)
 {
     if(radius <= 0) return;
@@ -635,20 +677,20 @@ void renderentcone(const extentity &e, const vec &dir, float radius, float angle
     spoke.normalize();
     spoke.mul(radius*sinf(angle*RAD));
     glBegin(GL_LINES);
-    loopi(8)
+    loopi(30)
     {
         vec p(spoke);
-        p.rotate(2*M_PI*i/8.0f, dir);
+        p.rotate(2*M_PI*i/30.0f, dir);
         p.add(spot);
         glVertex3fv(e.o.v);
         glVertex3fv(p.v);
     }
     glEnd();
     glBegin(GL_LINE_LOOP);
-    loopi(8)
+    loopi(30)
     {
         vec p(spoke);
-        p.rotate(2*M_PI*i/8.0f, dir);
+        p.rotate(2*M_PI*i/30.0f, dir);
         p.add(spot);
         glVertex3fv(p.v);
     }
@@ -657,6 +699,14 @@ void renderentcone(const extentity &e, const vec &dir, float radius, float angle
 
 void renderentradius(extentity &e, bool color)
 {
+	// Hanni's Primitives
+	vec p(e.o);
+	float scale1 = 0.25f*e.attr1;
+	float scale2 = 0.25f*e.attr2;
+	float scale3 = 0.25f*e.attr3;
+	float scale4 = 0.25f*e.attr4;
+	float scale5 = 0.25f*e.attr5;
+
     switch(e.type)
     {
         case ET_LIGHT:
@@ -676,6 +726,53 @@ void renderentradius(extentity &e, bool color)
                 renderentcone(*e.attached, dir, radius, angle); 
             }
             break;
+		
+		//  "sphere", "cube", "cylinder", "cone", "pyramid", "torus", "prism", "frustum",
+		// Hanni
+		case 47:
+			// Sphere
+            renderentsphere(e, e.attr2);
+
+			//conoutf(CON_DEBUG, "%f %f %f", e.o.x, e.o.y, e.o.z);
+			break;
+
+		case 48:
+			// Change shader!
+            lineshader->set();
+
+			// Cube
+			glBegin(GL_QUADS);
+
+            render3dbox(p, scale1, scale2, scale3);
+
+			/*
+			// 4 oben (plus bei z)
+			glVertex3f(p.x+scale,p.y+scale,p.z+scale);
+			glVertex3f(p.x-scale,p.y+scale,p.z+scale);
+			glVertex3f(p.x-scale,p.y-scale,p.z+scale);
+			glVertex3f(p.x+scale,p.y-scale,p.z+scale);
+
+			// 4 unten (minus bei z)
+			glVertex3f(p.x+scale,p.y+scale,p.z-scale);
+			glVertex3f(p.x-scale,p.y+scale,p.z-scale);
+			glVertex3f(p.x-scale,p.y-scale,p.z-scale);
+			glVertex3f(p.x+scale,p.y-scale,p.z-scale);
+			*/
+
+			// Standardshader setzen
+			defaultshader->set();
+
+			glEnd();
+    		break;
+
+		case 49:
+			// Cylinder
+			break;
+
+		case 50:
+			// Cone - buggy!
+			renderentcone(e,vec(0.0f,0.0f,-1.0f),scale1,scale2);
+			break;
 
         case ET_SOUND:
             if(color) glColor3f(0, 1, 1);

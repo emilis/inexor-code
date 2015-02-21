@@ -4,6 +4,8 @@ extern int outline;
 
 void boxs(int orient, vec o, const vec &s)
 {
+	//conoutf(CON_DEBUG, "void boxs(int orient, vec o, const vec &s)");
+
     int   d = dimension(orient),
           dc= dimcoord(orient);
 
@@ -25,11 +27,13 @@ void boxs(int orient, vec o, const vec &s)
 }
 
 void boxs3D(const vec &o, vec s, int g)
-{
+{	
+	//conoutf(CON_DEBUG, "void boxs3D(const vec &o, vec s, int g)");
+	
 	// set custom color
 	//glColor3f(58.0f/255.0f,173.0f/255.0f,255.0f/255.0f);
 	
-	glLineWidth(1);
+	glLineWidth(2.0f);
 
     s.mul(g);
     loopi(6)
@@ -41,7 +45,7 @@ void boxs3D(const vec &o, vec s, int g)
 
 void boxsgrid(int orient, vec o, vec s, int g)
 {
-	return;
+	//conoutf(CON_DEBUG, "void boxsgrid(int orient, vec o, vec s, int g)");
 
     int   d = dimension(orient),
           dc= dimcoord(orient);
@@ -106,6 +110,7 @@ ICOMMAND(moving, "b", (int *n),
     intret(moving);
 });
 
+// size of the cubes we work with
 VARF(gridpower, 0, 3, 12,
 {
     if(dragging) return;
@@ -114,17 +119,29 @@ VARF(gridpower, 0, 3, 12,
     cancelsel();
 });
 
+// decide if it is possible to select new cubes through the selected cube volume
+// if disabled, you will select the face the selected volume
 VAR(passthroughsel, 0, 0, 1);
+
 VAR(editing, 1, 0, 0);
+
+// allows you to only select/modify the corners of a surface
+// can not be applied to volumes (yet)
 VAR(selectcorners, 0, 0, 1);
+
+// toggle heightmap editing (standard bind key: h)
 VARF(hmapedit, 0, 0, 1, horient = sel.orient);
 
-void forcenextundo() { lastsel.orient = -1; }
+void forcenextundo() 
+{
+	lastsel.orient = -1;
+}
 
 extern void hmapcancel();
 
 void cubecancel()
 {
+	//conoutf(CON_DEBUG, "void cubecancel()");
     havesel = false;
     moving = dragging = hmapedit = passthroughsel = 0;
     forcenextundo();
@@ -133,12 +150,15 @@ void cubecancel()
 
 void cancelsel()
 {
+	//conoutf(CON_DEBUG, "void cancelsel()");
     cubecancel();
     entcancel();
 }
 
 void toggleedit(bool force)
 {
+	//conoutf(CON_DEBUG, "void toggleedit(bool force)");
+
     if(!force)
     {
         if(!isconnected()) return;
@@ -168,6 +188,8 @@ void toggleedit(bool force)
 
 bool noedit(bool view, bool msg)
 {
+	//conoutf(CON_DEBUG, "bool noedit(bool view, bool msg)");
+
     if(!editmode) { if(msg) conoutf(CON_ERROR, "operation only allowed in edit mode"); return true; }
     if(view || haveselent()) return false;
     float r = 1.0f;
@@ -182,6 +204,8 @@ bool noedit(bool view, bool msg)
 
 void reorient()
 {
+	//conoutf(CON_DEBUG, "void reorient()");
+
     sel.cx = 0;
     sel.cy = 0;
     sel.cxs = sel.s[R[dimension(orient)]]*2;
@@ -191,6 +215,7 @@ void reorient()
 
 void selextend()
 {
+	//conoutf(CON_DEBUG, "void selextend()");
     if(noedit(true)) return;
     loopi(3)
     {
@@ -222,6 +247,8 @@ ICOMMAND(selswap, "", (), { if(noedit(true)) return; swap(sel, savedsel); });
 
 cube &blockcube(int x, int y, int z, const block3 &b, int rgrid) // looks up a world cube, based on coordinates mapped by the block
 {
+	conoutf(CON_DEBUG, "cube &blockcube(int x, int y, int z, const block3 &b, int rgrid)");
+
     int dim = dimension(b.orient), dc = dimcoord(b.orient);
     ivec s(dim, x*b.grid, y*b.grid, dc*(b.s[dim]-1)*b.grid);
     s.add(b.o);
@@ -242,6 +269,8 @@ ICOMMAND(havesel, "", (), intret(havesel ? selchildcount : 0));
 
 void countselchild(cube *c, const ivec &cor, int size)
 {
+	//conoutf(CON_DEBUG, "void countselchild(cube *c, const ivec &cor, int size)");
+
     ivec ss = ivec(sel.s).mul(sel.grid);
     loopoctaboxsize(cor, size, sel.o, ss)
     {
@@ -261,6 +290,7 @@ void countselchild(cube *c, const ivec &cor, int size)
 
 void normalizelookupcube(int x, int y, int z)
 {
+	//conoutf(CON_DEBUG, "void normalizelookupcube(int x, int y, int z)");
     if(lusize>gridsize)
     {
         lu.x += (x-lu.x)/gridsize*gridsize;
@@ -278,6 +308,7 @@ void normalizelookupcube(int x, int y, int z)
 
 void updateselection()
 {
+	//conoutf(CON_DEBUG, "void updateselection()");
     sel.o.x = min(lastcur.x, cur.x);
     sel.o.y = min(lastcur.y, cur.y);
     sel.o.z = min(lastcur.z, cur.z);
@@ -288,6 +319,7 @@ void updateselection()
 
 bool editmoveplane(const vec &o, const vec &ray, int d, float off, vec &handle, vec &dest, bool first)
 {
+	//conoutf(CON_DEBUG, "bool editmoveplane(const vec &o, const vec &ray, int d, float off, vec &handle, vec &dest, bool first)");
     plane pl(d, off);
     float dist = 0.0f;
     if(!pl.rayintersect(player->o, ray, dist))
@@ -310,6 +342,7 @@ VAR(passthroughcube, 0, 1, 1);
 
 void rendereditcursor()
 {
+	//conoutf(CON_DEBUG, "void rendereditcursor()");
     int d   = dimension(sel.orient),
         od  = dimension(orient),
         odc = dimcoord(orient);
@@ -500,8 +533,10 @@ void rendereditcursor()
     glDisable(GL_BLEND);
 }
 
+// Checks if editmode should be enabled (editmode, no hidehud, no main menu)
 void tryedit()
 {
+	//conoutf(CON_DEBUG, "void tryedit()");
     extern int hidehud;
     if(!editmode || hidehud || mainmenu) return;
 	
@@ -516,6 +551,7 @@ static bool haschanged = false;
 
 void readychanges(const ivec &bbmin, const ivec &bbmax, cube *c, const ivec &cor, int size)
 {
+	//conoutf(CON_DEBUG, "void readychanges(const ivec &bbmin, const ivec &bbmax, cube *c, const ivec &cor, int size)");
     loopoctabox(cor, size, bbmin, bbmax)
     {
         ivec o(i, cor.x, cor.y, cor.z, size);
@@ -547,6 +583,7 @@ void readychanges(const ivec &bbmin, const ivec &bbmax, cube *c, const ivec &cor
 
 void commitchanges(bool force)
 {
+	//conoutf(CON_DEBUG, "void commitchanges(bool force)");
     if(!force && !haschanged) return;
     haschanged = false;
 
@@ -565,6 +602,7 @@ void commitchanges(bool force)
 
 void changed(const block3 &sel, bool commit = true)
 {
+	//conoutf(CON_DEBUG, "void changed(const block3 &sel, bool commit = true)");
     if(sel.s.iszero()) return;
     readychanges(ivec(sel.o).sub(1), ivec(sel.s).mul(sel.grid).add(sel.o).add(1), worldroot, ivec(0, 0, 0), worldsize/2);
     haschanged = true;
@@ -575,6 +613,7 @@ void changed(const block3 &sel, bool commit = true)
 //////////// copy and undo /////////////
 static inline void copycube(const cube &src, cube &dst)
 {
+	conoutf(CON_DEBUG, "static inline void copycube(const cube &src, cube &dst)");
     dst = src;
     dst.visible = 0;
     dst.merged = 0;
@@ -588,12 +627,14 @@ static inline void copycube(const cube &src, cube &dst)
 
 static inline void pastecube(const cube &src, cube &dst)
 {
+	conoutf(CON_DEBUG, "static inline void pastecube(const cube &src, cube &dst)");
     discardchildren(dst);
     copycube(src, dst);
 }
 
 void blockcopy(const block3 &s, int rgrid, block3 *b)
 {
+	conoutf(CON_DEBUG, "void blockcopy(const block3 &s, int rgrid, block3 *b)");
     *b = s;
     cube *q = b->c();
     loopxyz(s, rgrid, copycube(c, *q++));
@@ -601,6 +642,7 @@ void blockcopy(const block3 &s, int rgrid, block3 *b)
 
 block3 *blockcopy(const block3 &s, int rgrid)
 {
+	conoutf(CON_DEBUG, "block3 *blockcopy(const block3 &s, int rgrid)");
     int bsize = sizeof(block3)+sizeof(cube)*s.size();
     if(bsize <= 0 || bsize > (100<<20)) return 0;
     block3 *b = (block3 *)new uchar[bsize];
@@ -610,6 +652,7 @@ block3 *blockcopy(const block3 &s, int rgrid)
 
 void freeblock(block3 *b, bool alloced = true)
 {
+	conoutf(CON_DEBUG, "void freeblock(block3 *b, bool alloced = true)");
     cube *q = b->c();
     loopi(b->size()) discardchildren(*q++);
     if(alloced) delete[] b;
@@ -617,17 +660,20 @@ void freeblock(block3 *b, bool alloced = true)
 
 void selgridmap(selinfo &sel, int *g)                           // generates a map of the cube sizes at each grid point
 {
+	conoutf(CON_DEBUG, "void selgridmap(selinfo &sel, int *g)");
     loopxyz(sel, -sel.grid, (*g++ = lusize, (void)c));
 }
 
 void freeundo(undoblock *u)
 {
+	conoutf(CON_DEBUG, "void freeundo(undoblock *u)");
     if(!u->numents) freeblock(u->block(), false);
     delete[] (uchar *)u;
 }
 
 void pasteundo(undoblock *u)
 {
+	conoutf(CON_DEBUG, "void pasteundo(undoblock *u)");
     if(u->numents) pasteundoents(u);
     else
     {
@@ -640,6 +686,7 @@ void pasteundo(undoblock *u)
 
 static inline int undosize(undoblock *u)
 {
+	conoutf(CON_DEBUG, "static inline int undosize(undoblock *u)");
     if(u->numents) return u->numents*sizeof(undoent);
     else
     {
@@ -696,6 +743,7 @@ int totalundos = 0;
 
 void pruneundos(int maxremain)                          // bound memory
 {
+	//conoutf(CON_DEBUG, "void pruneundos(int maxremain)");
     while(totalundos > maxremain && !undos.empty())
     {
         undoblock *u = undos.popfirst();
@@ -717,6 +765,7 @@ COMMAND(clearundos, "");
 
 undoblock *newundocube(selinfo &s)
 {
+	conoutf(CON_DEBUG, "undoblock *newundocube(selinfo &s)");
     int ssize = s.size(),
         selgridsize = ssize*sizeof(int),
         blocksize = sizeof(block3)+ssize*sizeof(cube);
@@ -732,6 +781,7 @@ undoblock *newundocube(selinfo &s)
 
 void addundo(undoblock *u)
 {
+	conoutf(CON_DEBUG, "void addundo(undoblock *u)");
     u->size = undosize(u);
     u->timestamp = totalmillis;
     undos.add(u);
@@ -743,6 +793,7 @@ VARP(nompedit, 0, 1, 1);
 
 void makeundoex(selinfo &s)
 {
+	conoutf(CON_DEBUG, "void makeundoex(selinfo &s)");
     if(nompedit && multiplayer(false)) return;
     undoblock *u = newundocube(s);
     if(u) addundo(u);
@@ -750,6 +801,7 @@ void makeundoex(selinfo &s)
 
 void makeundo()                        // stores state of selected cubes before editing
 {
+	conoutf(CON_DEBUG, "void makeundo()");
     if(lastsel==sel || sel.s.iszero()) return;
     lastsel=sel;
     makeundoex(sel);
@@ -757,6 +809,7 @@ void makeundo()                        // stores state of selected cubes before 
 
 void swapundo(undolist &a, undolist &b, const char *s)
 {
+	conoutf(CON_DEBUG, "void swapundo(undolist &a, undolist &b, const char *s)");
     if(noedit() || (nompedit && multiplayer())) return;
     if(a.empty()) { conoutf(CON_WARN, "nothing more to %s", s); return; }
 	int ts = a.last->timestamp;
@@ -793,8 +846,16 @@ void swapundo(undolist &a, undolist &b, const char *s)
     forcenextundo();
 }
 
-void editundo() { swapundo(undos, redos, "undo"); }
-void editredo() { swapundo(redos, undos, "redo"); }
+void editundo()
+{
+	conoutf(CON_DEBUG, "void editundo()");
+	swapundo(undos, redos, "undo"); 
+}
+void editredo()
+{
+	conoutf(CON_DEBUG, "void editredo()");
+	swapundo(redos, undos, "redo"); 
+}
 
 // guard against subdivision
 #define protectsel(f) { undoblock *_u = newundocube(sel); f; if(_u) { pasteundo(_u); freeundo(_u); } }
@@ -805,6 +866,7 @@ editinfo *localedit = NULL;
 template<class B>
 static void packcube(cube &c, B &buf)
 {
+	conoutf(CON_DEBUG, "static void packcube(cube &c, B &buf)");
     if(c.children)
     {
         buf.put(0xFF);
@@ -824,6 +886,7 @@ static void packcube(cube &c, B &buf)
 template<class B>
 static bool packblock(block3 &b, B &buf)
 {
+	conoutf(CON_DEBUG, "static bool packblock(block3 &b, B &buf)");
     if(b.size() <= 0 || b.size() > (1<<20)) return false;
     block3 hdr = b;
     lilswap(hdr.o.v, 3);
@@ -839,6 +902,7 @@ static bool packblock(block3 &b, B &buf)
 template<class B>
 static void unpackcube(cube &c, B &buf)
 {
+	conoutf(CON_DEBUG, "static void unpackcube(cube &c, B &buf)");
     int mat = buf.get();
     if(mat == 0xFF)
     {
@@ -857,6 +921,7 @@ static void unpackcube(cube &c, B &buf)
 template<class B>
 static bool unpackblock(block3 *&b, B &buf)
 {
+	conoutf(CON_DEBUG, "static bool unpackblock(block3 *&b, B &buf)");
     if(b) { freeblock(b); b = NULL; }
     block3 hdr;
     buf.get((uchar *)&hdr, sizeof(hdr));
@@ -875,6 +940,7 @@ static bool unpackblock(block3 *&b, B &buf)
 
 static bool compresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, int &outlen)
 {
+	conoutf(CON_DEBUG, "static bool compresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, int &outlen)");
     uLongf len = compressBound(inlen);
     if(len > (1<<20)) return false;
     outbuf = new uchar[len];
@@ -890,6 +956,7 @@ static bool compresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, int 
 
 static bool uncompresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, int &outlen)
 {
+	conoutf(CON_DEBUG, "static bool uncompresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, int &outlen)");
     if(compressBound(outlen) > (1<<20)) return false;
     uLongf len = outlen;
     outbuf = new uchar[len];
@@ -905,6 +972,7 @@ static bool uncompresseditinfo(const uchar *inbuf, int inlen, uchar *&outbuf, in
 
 bool packeditinfo(editinfo *e, int &inlen, uchar *&outbuf, int &outlen)
 {
+	conoutf(CON_DEBUG, "bool packeditinfo(editinfo *e, int &inlen, uchar *&outbuf, int &outlen)");
     vector<uchar> buf;
     if(!e || !e->copy || !packblock(*e->copy, buf)) return false;
     inlen = buf.length();
@@ -913,6 +981,7 @@ bool packeditinfo(editinfo *e, int &inlen, uchar *&outbuf, int &outlen)
 
 bool unpackeditinfo(editinfo *&e, const uchar *inbuf, int inlen, int outlen)
 {
+	conoutf(CON_DEBUG, "bool unpackeditinfo(editinfo *&e, const uchar *inbuf, int inlen, int outlen)");
     if(e && e->copy) { freeblock(e->copy); e->copy = NULL; }
     uchar *outbuf = NULL;
     if(!uncompresseditinfo(inbuf, inlen, outbuf, outlen)) return false;
@@ -929,6 +998,7 @@ bool unpackeditinfo(editinfo *&e, const uchar *inbuf, int inlen, int outlen)
 
 void freeeditinfo(editinfo *&e)
 {
+	conoutf(CON_DEBUG, "void freeeditinfo(editinfo *&e)");
     if(!e) return;
     editinfos.removeobj(e);
     if(e->copy) freeblock(e->copy);
@@ -956,6 +1026,7 @@ static hashset<prefab> prefabs;
 
 void delprefab(char *name)
 {
+	conoutf(CON_DEBUG, "void delprefab(char *name)");
     if(prefabs.remove(name))
         conoutf("deleted prefab %s", name);
 }
@@ -963,6 +1034,7 @@ COMMAND(delprefab, "s");
 
 void saveprefab(char *name)
 {
+	conoutf(CON_DEBUG, "void saveprefab(char *name)");
     if(!name[0] || noedit(true) || (nompedit && multiplayer())) return;
     prefab *b = prefabs.access(name);
     if(!b)
@@ -991,6 +1063,7 @@ COMMAND(saveprefab, "s");
 
 void pasteblock(block3 &b, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void pasteblock(block3 &b, selinfo &sel, bool local)");
     sel.s = b.s;
     int o = sel.orient;
     sel.orient = b.orient;
@@ -1001,6 +1074,7 @@ void pasteblock(block3 &b, selinfo &sel, bool local)
 
 void pasteprefab(char *name)
 {
+	conoutf(CON_DEBUG, "void pasteprefab(char *name)");
     if(!name[0] || noedit() || (nompedit && multiplayer())) return;
     prefab *b = prefabs.access(name);
     if(!b)
@@ -1027,6 +1101,7 @@ COMMAND(pasteprefab, "s");
 
 void mpcopy(editinfo *&e, selinfo &sel, bool local)
 {
+	//conoutf(CON_DEBUG, "void mpcopy(editinfo *&e, selinfo &sel, bool local)");
     if(local) game::edittrigger(sel, EDIT_COPY);
     if(e==NULL) e = editinfos.add(new editinfo);
     if(e->copy) freeblock(e->copy);
@@ -1037,6 +1112,7 @@ void mpcopy(editinfo *&e, selinfo &sel, bool local)
 
 void mppaste(editinfo *&e, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mppaste(editinfo *&e, selinfo &sel, bool local)");
     if(e==NULL) return;
     if(local) game::edittrigger(sel, EDIT_PASTE);
     if(e->copy) pasteblock(*e->copy, sel, local);
@@ -1044,12 +1120,14 @@ void mppaste(editinfo *&e, selinfo &sel, bool local)
 
 void copy()
 {
+	//conoutf(CON_DEBUG, "void copy()");
     if(noedit(true)) return;
     mpcopy(localedit, sel, true);
 }
 
 void pastehilite()
 {
+	conoutf(CON_DEBUG, "void pastehilite()");
     if(!localedit) return;
 	sel.s = localedit->copy->s;
     reorient();
@@ -1058,6 +1136,7 @@ void pastehilite()
 
 void paste()
 {
+	conoutf(CON_DEBUG, "void paste()");
     if(noedit()) return;
     mppaste(localedit, sel, true);
 }
@@ -1072,6 +1151,7 @@ static VSlot *editingvslot = NULL;
 
 void compacteditvslots()
 {
+	conoutf(CON_DEBUG, "void compacteditvslots()");
     if(editingvslot && editingvslot->layer) compactvslot(editingvslot->layer);
     loopv(editinfos)
     {
@@ -1100,6 +1180,7 @@ int brushmaxy = 0, brushminy = MAXBRUSH;
 
 void clearbrush()
 {
+	conoutf(CON_DEBUG, "void clearbrush()");
     memset(brush, 0, sizeof brush);
     brushmaxx = brushmaxy = 0;
     brushminx = brushminy = MAXBRUSH;
@@ -1108,6 +1189,7 @@ void clearbrush()
 
 void brushvert(int *x, int *y, int *v)
 {
+	conoutf(CON_DEBUG, "void brushvert(int *x, int *y, int *v)");
     *x += MAXBRUSH2 - brushx + 1; // +1 for automatic padding
     *y += MAXBRUSH2 - brushy + 1;
     if(*x<0 || *y<0 || *x>=MAXBRUSH || *y>=MAXBRUSH) return;
@@ -1136,6 +1218,7 @@ ICOMMAND(hmapselect, "", (),
 
 inline bool isheightmap(int o, int d, bool empty, cube *c)
 {
+	conoutf(CON_DEBUG, "inline bool isheightmap(int o, int d, bool empty, cube *c)");
     return havesel ||
            (empty && isempty(*c)) ||
            htextures.empty() ||
@@ -1445,6 +1528,7 @@ int bounded(int n) { return n<0 ? 0 : (n>8 ? 8 : n); }
 
 void pushedge(uchar &edge, int dir, int dc)
 {
+	conoutf(CON_DEBUG, "void pushedge(uchar &edge, int dir, int dc)");
     int ne = bounded(edgeget(edge, dc)+dir);
     edgeset(edge, dc, ne);
     int oe = edgeget(edge, 1-dc);
@@ -1453,6 +1537,7 @@ void pushedge(uchar &edge, int dir, int dc)
 
 void linkedpush(cube &c, int d, int x, int y, int dc, int dir)
 {
+	conoutf(CON_DEBUG, "void linkedpush(cube &c, int d, int x, int y, int dc, int dir)");
     ivec v, p;
     getcubevector(c, d, x, y, dc, v);
 
@@ -1466,6 +1551,7 @@ void linkedpush(cube &c, int d, int x, int y, int dc, int dir)
 
 static ushort getmaterial(cube &c)
 {
+	//conoutf(CON_DEBUG, "static ushort getmaterial(cube &c)");
     if(c.children)
     {
         ushort mat = getmaterial(c.children[7]);
@@ -1479,6 +1565,7 @@ VAR(invalidcubeguard, 0, 1, 1);
 
 void mpeditface(int dir, int mode, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpeditface(int dir, int mode, selinfo &sel, bool local)");
     if(mode==1 && (sel.cx || sel.cy || sel.cxs&1 || sel.cys&1)) mode = 0;
     int d = dimension(sel.orient);
     int dc = dimcoord(sel.orient);
@@ -1558,6 +1645,7 @@ void mpeditface(int dir, int mode, selinfo &sel, bool local)
 
 void editface(int *dir, int *mode)
 {
+	conoutf(CON_DEBUG, "void editface(int *dir, int *mode)");
     if(noedit(moving!=0)) return;
     if(hmapedit!=1)
         mpeditface(*dir, *mode, sel, true);
@@ -1569,6 +1657,7 @@ VAR(selectionsurf, 0, 0, 1);
 
 void pushsel(int *dir)
 {
+	conoutf(CON_DEBUG, "void pushsel(int *dir)");
     if(noedit(moving!=0)) return;
     int d = dimension(orient);
     int s = dimcoord(orient) ? -*dir : *dir;
@@ -1582,12 +1671,14 @@ void pushsel(int *dir)
 
 void mpdelcube(selinfo &sel, bool local)
 {
+	//conoutf(CON_DEBUG, "void mpdelcube(selinfo &sel, bool local)");
     if(local) game::edittrigger(sel, EDIT_DELCUBE);
     loopselxyz(discardchildren(c, true); emptyfaces(c));
 }
 
 void delcube()
 {
+	//conoutf(CON_DEBUG, "void delcube()");
     if(noedit()) return;
     mpdelcube(sel, true);
 }
@@ -1604,6 +1695,7 @@ vector<ushort> texmru;
 
 void tofronttex()                                       // maintain most recently used of the texture lists when applying texture
 {
+	conoutf(CON_DEBUG, "void tofronttex()");
     int c = curtexindex;
     if(c>=0)
     {
@@ -1629,6 +1721,7 @@ VAR(usevdelta, 1, 0, 0);
 
 static VSlot *remapvslot(int index, const VSlot &ds)
 {
+	conoutf(CON_DEBUG, "static VSlot *remapvslot(int index, const VSlot &ds)");
     loopv(remappedvslots) if(remappedvslots[i].index == index) return remappedvslots[i].vslot;
     VSlot &vs = lookupvslot(index, false);
     if(vs.index < 0 || vs.index == DEFAULT_SKY) return NULL;
@@ -1647,6 +1740,7 @@ static VSlot *remapvslot(int index, const VSlot &ds)
 
 static void remapvslots(cube &c, const VSlot &ds, int orient, bool &findrep, VSlot *&findedit)
 {
+	conoutf(CON_DEBUG, "static void remapvslots(cube &c, const VSlot &ds, int orient, bool &findrep, VSlot *&findedit)");
     if(c.children)
     {
         loopi(8) remapvslots(c.children[i], ds, orient, findrep, findedit);
@@ -1681,6 +1775,7 @@ static void remapvslots(cube &c, const VSlot &ds, int orient, bool &findrep, VSl
 
 void edittexcube(cube &c, int tex, int orient, bool &findrep)
 {
+	conoutf(CON_DEBUG, "void edittexcube(cube &c, int tex, int orient, bool &findrep)");
     if(orient<0) loopi(6) c.texture[i] = tex;
     else
     {
@@ -1699,6 +1794,7 @@ VAR(allfaces, 0, 0, 1);
 
 void mpeditvslot(VSlot &ds, int allfaces, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpeditvslot(VSlot &ds, int allfaces, selinfo &sel, bool local)");
     if(local)
     {
         if(!(lastsel==sel)) tofronttex();
@@ -1726,6 +1822,7 @@ void mpeditvslot(VSlot &ds, int allfaces, selinfo &sel, bool local)
 
 void vdelta(char *body)
 {
+	conoutf(CON_DEBUG, "void vdelta(char *body)");
     if(noedit() || (nompedit && multiplayer())) return;
     usevdelta++;
     execute(body);
@@ -1735,6 +1832,7 @@ COMMAND(vdelta, "s");
 
 void vrotate(int *n)
 {
+	conoutf(CON_DEBUG, "void vrotate(int *n)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_ROTATION;
@@ -1745,6 +1843,7 @@ COMMAND(vrotate, "i");
 
 void voffset(int *x, int *y)
 {
+	conoutf(CON_DEBUG, "void voffset(int *x, int *y)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_OFFSET;
@@ -1756,6 +1855,7 @@ COMMAND(voffset, "ii");
 
 void vscroll(float *s, float *t)
 {
+	conoutf(CON_DEBUG, "void vscroll(float *s, float *t)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_SCROLL;
@@ -1767,6 +1867,7 @@ COMMAND(vscroll, "ff");
 
 void vscale(float *scale)
 {
+	conoutf(CON_DEBUG, "void vscale(float *scale)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_SCALE;
@@ -1777,6 +1878,7 @@ COMMAND(vscale, "f");
 
 void vlayer(int *n)
 {
+	conoutf(CON_DEBUG, "void vlayer(int *n)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_LAYER;
@@ -1787,6 +1889,7 @@ COMMAND(vlayer, "i");
 
 void valpha(float *front, float *back)
 {
+	conoutf(CON_DEBUG, "void valpha(float *front, float *back)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_ALPHA;
@@ -1798,6 +1901,7 @@ COMMAND(valpha, "ff");
 
 void vcolor(float *r, float *g, float *b)
 {
+	conoutf(CON_DEBUG, "void vcolor(float *r, float *g, float *b)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_COLOR;
@@ -1808,6 +1912,7 @@ COMMAND(vcolor, "fff");
 
 void vreset()
 {
+	conoutf(CON_DEBUG, "void vreset()");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     mpeditvslot(ds, allfaces, sel, true);
@@ -1816,6 +1921,7 @@ COMMAND(vreset, "");
 
 void vshaderparam(const char *name, float *x, float *y, float *z, float *w)
 {
+	conoutf(CON_DEBUG, "void vshaderparam(const char *name, float *x, float *y, float *z, float *w)");
     if(noedit() || (nompedit && multiplayer())) return;
     VSlot ds;
     ds.changed = 1<<VSLOT_SHPARAM;
@@ -1830,6 +1936,7 @@ COMMAND(vshaderparam, "sffff");
 
 void mpedittex(int tex, int allfaces, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpedittex(int tex, int allfaces, selinfo &sel, bool local)");
     if(local)
     {
         game::edittrigger(sel, EDIT_TEX, tex, allfaces);
@@ -1842,6 +1949,7 @@ void mpedittex(int tex, int allfaces, selinfo &sel, bool local)
 
 void filltexlist()
 {
+	//conoutf(CON_DEBUG, "void filltexlist()");
     if(texmru.length()!=vslots.length())
     {
         loopvrev(texmru) if(texmru[i]>=vslots.length())
@@ -1856,6 +1964,7 @@ void filltexlist()
 
 void compactmruvslots()
 {
+	conoutf(CON_DEBUG, "void compactmruvslots()");
     remappedvslots.setsize(0);
     loopvrev(texmru)
     {
@@ -1883,6 +1992,7 @@ void compactmruvslots()
 
 void edittex(int i, bool save = true)
 {
+	conoutf(CON_DEBUG, "void edittex(int i, bool save = true)");
     lasttex = i;
     lasttexmillis = totalmillis;
     if(save)
@@ -1894,6 +2004,7 @@ void edittex(int i, bool save = true)
 
 void edittex_(int *dir)
 {
+	conoutf(CON_DEBUG, "void edittex_(int *dir)");
     if(noedit()) return;
     filltexlist();
     texpaneltimer = 5000;
@@ -1904,6 +2015,7 @@ void edittex_(int *dir)
 
 void gettex()
 {
+	conoutf(CON_DEBUG, "void gettex()");
     if(noedit(true)) return;
     filltexlist();
     int tex = -1;
@@ -1918,6 +2030,7 @@ void gettex()
 
 void getcurtex()
 {
+	conoutf(CON_DEBUG, "void getcurtex()");
     if(noedit(true)) return;
     filltexlist();
     int index = curtexindex < 0 ? 0 : curtexindex;
@@ -1927,6 +2040,7 @@ void getcurtex()
 
 void getseltex()
 {
+	conoutf(CON_DEBUG, "void getseltex()");
     if(noedit(true)) return;
     cube &c = lookupcube(sel.o.x, sel.o.y, sel.o.z, -sel.grid);
     if(c.children || isempty(c)) return;
@@ -1935,6 +2049,7 @@ void getseltex()
 
 void gettexname(int *tex, int *subslot)
 {
+	conoutf(CON_DEBUG, "void gettexname(int *tex, int *subslot)");
     if(noedit(true) || *tex<0) return;
     VSlot &vslot = lookupvslot(*tex, false);
     Slot &slot = *vslot.slot;
@@ -1951,12 +2066,14 @@ COMMAND(gettexname, "ii");
 
 void replacetexcube(cube &c, int oldtex, int newtex)
 {
+	conoutf(CON_DEBUG, "void replacetexcube(cube &c, int oldtex, int newtex)");
     loopi(6) if(c.texture[i] == oldtex) c.texture[i] = newtex;
     if(c.children) loopi(8) replacetexcube(c.children[i], oldtex, newtex);
 }
 
 void mpreplacetex(int oldtex, int newtex, bool insel, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpreplacetex(int oldtex, int newtex, bool insel, selinfo &sel, bool local)");
     if(local) game::edittrigger(sel, EDIT_REPLACE, oldtex, newtex, insel ? 1 : 0);
     if(insel)
     {
@@ -1971,6 +2088,7 @@ void mpreplacetex(int oldtex, int newtex, bool insel, selinfo &sel, bool local)
 
 void replace(bool insel)
 {
+	conoutf(CON_DEBUG, "void replace(bool insel)");
     if(noedit()) return;
     if(reptex < 0) { conoutf(CON_ERROR, "can only replace after a texture edit"); return; }
     mpreplacetex(reptex, lasttex, insel, sel, true);
@@ -1987,6 +2105,7 @@ uint mflip(uint face) { return (face&0xFF0000FF) | ((face&0x00FF0000)>>8) | ((fa
 
 void flipcube(cube &c, int d)
 {
+	conoutf(CON_DEBUG, "void flipcube(cube &c, int d)");
     swap(c.texture[d*2], c.texture[d*2+1]);
     c.faces[D[d]] = dflip(c.faces[D[d]]);
     c.faces[C[d]] = cflip(c.faces[C[d]]);
@@ -2000,11 +2119,13 @@ void flipcube(cube &c, int d)
 
 void rotatequad(cube &a, cube &b, cube &c, cube &d)
 {
+	conoutf(CON_DEBUG, "void rotatequad(cube &a, cube &b, cube &c, cube &d)");
     cube t = a; a = b; b = c; c = d; d = t;
 }
 
 void rotatecube(cube &c, int d)   // rotates cube clockwise. see pics in cvs for help.
 {
+	conoutf(CON_DEBUG, "void rotatecube(cube &c, int d)");
     c.faces[D[d]] = cflip (mflip(c.faces[D[d]]));
     c.faces[C[d]] = dflip (mflip(c.faces[C[d]]));
     c.faces[R[d]] = rflip (mflip(c.faces[R[d]]));
@@ -2031,6 +2152,7 @@ void rotatecube(cube &c, int d)   // rotates cube clockwise. see pics in cvs for
 
 void mpflip(selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpflip(selinfo &sel, bool local)");
     if(local) 
     { 
         game::edittrigger(sel, EDIT_FLIP);
@@ -2052,12 +2174,14 @@ void mpflip(selinfo &sel, bool local)
 
 void flip()
 {
+	conoutf(CON_DEBUG, "void flip()");
     if(noedit()) return;
     mpflip(sel, true);
 }
 
 void mprotate(int cw, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mprotate(int cw, selinfo &sel, bool local)");
     if(local) 
     {
         game::edittrigger(sel, EDIT_ROTATE, cw);
@@ -2083,6 +2207,7 @@ void mprotate(int cw, selinfo &sel, bool local)
 
 void rotate(int *cw)
 {
+	conoutf(CON_DEBUG, "void rotate(int *cw)");
     if(noedit()) return;
     mprotate(*cw, sel, true);
 }
@@ -2101,6 +2226,7 @@ static const struct { const char *name; int filter; } editmatfilters[] =
 
 void setmat(cube &c, ushort mat, ushort matmask, ushort filtermat, ushort filtermask, int filtergeom)
 {
+	conoutf(CON_DEBUG, "void setmat(cube &c, ushort mat, ushort matmask, ushort filtermat, ushort filtermask, int filtergeom)");
     if(c.children)
         loopi(8) setmat(c.children[i], mat, matmask, filtermat, filtermask, filtergeom);
     else if((c.material&filtermask) == filtermat)
@@ -2123,6 +2249,7 @@ void setmat(cube &c, ushort mat, ushort matmask, ushort filtermat, ushort filter
 
 void mpeditmat(int matid, int filter, selinfo &sel, bool local)
 {
+	conoutf(CON_DEBUG, "void mpeditmat(int matid, int filter, selinfo &sel, bool local)");
     if(local) game::edittrigger(sel, EDIT_MAT, matid, filter);
 
     ushort filtermat = 0, filtermask = 0, matmask;
@@ -2151,6 +2278,7 @@ void mpeditmat(int matid, int filter, selinfo &sel, bool local)
 
 void editmat(char *name, char *filtername)
 {
+	conoutf(CON_DEBUG, "void editmat(char *name, char *filtername)");
     if(noedit()) return;
     int filter = -1;
     if(filtername[0])
@@ -2253,7 +2381,11 @@ struct texturegui : g3d_callback
         filltexlist();
         extern int usegui2d;
         if(!editmode || ((!texgui2d || !usegui2d) && camera1->o.dist(menupos) > menuautoclose)) menuon = false;
-        else g3d_addgui(this, menupos, texgui2d ? GUI_2D : 0);
+        else 
+		{
+			//conoutf(CON_DEBUG, "void g3d_texturemenu()");
+			g3d_addgui(this, menupos, texgui2d ? GUI_2D : 0);
+		}
     }
 } gui;
 
@@ -2264,6 +2396,7 @@ void g3d_texturemenu()
 
 void showtexgui(int *n)
 {
+	conoutf(CON_DEBUG, "void showtexgui(int *n)");
     if(!editmode) { conoutf(CON_ERROR, "operation only allowed in edit mode"); return; }
     gui.showtextures(*n==0 ? !gui.menuon : *n==1);
 }
@@ -2273,6 +2406,7 @@ COMMAND(showtexgui, "i");
 
 void rendertexturepanel(int w, int h)
 {
+	//conoutf(CON_DEBUG, "void rendertexturepanel(int w, int h)");
     if((texpaneltimer -= curtime)>0 && editmode)
     {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

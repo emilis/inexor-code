@@ -13,7 +13,7 @@ static const int MAXARGS = 25;
 
 VARN(numargs, _numargs, MAXARGS, 0, 0);
 
-
+// C++ standard library
 #include <fstream>
 #include <string>
 
@@ -31,6 +31,8 @@ void print_idents(void)
 	// create table
 	char html5_table_begin[] = "<table style=\"width:100%;\"><tr><td><h2>Name</h2></td> <td><h2>ID type</h2></td> <td><h2>Usage</h2></td></tr>\n";
 	datei_aus.write(html5_table_begin, strlen(html5_table_begin)  );
+
+	// use tableSort2 plugin in firefox to sort it...
 
 	// enumerate idents
 	enumerate(idents, ident, i, 

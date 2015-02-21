@@ -1022,7 +1022,7 @@ void recomputecamera()
         }
     }
 
-	#define HANNI_FLYCAM_TEST
+	//#define HANNI_FLYCAM_TEST
 	#ifdef HANNI_FLYCAM_TEST
 	if(flycamtest)
 	{
@@ -2045,7 +2045,15 @@ void gl_drawhud(int w, int h);
 int xtraverts, xtravertsva;
 
 
+
 VARP(showcurve, 0, 0, 1);
+
+#include "bezier\BezierCurve.h"
+// Hanni
+CBezierCurve curve;
+VARP(sanitizer, 0, 1, 1);
+
+VAR(curve_prec, 0, 100.0f, 1000.0f);
 
 void gl_drawframe(int w, int h)
 {
@@ -2135,14 +2143,170 @@ void gl_drawframe(int w, int h)
 
     renderdecals(true);
 
-	/**
-	* Render curve
-	*/
-	if(showcurve) 
+	
+	// EXPERIMENTELL
+	vector<extentity *> &ents = entities::getents();
+
+	curve.ClearAllPoints();
+
+	for(int i=0; i<ents.ulen; i++)
 	{
-		lineshader->set();
-		curve_renderer.RenderCurve();
+		if(ents[i]->type == 47)
+		{
+			curve.AddParamPoint(ents[i]->o); // Position merken
+		}
 	}
+
+	/*
+	for(unsigned int k=0; k<curves.size(); k++)
+		curve.ClearAllPoints();
+
+	//unsigned int current_curve=0;
+	CBezierCurve tmp_curve;
+	
+
+	static DWORD lastm = 0;
+		
+	if(SDL_GetTicks() -lastm > 5*1000) // ALle 5 Sekunden
+	{
+		conoutf(CON_DEBUG, "Hallo Weld");
+
+		curves.clear();
+
+		for(int i=0; i<100; i++)
+		{
+			vec o;
+			srand(unsigned(time(NULL))+SDL_GetTicks());
+				
+			float r = SDL_GetTicks() * rand() % 500 - 500;
+			o = vec(r,r,r);
+			tmp_curve.AddParamPoint(o);
+			r = SDL_GetTicks() * rand() % 500 - 500;
+			o = vec(r,r,r);
+			tmp_curve.AddParamPoint(o);
+			r = SDL_GetTicks() * rand() % 500 - 500;
+			o = vec(r,r,r);
+			tmp_curve.AddParamPoint(o);
+			r = SDL_GetTicks() * rand() % 500 - 500;
+			o = vec(r,r,r);
+			tmp_curve.AddParamPoint(o);
+
+			curves.push_back(tmp_curve);
+
+			tmp_curve.ClearAllPoints();
+		}
+		
+		lastm = SDL_GetTicks();
+	}
+	lastm=SDL_GetTicks();
+	*/
+
+	// Kurve generieren
+	//for(unsigned int k=0; k<curves.size(); k++)
+	/*if(sanitizer)
+	curve.PreComputeCache(ALGORITHM_DECASTELJAU);
+	else
+	*/
+	curve.PreComputeCache(ALGORITHM_BERNSTEIN_POLYNOM);
+
+	// WICHTIG
+	lineshader->set();
+	// Kurve rendern
+	glPushMatrix();
+		
+
+	// begin render process
+	glBegin(GL_LINES);
+	
+	
+	curve.SetCachedCurvePrecision(curve_prec);
+
+	//for(unsigned int k=0; k<curves.size(); k++)
+
+	if(curve.m_ComputedPoints.size() > 3)
+	{
+		glLineWidth(2.0f);
+		
+		// RENDER TANGENTS!
+		glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+		for(unsigned int i=0; i<curve.m_ComputedPoints.size(); i++) 
+		{
+			vec pos = curve.m_ComputedPoints[i];
+			vec dir = curve.m_ComputedPoints[i].tangent + pos;
+
+			glVertex3fv(pos.v);
+			glVertex3fv(dir.v);
+		}
+		
+		// Set color to red
+		glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+
+		// Set line thickness
+		glLineWidth(50.0f);
+
+		// loop through computed points and render them	
+		for(unsigned int i=0; i<curve.m_ComputedPoints.size()   /*!!!*/ -1 ; i++) 
+		{
+			vec cur = curve.m_ComputedPoints[i];
+			vec next = curve.m_ComputedPoints[i  +1];
+				
+			// set vertices
+			glVertex3f(cur.x, cur.y, cur.z);
+			glVertex3f(next.x, next.y, next.z);
+		}
+		
+
+		// RENDER NORMALS!
+		glColor4f(1.0f, 0.0f, 220.0f/255.0f, 1.0f);
+
+		for(unsigned int i=0; i<curve.m_ComputedPoints.size(); i++) 
+		{
+			vec pos = curve.m_ComputedPoints[i];
+			vec dir = curve.m_ComputedPoints[i].normal + pos;
+
+			glVertex3fv(pos.v);
+			glVertex3fv(dir.v);
+		}
+		
+		// Render first control point
+		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+
+
+		if(curve.m_ParameterPoints.size() > 3)
+		{
+			// Render first conol line (we assume we have 2)
+			vec o;
+			int letzte = curve.m_ParameterPoints.size()-1;
+			o.x = curve.m_ParameterPoints[letzte].x;
+			o.y = curve.m_ParameterPoints[letzte].y;
+			o.z = curve.m_ParameterPoints[letzte].z;
+			glVertex3f(o.x, o.y, o.z);
+
+			// Render first conol line (we assume we have 2)
+			int vorletzte = curve.m_ParameterPoints.size()-2;
+			o.x = curve.m_ParameterPoints[vorletzte].x;
+			o.y = curve.m_ParameterPoints[vorletzte].y;
+			o.z = curve.m_ParameterPoints[vorletzte].z;
+			glVertex3f(o.x, o.y, o.z);
+		
+			// Render first conol line (we assume we have 2)
+			o.x = curve.m_ParameterPoints[0].x;
+			o.y = curve.m_ParameterPoints[0].y;
+			o.z = curve.m_ParameterPoints[0].z;
+			glVertex3f(o.x, o.y, o.z);
+
+			// Render first conol line (we assume we have 2)
+			o.x = curve.m_ParameterPoints[1].x;
+			o.y = curve.m_ParameterPoints[1].y;
+			o.z = curve.m_ParameterPoints[1].z;
+			glVertex3f(o.x, o.y, o.z);
+		}
+	}
+
+	// end render process
+	glEnd();
+	glPopMatrix();
+
 
     rendermapmodels();
     rendergame(true);

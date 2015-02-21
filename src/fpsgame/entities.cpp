@@ -861,6 +861,10 @@ namespace entities
             "obstacle",
             "start", "finish", "checkpoint",
             "gravity", "friction", "jump", "speed",
+
+			// scripting ...
+			"bezier", "sphere", "cube", "cylinder", "cone", "pyramid", "torus", "prism", "frustum",
+
             "", "", // two empty strings follows.
         };
         return i>=0 && size_t(i)<sizeof(entnames)/sizeof(entnames[0]) ? entnames[i] : "";

@@ -1246,6 +1246,7 @@ namespace game
             {
                 int cn = getint(p), len = getuint(p);
                 ucharbuf q = p.subbuf(len);
+				conoutf(CON_DEBUG, "cn: %d: len: %d, buf: %s", cn, len, p.subbuf(len));
                 parsemessages(cn, getclient(cn), q);
                 break;
             }

@@ -239,6 +239,9 @@ extern void renderentattachment(const extentity &e);
 extern void renderentsphere(const extentity &e, float radius);
 extern void renderentring(const extentity &e, float radius, int axis = 0);
 
+// Hanni
+void renderarrow(const vec &pos, const vec &dir, float radius);
+
 // bomberman
 extern extentity *newentity(bool local, const vec &o, int type, int v1, int v2, int v3, int v4, int v5, int &idx);
 extern void attachentity(extentity &e);

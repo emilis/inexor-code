@@ -155,12 +155,12 @@ class CBezierCurve
 	/**
 	* Calculate curve with BERNSTEIN polynoms
 	*/
-	void CalculateCurve_BernsteinPolynom(void);
+	//void CalculateCurve_BernsteinPolynom(void);
 
 	/**
 	* Calculate curve via recursive DE CASTELJAU algorithm
 	*/
-	void CalculateCurve_DeCasteljauRecursive(void);
+	//void CalculateCurve_DeCasteljauRecursive(void);
 
 
 	/** ----------------------------- REAL TIME CALCULATIONS ----------------------------- **/
@@ -171,7 +171,7 @@ class CBezierCurve
 	* This point will be rendered in realtime
 	* This could be very slow if you repeat.
 	*/
-	vec CalculatePointFromFloat(float curveposition);
+	//vec CalculatePointFromFloat(float curveposition);
 
 
 	/** ----------------------------- CAHCED CALCULATIONS ----------------------------- **/
@@ -185,7 +185,7 @@ class CBezierCurve
 	/**
 	* Get a curve point at parameter interpolation_value
 	*/
-	vec GetCurvePos(float curveposition);
+	//vec GetCurvePos(float curveposition);
 
 	/**
 	* Get a point with a certain number from the generated curve
@@ -200,14 +200,14 @@ class CBezierCurve
 	/**
 	* Get access to m_bComputed [Read only!]
 	*/
-	bool IsCurveComputed(void);
+	//bool IsCurveComputed(void);
 
 
 	/**
 	* We will add some get/set functions so we cann keep this private
 	*/
 	protected:
-
+	/*
 	// Bernstein position
 	float bernsteinposition(float val, int i, float position, int elementcount, float weight);
 	
@@ -223,17 +223,17 @@ class CBezierCurve
 	/**
 	* Maybe we should add a limit for parameter points
 	*/
-	unsigned int m_uiParamLimit;
+	//unsigned int m_uiParamLimit;
 
 	/**
 	* Precision
 	*/
-	float m_fCalcPrecision;
+	//float m_fCalcPrecision;
 
 	/**
 	* Is the curve computed or not?
 	*/
-	bool m_bComputed;
+	//bool m_bComputed;
 };
 
 

@@ -759,6 +759,8 @@ extern int oqfrags;
 
 void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, float yaw, float pitch, int flags, dynent *d, modelattach *a, int basetime, int basetime2, float trans)
 {
+	pitch = 0.0f;
+
     if(shadowmapping && !(flags&(MDL_SHADOW|MDL_DYNSHADOW))) return;
     model *m = loadmodel(mdl); 
     if(!m) return;
@@ -777,7 +779,11 @@ void rendermodel(entitylight *light, const char *mdl, int anim, const vec &o, fl
         }
         else
         {
-            center.rotate_around_z(yaw*RAD);
+            //center.rotate_around_z(yaw*RAD);
+
+			// Hanni
+			//center.rotate_around_y(23.0f*RAD);
+
             center.add(o);
         }
         if(flags&MDL_CULL_DIST && center.dist(camera1->o)/radius>maxmodelradiusdistance) return;

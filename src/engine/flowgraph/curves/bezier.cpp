@@ -2,8 +2,8 @@
 * Include bezier curve header file
 * and Sauerbraten engine file
 */
-#include "engine.h"
-#include "bezier.h"
+//#include "engine.h"
+//#include "bezier.h"
 
 /**
 * The more points you add as parameter points, the tinier
@@ -193,6 +193,7 @@ vec CBezierCurve::GetComputedPointIndexed(unsigned int index)
 /**
 * Get parameter point number # from computed curve
 */
+/*
 vec CBezierCurve::GetParameterPointIndexed(unsigned int index) 
 {
 	// return null vector if setup is invalid
@@ -200,6 +201,7 @@ vec CBezierCurve::GetParameterPointIndexed(unsigned int index)
 	// return point
 	return vec( m_ParameterPoints[index].pos.x,m_ParameterPoints[index].pos.y ,m_ParameterPoints[index].pos.z );
 }
+*/
 
 /**
 * This technique is much faste to use
@@ -244,6 +246,7 @@ vec CBezierCurve::CalculatePointFromFloat(float curveposition)
 /**
 * binomial coefficient (for bernstein polynom)
 */
+/*
 unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 {
 	unsigned int r = 1;
@@ -254,7 +257,7 @@ unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 	}
 	return r;
 }
-
+*/
 /**
 * Calculate exact point using bernstein polynoms
 */
@@ -264,52 +267,29 @@ unsigned int CBezierCurve::binomialCoef(unsigned int n, const unsigned int k)
 *	TRY TO USE THE CACHING TECHNIQUE IN ORDER NOT
 *	COMPUTE THIS CURVE IN REAL TIME. THAT WOULD BE REALLY SLOW!
 */
-vec CBezierCurve::calculateposition(float position)
-{
-	// computed point
-	vec finished_point;
 
-	// reset point's coordinates
-	finished_point.x = 0.0f;
-	finished_point.y = 0.0f;
-	finished_point.z = 0.0f;
-
-	// the number of parameter points given
-	int uiElements = m_ParameterPoints.size() -1;
-
-	// apply fPos to our bernstein polynom					
-	for(int i=0; i<=uiElements; i++) 
-	{
-		// compute bezier coordinates using bernstein polynoms
-		finished_point.x += bernsteinposition(m_ParameterPoints[i].pos.x, i, position, uiElements, m_ParameterPoints[i].weight);
-		finished_point.y += bernsteinposition(m_ParameterPoints[i].pos.y, i, position, uiElements, m_ParameterPoints[i].weight);
-		finished_point.z += bernsteinposition(m_ParameterPoints[i].pos.z, i, position, uiElements, m_ParameterPoints[i].weight);
-	}
-
-	// return finished point
-	return finished_point;
-}
 
 /**
 * Bernstein polynom
 */
-float CBezierCurve::bernsteinposition(float value, int currentelement, float position, int elementcount, float weight)
+/*float CBezierCurve::bernsteinposition(float value, int currentelement, float position, int elementcount, float weight)
 {
 	// avoid crash
 	if(position >= 1.0f) position= 0.999f;
 	/**
 	* Return bernstein polynom
-	*/
 	return binomialCoef(elementcount, currentelement) // bonomial term
 				* pow(position, currentelement) // polynomial term 
 				* pow((1-position), (elementcount-currentelement)) // polynomial term
 				* value  // actual value
 				* weight; // weight
 }
+*/
 
 /**
 * Calculate (Method 1)
 */
+/*
 void CBezierCurve::CalculateCurve_BernsteinPolynom(void) 
 {
 	// Calculate precision
@@ -324,7 +304,7 @@ void CBezierCurve::CalculateCurve_BernsteinPolynom(void)
 
 	// curve computed!
 	m_bComputed = true;
-}
+}*/
 /* ---------------------------------------------- BERNSTEIN ALGORITHM ----------------------------------------------------- */
 
 
