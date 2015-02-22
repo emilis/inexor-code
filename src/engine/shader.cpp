@@ -31,7 +31,8 @@ VAR(maxfsuniforms, 1, 0, 0);
 VAR(maxvaryings, 1, 0, 0);
 VAR(dbgshader, 0, 0, 2);
 
-void loadshaders()
+/// Parse Shader Definitions from cfg-files, need to be build afterwards
+void parseshaders()
 {
     standardshader = true;
     execfile(renderpath==R_GLSLANG ? "config/glsl.cfg" : "config/stdshader.cfg");
@@ -55,7 +56,109 @@ void loadshaders()
     lineshader = lookupshaderbyname(ati_line_bug && renderpath == R_ASMGLSLANG ? "notextureglsl" : "notexture");
     foggedlineshader = lookupshaderbyname(ati_line_bug && renderpath == R_ASMGLSLANG ? "foggednotextureglsl" : "foggednotexture");
     
-    defaultshader->set();
+    //defaultshader->set();
+}
+
+/// Begin to compile Shaders
+/// Needs to be seperated from endcompileshaders and the linking process to achieve multithreading
+/// Shaders = all shaders recognized by parseshaders
+void startcompilingshaders()
+{
+    enumerate(shaders, Shader, s,
+    {
+        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        {
+            defformatstring(info)("shader %s", s.name);
+            renderprogress(0.0, info);
+            s.compile();
+            loopi(MAXVARIANTROWS) loopvj(s.variants[i])
+            {
+                Shader *v = s.variants[i][j];
+                if(!(v->reusevs && v->reusevs->type&SHADER_INVALID) &&
+                    !(v->reuseps && v->reuseps->type&SHADER_INVALID))
+                    v->compile();
+            }
+        }
+    });
+}
+
+/// End Shader Compilation
+/// Shaders = all shaders recognized by parseshaders
+void endcompilingshaders()
+{
+    enumerate(shaders, Shader, s,
+    {
+        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        {
+            defformatstring(info)("shader %s", s.name);
+            renderprogress(0.0, info);
+            s.getcompilestatus(); //todo, warning dialog?
+            loopi(MAXVARIANTROWS) loopvj(s.variants[i])
+            {
+                Shader *v = s.variants[i][j];
+                if(!(v->reusevs && v->reusevs->type&SHADER_INVALID) &&
+                    !(v->reuseps && v->reuseps->type&SHADER_INVALID))
+                    v->getcompilestatus();
+            }
+        }
+    });
+}
+
+/// Begin to link all Shaders
+/// Shaders = all shaders recognized by parseshaders
+void startlinkingshaders()
+{
+    enumerate(shaders, Shader, s,
+    {
+        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        {
+            defformatstring(info)("shader %s", s.name);
+            renderprogress(0.0, info);
+            s.link();
+            loopi(MAXVARIANTROWS) loopvj(s.variants[i])
+            {
+                Shader *v = s.variants[i][j];
+                if(!(v->reusevs && v->reusevs->type&SHADER_INVALID) &&
+                    !(v->reuseps && v->reuseps->type&SHADER_INVALID))
+                    v->link();
+            }
+        }
+    });
+}
+
+/// End linking of Shaders
+/// Shaders are usable afterwards
+/// Shaders = all shaders recognized by parseshaders
+void endlinkingshaders()
+{
+    enumerate(shaders, Shader, s,
+    {
+        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        {
+            defformatstring(info)("shader %s", s.name);
+            renderprogress(0.0, info);
+            if(!s.finish()) s.cleanup(true); //compiling or linking failed
+            loopi(MAXVARIANTROWS) loopvj(s.variants[i])
+            {
+                Shader *v = s.variants[i][j];
+                if((v->reusevs && v->reusevs->type&SHADER_INVALID) ||
+                    (v->reuseps && v->reuseps->type&SHADER_INVALID) ||
+                    !v->finish()) //compiling or linking of variants failed
+                    v->cleanup(true);
+            }
+        }
+        if(s.forced && !s.detailshader) s.fixdetailshader();
+    });
+}
+
+/// Builds all recognized shaders which arent build yet
+/// Very simplified atm, it simply takes any shader recognized instead of dividing or sorting before
+void buildshaders()
+{
+    startcompilingshaders();
+    endcompilingshaders();
+    startlinkingshaders();
+    endlinkingshaders();
 }
 
 Shader *lookupshaderbyname(const char *name) 
@@ -779,6 +882,7 @@ void Shader::compile()
 bool Shader::getcompilestatus()
 {
     if(status == SHADER_STATUS_ERRORED) return false;
+    else if(status == SHADER_STATUS_READY)   return true; //do not recompile
 
     if(type & SHADER_GLSLANG)
     {
@@ -804,7 +908,7 @@ bool Shader::getcompilestatus()
 
 void Shader::link()
 {
-    if(status == SHADER_STATUS_ERRORED) return;
+    if(status != SHADER_STATUS_COMPILED) return; //do not recompile or try to link uncompiled shaders
 
     if(type & SHADER_GLSLANG) linkglslprogram(*this);
     status = SHADER_STATUS_LINKING;
@@ -812,7 +916,8 @@ void Shader::link()
 
 bool Shader::finish()
 {
-    if(status == SHADER_STATUS_ERRORED) return false;
+    if(status == SHADER_STATUS_ERRORED) return false; // do not try to finish unlinked or uncompiled shaders
+    if(status == SHADER_STATUS_READY)   return true;  // do not recompile shaders 
 
     if(type & SHADER_GLSLANG)
     {
