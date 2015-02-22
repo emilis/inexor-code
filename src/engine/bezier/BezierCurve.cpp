@@ -15,6 +15,8 @@
 /// Include engine header file
 #include "BezierCurve.h"
 
+using namespace inexor::geom;
+
 /// Default parameter point limit
 /// More parameter points will require more memory!
 /// Please keep in mind that 4 points are more than enough

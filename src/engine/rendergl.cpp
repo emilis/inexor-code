@@ -2050,7 +2050,7 @@ VARP(showcurve, 0, 0, 1);
 
 #include "bezier\BezierCurve.h"
 // Hanni
-CBezierCurve curve;
+inexor::geom::CBezierCurve curve;
 VARP(sanitizer, 0, 1, 1);
 
 VAR(curve_prec, 0, 100.0f, 1000.0f);
