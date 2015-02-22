@@ -10,52 +10,51 @@
 /// https://geom.ivd.kit.edu/downloads/pubs/pub-boehm-prautzsch_2002_preview.pdf
 /// https://www.clear.rice.edu/comp360/lectures/BezSubd.pdf
 
-/*
-TODO:
--Do we need the fWeight coefficients? 
--Derivation (tangent/normal vector) for deCasteljau?
--Is DeCasteljau dangerous because it is recursive?
--Better access for control/parameter points
--Generate a random curve?
-*/
+
+/// TODO:
+/// -Do we need the fWeight coefficients? 
+/// -Derivation (tangent/normal vector) for deCasteljau?
+/// -Is DeCasteljau dangerous because it is recursive?
+/// -Better access for control/parameter points
+/// -Generate a random curve?
 
 
-/*
-	INTRODUCTION
-	A bezier curve (named after french mathematician PIERRE ETIENNE BEZIER) is a parametric curve
-	whose only purpose is to look soft and smooth. Bezier curves are all about elegance!
-	Those curves can be used to represent the path of a everything (imagina a moving camera for example).
+/// INTRODUCTION
+/// A bezier curve (named after french mathematician PIERRE ETIENNE BEZIER) is a parametric curve
+/// whose only purpose is to look soft and smooth. Bezier curves are all about elegance!
+/// Those curves can be used to represent the path of a everything (imagina a moving camera for example).
 	
-	Bezier curves are fast, flexible, beautiful and easy to compute. You just pass a bunch of parameter points to
-	your code and the final curve will be computed. Because every complex curve can be represented with a 
-	chain of smaller curves, it is recommended to create a chain of curves.
-	Bezier curves are ESSENTIAL AND FUNDAMENTAL in the field of computer graphics and image processing. Also can
-	they be used for approximation, interpolation and more.
+/// Bezier curves are fast, flexible, beautiful and easy to compute. You just pass a bunch of parameter points to
+/// your code and the final curve will be computed. Because every complex curve can be represented with a 
+/// chain of smaller curves, it is recommended to create a chain of curves.
+/// Bezier curves are ESSENTIAL AND FUNDAMENTAL in the field of computer graphics and image processing. Also can
+/// they be used for approximation, interpolation and more.
 
-	COMPUTING
-	There are two ways to generate a bezier curves from a group of [n] points.
-	You can either write a code that uses recursion to solve the problem or use Bernstein Polynoms.
-	Both ways will be implemented in this engine.
+/// COMPUTING
+/// There are two ways to generate a bezier curves from a group of [n] points.
+/// You can either write a code that uses recursion to solve the problem or use Bernstein Polynoms.
+/// Both ways will be implemented in this engine.
 
-		Method 1: Bernstein Polynoms ***HIGHLY RECOMMENDED***
-		-uses brilliant math to resolve the recursion and turn all the problems into more or less simple terms.
+/// 	Method 1: Bernstein Polynoms ***HIGHLY RECOMMENDED***
+/// 	-uses brilliant math to resolve the recursion and turn all the problems into more or less simple terms.
 
-		Method 1: De-Casteljau-Algorithm (recursive!)
-		-possibly needs a lot of memory for every sub-call (not sure)
-		-possibly violates the theory of an algorithm (because is has to end somewhere)
+/// 	Method 1: De-Casteljau-Algorithm (recursive!)
+/// 	-possibly needs a lot of memory for every sub-call (not sure)
+/// 	-possibly violates the theory of an algorithm (because is has to end somewhere)
 
-	IN HONOR OF
-	Pierre Etienne BEZIER       (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
-	Paul de CASTELJAU           (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
-	Sergei Natanovich BERNSTEIN (March 5, 1880 - October 26, 1968), Russian mathematician
-	Charles HERMITE             (December 24, 1822 - January 14, 1901), French mathematician
-	Leonardo FIBONACCI          (~1170, ~1240), Italian mathematician
-*/
+/// IN HONOR OF
+/// Pierre Etienne BEZIER       (September 1, 1910 - November 25, 1999), French mathematician and engineer at RENAULT
+/// Paul de CASTELJAU           (November 19, 1930), French mathematician and physicist  and engineer ar Citroen
+/// Sergei Natanovich BERNSTEIN (March 5, 1880 - October 26, 1968), Russian mathematician
+/// Charles HERMITE             (December 24, 1822 - January 14, 1901), French mathematician
+/// Leonardo FIBONACCI          (~1170, ~1240), Italian mathematician
 
 
 /// Include guard
-#ifndef __BEZIER_ENGINE_HEADER_FILE_INCLUDED__
-#define __BEZIER_ENGINE_HEADER_FILE_INCLUDED__
+#ifndef INEXOR_GEOM_BEZIER_CURVE_HEADER
+#define INEXOR_GEOM_BEZIER_CURVE_HEADER
+
+// TODO: write a readme!
 
 /// Include vector stuff here
 #include "engine.h"
@@ -64,11 +63,14 @@ TODO:
 // standard library
 #include <string>
 #include <vector>
-//#include <map>
-//#include <list>
-//#include <deque>
-//#include <iterator>
 
+/// security module namespaces
+namespace inexor {
+namespace geom {
+
+
+/// IDEA: Should we move these structures into the class 
+/// IDEA: use generic types (templates)
 
 /// custom inherited point structures to store additional data
 /// all vector members have float as type, double precision is not neccesary!
@@ -106,7 +108,6 @@ struct SPreComputedPointStructure : public SPointStructure
 };
 
 
-
 /// algorithm type enumeration
 enum BEZIER_ALGORITHM
 {
@@ -137,6 +138,7 @@ class CBezierCurve
 
 		/// please note: start and end point are just parameter points as well!
 
+
 		/// set the limit of parameter points
 		/// @param limit the maximal amount of parameter points which can be passed to the engine
 		void SetParamPointLimit(unsigned int input_point_limit);
@@ -159,6 +161,7 @@ class CBezierCurve
 		void AddParamPoint(float x, float y, float z, float weight = 1.0f);
 	
 
+
 		/// Add a parameter point (function overload: vector as parameter)
 		/// @brief adds a parameter point to the curve pool which is used to compute points either in realtime or cached!
 		/// @param point paramter point's vector
@@ -166,6 +169,7 @@ class CBezierCurve
 		void AddParamPoint(vec point, float weight = 1.0f);
 
 		
+
 		/// Delete both parameter points and cached points 
 		void ClearAllPoints(void);
 
@@ -244,5 +248,10 @@ class CBezierCurve
 		SPreComputedPointStructure calculate_bernstein_coordinates(float position);
 };
 
+
+}; // Namespace "geom"
+}; // Namespace "inexor"
+
+
 // end of include guard
-#endif /*__BEZIER_ENGINE_HEADER_FILE_INCLUDED__*/
+#endif // INEXOR_GEOM_BEZIER_CURVE_HEADER

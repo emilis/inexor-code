@@ -164,7 +164,7 @@ vec CBezierCurve::GetPointFromCache(float curvepos)
 
 /// "One interesting property of Bézier curves is that an nth order curve can always be perfectly represented by an (n+1)th order curve, by giving the higher order curve specific control points."
 /// "[...] and one of the more amusing observations about Bézier curves is that their derivatives are, in fact, also Bézier curves"
-/// "[...] or, in plain text: the derivative of an nth degree Bézier curve is an (n-1)th degree Bézier curve" 
+/// "[...] or, in plain text: the derivative of an nth degree Bézier curve is an (n-1)th degree Bézier curve"
 /// http://pomax.github.io/bezierinfo/
 /// https://github.com/Pomax
 /// -Mike "Pomax" Kamerams
@@ -222,10 +222,10 @@ void CBezierCurve::CalculateCurveCacheWithDeCasteljau(void)
 
 vec CBezierCurve::calculate_de_casteljau_coordinate(int index, int nextindex, float curvepos)
 {
-	// If index is the first index, stop computing
+	// if index is the first index, stop computing
 	if(0 == index) return m_ParameterPoints[nextindex]; // return the first parameter
 		
-	// Return position
+	// return position
 	return calculate_de_casteljau_coordinate(index -1, nextindex, curvepos) *(1 - curvepos) + calculate_de_casteljau_coordinate(index-1, nextindex+1, curvepos) * curvepos;
 }
 
