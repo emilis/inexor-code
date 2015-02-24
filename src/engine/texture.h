@@ -723,6 +723,7 @@ extern Shader *lookupshaderbyname(const char *name, bool compiledonly = false);
 extern Shader *useshaderbyname(const char *name);
 extern Texture *loadthumbnail(Slot &slot);
 extern void resetslotshader();
+extern void setslotshader(Slot &s);
 extern void setslotshader(Slot &s, JSON *j);
 extern void linkslotshader(Slot &s, bool load = true);
 extern void linkvslotshader(VSlot &s, bool load = true);

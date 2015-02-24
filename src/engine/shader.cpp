@@ -1913,6 +1913,19 @@ void resetslotshader()
     curparams.shrink(0);
 }
 
+/// Set slot shader for the deprecated cfg-pipeline
+void setslotshader(Slot &s)
+{
+    s.shader = curshader;
+    if(!s.shader)
+    {
+        s.shader = stdworldshader;
+        return;
+    }
+    loopv(curparams) s.params.add(curparams[i]);
+}
+
+/// Set shader for a texture slot s from a JSON value
 void setslotshader(Slot &s, JSON *j)
 {
     if(!j)

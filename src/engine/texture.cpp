@@ -1702,43 +1702,45 @@ int findslottex(const char *name)
     return -1;
 }
 
-//void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float *scale)
-//{
-//    if(slots.length()>=0x10000) return;
-//    static int lastmatslot = -1;
-//    int tnum = findslottex(type), matslot = findmaterial(type);
-//    if(tnum<0) tnum = atoi(type);
-//    if(tnum==TEX_DIFFUSE) lastmatslot = matslot;
-//    else if(lastmatslot>=0) matslot = lastmatslot;
-//    else if(slots.empty()) return;
-//    Slot &s = matslot>=0 ? materialslots[matslot] : *(tnum!=TEX_DIFFUSE ? slots.last() : slots.add(new Slot(slots.length())));
-//    s.loaded = false;
-//    s.texmask |= 1<<tnum;
-//    if(s.sts.length()>=8) conoutf(CON_WARN, "warning: too many textures in slot %d", slots.length()-1);
-//    Slot::Tex &st = s.sts.add();
-//    st.type = tnum;
-//    st.combined = -1;
-//    st.t = NULL;
-//	if(name && strpbrk(name, "/\\")) copystring(st.name, makerelpath(getcurexecdir(), name)); //relative path to current folder
-//    else copystring(st.name, name);
-//    path(st.name);
-//    if(tnum==TEX_DIFFUSE)
-//    {
-//        setslotshader(s);
-//        VSlot &vs = matslot >= 0 ? materialslots[matslot] : *emptyvslot(s);
-//        vs.reset();
-//        vs.rotation = clamp(*rot, 0, 5);
-//        vs.xoffset = max(*xoffset, 0);
-//        vs.yoffset = max(*yoffset, 0);
-//        vs.scale = *scale <= 0 ? 1 : *scale;
-//        propagatevslot(&vs, (1<<VSLOT_NUM)-1);
-//    }
-//}
-//COMMAND(texture, "ssiiif");
+void texture(char *type, char *name, int *rot, int *xoffset, int *yoffset, float *scale)
+{
+    if(slots.length()>=0x10000) return;
+    static int lastmatslot = -1;
+    int tnum = findslottex(type), matslot = findmaterial(type);
+    if(tnum<0) tnum = atoi(type);
+    if(tnum==TEX_DIFFUSE) lastmatslot = matslot;
+    else if(lastmatslot>=0) matslot = lastmatslot;
+    else if(slots.empty()) return;
+    Slot &s = matslot>=0 ? materialslots[matslot] : *(tnum!=TEX_DIFFUSE ? slots.last() : slots.add(new Slot(slots.length())));
+    s.loaded = false;
+    s.texmask |= 1<<tnum;
+    if(s.sts.length()>=8) conoutf(CON_WARN, "warning: too many textures in slot %d", slots.length()-1);
+    Slot::Tex &st = s.sts.add();
+    st.type = tnum;
+    st.combined = -1;
+    st.t = NULL;
+	if(name && strpbrk(name, "/\\")) copystring(st.name, makerelpath(getcurexecdir(), name)); //relative path to current folder
+    else copystring(st.name, name);
+    path(st.name);
+    if(tnum==TEX_DIFFUSE)
+    {
+        setslotshader(s);
+        VSlot &vs = matslot >= 0 ? materialslots[matslot] : *emptyvslot(s);
+        vs.reset();
+        vs.rotation = clamp(*rot, 0, 5);
+        vs.xoffset = max(*xoffset, 0);
+        vs.yoffset = max(*yoffset, 0);
+        vs.scale = *scale <= 0 ? 1 : *scale;
+        propagatevslot(&vs, (1<<VSLOT_NUM)-1);
+    }
+	//conoutf(CON_WARN, "old texture loaded, should it be converted?")
+}
+COMMAND(texture, "ssiiif");
 
 const char *jsontextures[8] = { "diffuse", "other", "decal", "normal", "glow", "spec", "depth", "envmap" };
 
-void loadtexturejson(JSON *j)
+/// Loads a Texture into a Textureslot from a File/JSON
+void gettexinfofromjson(JSON *j)
 {
     if(!j || slots.length()>=0x10000) return;
     Slot &s = *slots.add(new Slot(slots.length()));
@@ -1749,22 +1751,24 @@ void loadtexturejson(JSON *j)
         if(!sub) continue;
         char *name = sub->valuestring;
         if(!name) continue;
-        s.texmask |= i;
+        s.texmask |= 1<<i;
         Slot::Tex &st = s.sts.add();
+        st.type = i;
         st.combined = -1;
         st.t = NULL;
         //todo:
-        if(name && strpbrk(name, "/\\")) copystring(st.name, makerelpath(getcurexecdir(), name)); //relative path to current folder
-        else copystring(st.name, name);
+        //if(name && strpbrk(name, "/\\")) copystring(st.name, makerelpath(getcurexecdir(), name)); //relative path to current folder
+        //else 
+            copystring(st.name, name);
         path(st.name);
     }
-    
+
     setslotshader(s, j->getitem("shader"));
 
     //other stuff:
     JSON *scale = j->getitem("scale"), *rot = j->getitem("rotation"), 
           *xoff = j->getitem("xoffset"), *yoff = j->getitem("yoffset");
-    
+
     VSlot &vs = *emptyvslot(s);
     vs.reset();
     vs.rotation = rot ? clamp(rot->valueint, 0, 5) : 0;
@@ -1774,6 +1778,31 @@ void loadtexturejson(JSON *j)
     propagatevslot(&vs, (1<<VSLOT_NUM)-1);
 }
 
+void loadtexturedefinition(const char *filename)
+{
+    if(!filename) return;
+    JSON *j = loadjson(filename);
+    if(!j) {
+        conoutf("could not load texture definition %s", filename); return;
+    }
+
+    gettexinfofromjson(j);
+    delete j;
+}
+COMMAND(loadtexturedefinition, "s");
+
+/// Loads all textures from a "textures" child of given JSON structure
+void loadtextures(JSON *parent)
+{
+    if(!parent) return;
+    JSON *j = parent->getitem("textures");
+    if(!j) return;
+
+    loopi(j->numchilds())
+    {
+        loadtexturedefinition(j->getstring(i));
+    }
+}
 
 void autograss(char *name)
 {
