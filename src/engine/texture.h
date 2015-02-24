@@ -303,7 +303,7 @@ struct Shader
     Shader *detailshader, *variantshader, *altshader, *fastshader[MAXSHADERDETAIL];
     vector<Shader *> variants[MAXVARIANTROWS];
     bool standard, forced, used, native;
-    Shader *reusevs, *reuseps;
+    Shader *reusevs, *reuseps;       //reuse program if known to be a variant of the same source
     int numextparams;
     LocalShaderParamState *extparams;
     uchar *extvertparams, *extpixparams;
@@ -719,7 +719,7 @@ extern Texture *notexture;
 extern Shader *defaultshader, *rectshader, *cubemapshader, *notextureshader, *nocolorshader, *nocolorglslshader, *foggedshader, *foggednotextureshader, *stdworldshader, *lineshader, *foggedlineshader;
 extern int reservevpparams, maxvpenvparams, maxvplocalparams, maxfpenvparams, maxfplocalparams, maxvsuniforms, maxfsuniforms;
 
-extern Shader *lookupshaderbyname(const char *name);
+extern Shader *lookupshaderbyname(const char *name, bool compiledonly = false);
 extern Shader *useshaderbyname(const char *name);
 extern Texture *loadthumbnail(Slot &slot);
 extern void resetslotshader();

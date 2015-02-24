@@ -55,7 +55,7 @@ void parseshaders()
     foggednotextureshader = lookupshaderbyname("foggednotexture");
     lineshader = lookupshaderbyname(ati_line_bug && renderpath == R_ASMGLSLANG ? "notextureglsl" : "notexture");
     foggedlineshader = lookupshaderbyname(ati_line_bug && renderpath == R_ASMGLSLANG ? "foggednotextureglsl" : "foggednotexture");
-    
+
     //defaultshader->set();
 }
 
@@ -66,7 +66,7 @@ void startcompilingshaders()
 {
     enumerate(shaders, Shader, s,
     {
-        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        if(!(s.type&(SHADER_INVALID)))
         {
             defformatstring(info)("shader %s", s.name);
             renderprogress(0.0, info);
@@ -88,11 +88,11 @@ void endcompilingshaders()
 {
     enumerate(shaders, Shader, s,
     {
-        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        if(!(s.type&(SHADER_INVALID)))
         {
             defformatstring(info)("shader %s", s.name);
             renderprogress(0.0, info);
-            s.getcompilestatus(); //todo, warning dialog?
+            s.getcompilestatus();
             loopi(MAXVARIANTROWS) loopvj(s.variants[i])
             {
                 Shader *v = s.variants[i][j];
@@ -110,7 +110,7 @@ void startlinkingshaders()
 {
     enumerate(shaders, Shader, s,
     {
-        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        if(!(s.type&(SHADER_INVALID)))
         {
             defformatstring(info)("shader %s", s.name);
             renderprogress(0.0, info);
@@ -133,7 +133,7 @@ void endlinkingshaders()
 {
     enumerate(shaders, Shader, s,
     {
-        if(!(s.type&(SHADER_DEFERRED | SHADER_INVALID)))
+        if(!(s.type&(SHADER_INVALID)))
         {
             defformatstring(info)("shader %s", s.name);
             renderprogress(0.0, info);
@@ -147,7 +147,7 @@ void endlinkingshaders()
                     v->cleanup(true);
             }
         }
-        if(s.forced && !s.detailshader) s.fixdetailshader();
+        s.fixdetailshader();
     });
 }
 
@@ -161,10 +161,20 @@ void buildshaders()
     endlinkingshaders();
 }
 
-Shader *lookupshaderbyname(const char *name) 
+/// Loads shaders (Parsing and Building)
+void loadshaders()
+{
+    parseshaders();
+    buildshaders();
+    defaultshader->set();
+}
+
+Shader *lookupshaderbyname(const char *name, bool compiledonly) 
 { 
     Shader *s = shaders.access(name);
-    return s && s->detailshader ? s : NULL;
+    if(!s) return NULL;
+    if(!s->detailshader && compiledonly) conoutf(CON_WARN, "can not access shader %s. It hasn't been built yet..", name);
+    return s && (s->detailshader || !compiledonly) ? s : NULL;
 }
 
 /// Compile deprecated openGL Assembly Shader
@@ -249,11 +259,13 @@ static void compileglslshader(GLenum type, GLuint &obj, const char *def)
 }
 
 /// Retrieve Shader compilation status and conout error message
-static void checkcompilestatusglslshader(GLenum type, GLuint &obj, const char *def, const char *name, bool msg = true)
+/// @Return true if successfully compiled
+static bool checkcompilestatusglslshader(GLenum type, GLuint &obj, const char *def, const char *name, bool msg = true)
 {
     const GLchar *source = (const GLchar *)(def + strspn(def, " \t\r\n"));
     GLint success;
     glGetShaderiv_(obj, GL_COMPILE_STATUS, &success);
+   // if(success && name) conoutf("%s compiled successfully %sshader", name, type == GL_FRAGMENT_SHADER ? "fragment" : "vertex");
     if (!success)
     {
         if (msg) showglslinfo(type, obj, name, source);
@@ -261,6 +273,7 @@ static void checkcompilestatusglslshader(GLenum type, GLuint &obj, const char *d
         obj = 0;
     }
     else if (dbgshader > 1 && msg) showglslinfo(type, obj, name, source);
+    return success > 0;
 }
 
 VAR(dbgubo, 0, 0, 1);
@@ -858,7 +871,7 @@ VARF(forceglsl, -1, -1, 1, initwarning("shaders"));
 
 void Shader::compile()
 {
-    if(status == SHADER_STATUS_READY) return; //do not recompile
+    if(status != SHADER_STATUS_INIT) return; //do not recompile, except set to init
 
     if(type & SHADER_GLSLANG)
     {
@@ -881,16 +894,16 @@ void Shader::compile()
 
 bool Shader::getcompilestatus()
 {
-    if(status == SHADER_STATUS_ERRORED) return false;
+    if(status != SHADER_STATUS_ERRORED) return false;
     else if(status == SHADER_STATUS_READY)   return true; //do not recompile
 
     if(type & SHADER_GLSLANG)
     {
-        if(!vsstr) vsobj = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vsobj;
-        else checkcompilestatusglslshader(GL_VERTEX_SHADER, vsobj, vsstr, name, dbgshader || !variantshader);
+        status = SHADER_STATUS_COMPILED;    //assume the best
+        if(!vsstr) vsobj = !reusevs || reusevs->type&SHADER_INVALID ? 0 : reusevs->vsobj; //todo clear that line
+        else if(!checkcompilestatusglslshader(GL_VERTEX_SHADER, vsobj, vsstr, name, dbgshader || !variantshader)) status = SHADER_STATUS_ERRORED; //not so fast, we errored
         if(!psstr) psobj = !reuseps || reuseps->type&SHADER_INVALID ? 0 : reuseps->psobj;
-        else checkcompilestatusglslshader(GL_FRAGMENT_SHADER, psobj, psstr, name, dbgshader || !variantshader);
-        status = program != 0 ? SHADER_STATUS_COMPILED : SHADER_STATUS_ERRORED;
+        else if(!checkcompilestatusglslshader(GL_FRAGMENT_SHADER, psobj, psstr, name, dbgshader || !variantshader)) status = SHADER_STATUS_ERRORED;
     }
     else if(renderpath == R_ASMSHADER || renderpath == R_ASMGLSLANG)
     {
@@ -901,7 +914,7 @@ bool Shader::getcompilestatus()
         else if(!checkcompilestatusasmshader(GL_FRAGMENT_PROGRAM_ARB, ps, psstr, "PS", name, dbgshader || !variantshader, variantshader != NULL))
             native = false;
 
-        status = vs && ps && (!variantshader || native) ? SHADER_STATUS_COMPILED : SHADER_STATUS_ERRORED;
+        status = vs && ps && (!variantshader || native) ? SHADER_STATUS_COMPILED : SHADER_STATUS_ERRORED; //todo variantshader?
     }
     return status == SHADER_STATUS_COMPILED;
 }
@@ -916,8 +929,8 @@ void Shader::link()
 
 bool Shader::finish()
 {
-    if(status == SHADER_STATUS_ERRORED) return false; // do not try to finish unlinked or uncompiled shaders
-    if(status == SHADER_STATUS_READY)   return true;  // do not recompile shaders 
+    if(status == SHADER_STATUS_ERRORED)      return false; // do not try to finish unlinked or uncompiled shaders
+    else if(status == SHADER_STATUS_READY)   return true;  // do not recompile shaders 
 
     if(type & SHADER_GLSLANG)
     {
@@ -1036,14 +1049,14 @@ Shader *newshader(int type, const char *name, const char *vs, const char *ps, Sh
         genattriblocs(s, vs, ps);
         genuniformlocs(s, vs, ps);
     }
-    if(renderpath!=R_FIXEDFUNCTION && !s.compile())
-    {
-        s.cleanup(true);
-        if(variant) shaders.remove(rname);
-        return NULL;
-    }
+    //if(renderpath!=R_FIXEDFUNCTION && !s.compile())
+    //{
+    //    s.cleanup(true);
+    //    if(variant) shaders.remove(rname);
+    //    return NULL;
+    //}
     if(variant) variant->variants[row].add(&s);
-    s.fixdetailshader();
+    //s.fixdetailshader();
     return &s;
 }
 
@@ -1779,7 +1792,7 @@ Shader *useshaderbyname(const char *name)
 void shader(int *type, char *name, char *vs, char *ps)
 {
     if(lookupshaderbyname(name)) return;
-   
+
     if((*type & SHADER_GLSLANG ? renderpath!=R_GLSLANG && renderpath!=R_ASMGLSLANG : renderpath==R_GLSLANG) ||
        (!hasCM && strstr(ps, *type & SHADER_GLSLANG ? "textureCube" : "CUBE;")) ||
        (!hasTR && strstr(ps, *type & SHADER_GLSLANG ? "texture2DRect" : "RECT;")))
@@ -1847,6 +1860,7 @@ void variantshader(int *type, char *name, int *row, char *vs, char *ps)
             GENSHADER(strstr(vs, "#pragma CUBE2_fog") || strstr(ps, "#pragma CUBE2_fog"), genfogshader(vsbuf, psbuf, vs, ps));
         }
     }
+    //conoutf("parsed variant: %s", name);
     Shader *v = newshader(*type, varname, vs, ps, s, *row);
     if(v && renderpath!=R_FIXEDFUNCTION)
     {
@@ -2452,24 +2466,24 @@ void reloadshaders()
     identflags |= IDF_PERSIST;
     if(renderpath==R_FIXEDFUNCTION) return;
     linkslotshaders();
-    enumerate(shaders, Shader, s, 
-    {
-        if(!s.standard && !(s.type&(SHADER_DEFERRED|SHADER_INVALID)) && !s.variantshader) 
-        {
-            defformatstring(info)("shader %s", s.name);
-            renderprogress(0.0, info);
-            if(!s.compile()) s.cleanup(true);
-            loopi(MAXVARIANTROWS) loopvj(s.variants[i])
-            {
-                Shader *v = s.variants[i][j];
-                if((v->reusevs && v->reusevs->type&SHADER_INVALID) || 
-                   (v->reuseps && v->reuseps->type&SHADER_INVALID) ||
-                   !v->compile())
-                    v->cleanup(true);
-            }
-        }
-        if(s.forced && !s.detailshader) s.fixdetailshader();
-    });
+    //enumerate(shaders, Shader, s, 
+    //{
+    //    if(!s.standard && !(s.type&(SHADER_DEFERRED|SHADER_INVALID)) && !s.variantshader) 
+    //    {
+    //        defformatstring(info)("shader %s", s.name);
+    //        renderprogress(0.0, info);
+    //        if(!s.compile()) s.cleanup(true);
+    //        loopi(MAXVARIANTROWS) loopvj(s.variants[i])
+    //        {
+    //            Shader *v = s.variants[i][j];
+    //            if((v->reusevs && v->reusevs->type&SHADER_INVALID) || 
+    //               (v->reuseps && v->reuseps->type&SHADER_INVALID) ||
+    //               !v->compile())
+    //                v->cleanup(true);
+    //        }
+    //    }
+    //    if(s.forced && !s.detailshader) s.fixdetailshader();
+    //});
 }
 
 void setupblurkernel(int radius, float sigma, float *weights, float *offsets)
