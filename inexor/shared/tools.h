@@ -7,7 +7,10 @@
 
 #include <boost/algorithm/clamp.hpp>
 
-#include "inexor/util/util.h"
+#include "inexor/util/util.h" // function_alias
+#include "inexor/util/Observe.h" // Provides specifications
+  // for std::min/std::max; make sure they are available;
+  // TODO: Get ridd of the aliases
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -555,47 +558,40 @@ static inline bool htcmp(GLuint x, GLuint y)
 #endif
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /// Vector template
-/// @brief a manual implementation of vector templates (self managing dynamic arrays which store one type).
+/// A manual implementation of vector templates (self managing dynamic arrays which store one type).
+/// DEPRECATED! (but difficult to replace in the engine) We recommend to use std::vector instead!
 /// @see std::vector
 template <class T, int MINSIZE = 8> struct vector {
 
-	/// data pointer
     T *buf;
 
-	/// ALLOCATED memory size
+    /// ALLOCATED memory size
     int alen;
-	/// USED memory size
-	int ulen;
+    /// USED memory size
+    int ulen;
 
     /// Default constructor
-	/// @brief sets all members to 0
-	vector() : buf(NULL), alen(0), ulen(0)
-    {
-    }
+    /// @brief sets all members to 0
+    vector() : buf(NULL), alen(0), ulen(0) {}
 
-	/// Copy constructor
-	/// @brief this constructor initialises the vector by copying another vector.
-	/// @param v the vector from which data will be copied (call by reference).
+    /// Copy constructor
+    /// @brief this constructor initialises the vector by copying another vector.
+    /// @param v the vector from which data will be copied (call by reference).
     vector(const vector &v) : buf(NULL), alen(0), ulen(0)
     {
         *this = v;
     }
 
-	/// Destructor
-	/// @brief Deletes all allocated memory and sets vector size to 0.
-	/// @sideeffects Calling this method manually means that all data contained in this vector will be lost.
-    ~vector() 
-	{
-		shrink(0);
-		if(buf) free(buf);
-	}
+    ~vector() {
+        shrink(0);
+        if(buf) free(buf);
+    }
 
-	/// Operator =
-	/// @brief Resets own memory and copies all data from the other vector.
-	/// @param v The vector from which data will be copied.
-	/// @return Returns a pointer to itself.
+    /// Operator =
+    /// @brief Resets own memory and copies all data from the other vector.
+    /// @param v The vector from which data will be copied.
+    /// @return Returns a pointer to itself.
     vector<T> &operator=(const vector<T> &v)
     {
         shrink(0);
@@ -604,12 +600,12 @@ template <class T, int MINSIZE = 8> struct vector {
         return *this;
     }
 
-	/// Add new index to vector
-	/// @brief Pushs a new element at the end of the vector. Allocates memory automaticly if neccesary.
-	/// @param x Element which will be added at the end
-	/// @sideeffects May allocates a lot of memory without your notice
-	/// @see growbuf
-	/// @return The last element of the vector (which is parameter x)
+    /// Add new index to vector
+    /// @brief Pushs a new element at the end of the vector. Allocates memory automaticly if neccesary.
+    /// @param x Element which will be added at the end
+    /// @sideeffects May allocates a lot of memory without your notice
+    /// @see growbuf
+    /// @return The last element of the vector (which is parameter x)
     T &add(const T &x)
     {
         if(ulen==alen) growbuf(ulen+1);
@@ -617,12 +613,12 @@ template <class T, int MINSIZE = 8> struct vector {
         return buf[ulen++];
     }
 
-	/// Add new EMPTY index to vector.
-	/// @brief Pushs a new EMPTY element at the end of the vector. Allocates memory automaticly if neccesary.
-	/// @param x Element which will be added at the end.
-	/// @see growbuf
-	/// @sideeffects May allocates a lot of memory without your notice.
-	/// @return The last element of the vector (which is parameter x).
+    /// Add new EMPTY index to vector.
+    /// @brief Pushs a new EMPTY element at the end of the vector. Allocates memory automaticly if neccesary.
+    /// @param x Element which will be added at the end.
+    /// @see growbuf
+    /// @sideeffects May allocates a lot of memory without your notice.
+    /// @return The last element of the vector (which is parameter x).
     T &add()
     {
         if(ulen==alen) growbuf(ulen+1);
@@ -630,11 +626,11 @@ template <class T, int MINSIZE = 8> struct vector {
         return buf[ulen++];
     }
 
-	/// Duplicate vector's last index.
-	/// @brief Duplicates last index of the vector and appends it to the end. Allocates memory automaticly if neccesary.
-	/// @see growbuf
-	/// @sideeffects May allocates a lot of memory without your notice.
-	/// @return The last element of the vector.
+    /// Duplicate vector's last index.
+    /// @brief Duplicates last index of the vector and appends it to the end. Allocates memory automaticly if neccesary.
+    /// @see growbuf
+    /// @sideeffects May allocates a lot of memory without your notice.
+    /// @return The last element of the vector.
     T &dup()
     {
         if(ulen==alen) growbuf(ulen+1);
@@ -642,7 +638,7 @@ template <class T, int MINSIZE = 8> struct vector {
         return buf[ulen++];
     }
 
-	/// copy vector from vector reference
+    /// copy vector from vector reference
     void move(vector<T> &v)
     {
         if(!ulen)
@@ -660,10 +656,10 @@ template <class T, int MINSIZE = 8> struct vector {
         }
     }
 
-	/// safety check: tests if index i exists in this vector
+    /// safety check: tests if index i exists in this vector
     bool inrange(size_t i) const { return i<size_t(ulen); }
-	/// safety check: tests if index i exists in this vector
-	/// integer version: i must be greater (or equal to) 0
+    /// safety check: tests if index i exists in this vector
+    /// integer version: i must be greater (or equal to) 0
     bool inrange(int i) const { return i>=0 && i<ulen; }
 
     // Get the last element and remove it from the vector
@@ -677,68 +673,69 @@ template <class T, int MINSIZE = 8> struct vector {
     /// get the last index
     T &last() { return buf[ulen-1]; }
 
-	/// decrement vector's size and call the DESTRUCTOR of the template in the last index
-    void drop()
-	{
-		ulen--;
-		buf[ulen].~T(); /// call template's destructor
-	}
+    /// decrement vector's size and call the DESTRUCTOR of the template in the last index
+    void drop() {
+        ulen--;
+        buf[ulen].~T(); /// call template's destructor
+    }
 
-	/// is this vector empty?
+    /// is this vector empty?
     bool empty() const { return ulen==0; }
 
-	/// return size of reserved memory
+    /// return size of reserved memory
     int capacity() const { return alen; }
-	/// return size of used memory
+    /// return size of used memory
     int length() const { return ulen; }
 
-	/// [] array access operators
+    /// [] array access operators
     T &operator[](int i) { ASSERT(i>=0 && i<ulen); return buf[i]; }
     const T &operator[](int i) const { ASSERT(i >= 0 && i<ulen); return buf[i]; }
 
-	/// resets all members to 0
-	/// @warning This member does NOT clean up its memory!
-    void disown()
-	{ 
-		buf = NULL; 
-		alen = ulen = 0;
-	}
-	
-	/// shrink vector memory size AND DELETE UNUSED MEMORY
+    /// Relinquish ownership over the backing buffer;
+    ///
+    /// @warning This member does NOT clean up its memory!
+    void disown() {
+        buf = NULL;
+        alen = ulen = 0;
+    }
+
+    /// shrink vector memory size AND DELETE UNUSED MEMORY
     void shrink(int i) { ASSERT(i<=ulen); if(isclass<T>::no) ulen = i; else while(ulen>i) drop(); }
     /// shrink vector memory size
-	void setsize(int i) { ASSERT(i<=ulen); ulen = i; }
+    void setsize(int i) { ASSERT(i<=ulen); ulen = i; }
 
     void deletecontents() { while(!empty()) delete   pop(); }
     void deletearrays() { while(!empty()) delete[] pop(); }
 
-	/// get the whole vector
+    /// get the whole vector
     T *getbuf() { return buf; }
-	/// get the whole vector as const value
     const T *getbuf() const { return buf; }
-    bool inbuf(const T *e) const { return e >= buf && e < &buf[ulen]; }
+    bool inbuf(const T *e) const {
+        return e >= buf && e < &buf[ulen];
+    }
 
-	/// sort the vector using quicksort template and sort criteria F
+    /// sort the vector using quicksort template and sort criteria F
     template<class F>
     void sort(F fun, int i = 0, int n = -1)
     {
         quicksort(&buf[i], n < 0 ? ulen-i : n, fun);
     }
-	/// sort the vector using compareless function
+
+    /// sort the vector
     void sort() { sort(compareless<T>); }
 
-	/// mix the vector's indices randomly
+    /// mix the vector's indices randomly
     void shuffle(){
-    	extern uint randomMT();
-    	for(int i = 0; i < ulen; i++){
-    		int indx = rnd(ulen);
-    		T temp = buf[i];
-    		buf[i] = buf[indx];
-    		buf[indx] = temp;
-    	}
+        extern uint randomMT();
+        for(int i = 0; i < ulen; i++){
+            int indx = rnd(ulen);
+            T temp = buf[i];
+            buf[i] = buf[indx];
+            buf[indx] = temp;
+        }
     }
 
-	/// reallocate memory for vector (its size)
+    /// reallocate memory for vector (its size)
     void growbuf(int sz)
     {
         int olen = alen;
@@ -749,26 +746,29 @@ template <class T, int MINSIZE = 8> struct vector {
         if(!buf) abort();
     }
 
-	/// reserved memory and returns vector of the reserved memory
+    /// reserved memory and returns vector of the reserved memory
     databuf<T> reserve(int sz)
     {
         if(ulen+sz > alen) growbuf(ulen+sz);
         return databuf<T>(&buf[ulen], sz);
     }
 
-	/// increase value of used bytes manually (?)
+    /// Mark a given number of element slots as used
+    ///
+    /// This is a terrible idea and a very unsafe function.
+    /// Consider it private and pray that this may never be
+    /// called again.
     void advance(int sz)
     {
         ulen += sz;
     }
 
-	/// increase value of used bytes by size of a vector
+    /// increase value of used bytes by size of a vector
     void addbuf(const databuf<T> &p)
     {
         advance(p.length());
     }
 
-	/// 
     T *pad(int n)
     {
         T *buf = reserve(n).buf;
@@ -776,11 +776,11 @@ template <class T, int MINSIZE = 8> struct vector {
         return buf;
     }
 
-	/// write bytes to vector
-    void put(const T &v) 
-	{
-		add(v);
-	}
+    /// write bytes to vector
+    void put(const T &v) {
+        add(v);
+    }
+
     void put(const T *v, int n)
     {
         databuf<T> buf = reserve(n);
@@ -788,8 +788,8 @@ template <class T, int MINSIZE = 8> struct vector {
         addbuf(buf);
     }
 
-	/// remove indices from vector
-	/// remove ordered?
+    /// remove indices from vector
+    /// remove ordered?
     void remove(int i, int n)
     {
         for(int p = i+n; p<ulen; p++) buf[p-n] = buf[p];
@@ -810,7 +810,7 @@ template <class T, int MINSIZE = 8> struct vector {
         return e;
     }
 
-	/// find (first) index in vector
+    /// find (first) index in vector
     template<class U>
     int find(const U &o)
     {
@@ -818,13 +818,13 @@ template <class T, int MINSIZE = 8> struct vector {
         return -1;
     }
 
-	/// only add new element if it is unique
+    /// only add new element if it is unique
     void addunique(const T &o)
     {
         if(find(o) < 0) add(o);
     }
 
-	/// remove an index using a template parameter key
+    /// remove an index using a template parameter key
     void removeobj(const T &o)
     {
         loopi(ulen) if(buf[i] == o)
@@ -836,7 +836,7 @@ template <class T, int MINSIZE = 8> struct vector {
         }
     }
 
-	/// replace an index with the last vector index using a template parameter key
+    /// replace an index with the last vector index using a template parameter key
     void replacewithlast(const T &o)
     {
         if(!ulen) return;
@@ -848,7 +848,7 @@ template <class T, int MINSIZE = 8> struct vector {
         ulen--;
     }
 
-	/// insertion functions
+    /// insertion functions
     T &insert(int i, const T &e)
     {
         add(T());
@@ -865,23 +865,20 @@ template <class T, int MINSIZE = 8> struct vector {
         return &buf[i];
     }
 
-	/// reverse all indices (first becomes last and so on...)
+    /// reverse all indices (first becomes last and so on...)
     void reverse()
     {
         loopi(ulen/2) swap(buf[i], buf[ulen-1-i]);
     }
 
-	/// ?
     static int heapparent(int i) { return (i - 1) >> 1; }
     static int heapchild(int i) { return (i << 1) + 1; }
 
-	/// ?
     void buildheap()
     {
         for(int i = ulen/2; i >= 0; i--) downheap(i);
     }
 
-	/// ?
     int upheap(int i)
     {
         float score = heapscore(buf[i]);
@@ -895,14 +892,12 @@ template <class T, int MINSIZE = 8> struct vector {
         return i;
     }
 
-	/// ?
     T &addheap(const T &x)
     {
         add(x);
         return buf[upheap(ulen-1)];
     }
 
-	/// ?
     int downheap(int i)
     {
         float score = heapscore(buf[i]);
@@ -922,7 +917,6 @@ template <class T, int MINSIZE = 8> struct vector {
         return i;
     }
 
-	/// ?
     T removeheap()
     {
         T e = removeunordered(0);
@@ -930,8 +924,8 @@ template <class T, int MINSIZE = 8> struct vector {
         return e;
     }
 
-	/// similar to find but uses hashtable keys
-    template<class K> 
+    /// similar to find but uses hashtable keys
+    template<class K>
     int htfind(const K &key)
     {
         loopi(ulen) if(htcmp(key, buf[i])) return i;
@@ -939,9 +933,8 @@ template <class T, int MINSIZE = 8> struct vector {
     }
 };
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // manual implementation of hashsets
-// please make sure you know the difference between hashset and std::map!
+// DEPRECATED: use std::unordered_map instead
 template<class T> struct hashset
 {
     typedef T elem;
