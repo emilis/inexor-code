@@ -446,7 +446,7 @@ GLuint getwaterfalltex() { return waterfallrefraction.refracttex ? waterfallrefr
 
 VAR(oqwater, 0, 2, 2);
 
-extern int oqfrags;
+extern SharedVar<int> oqfrags;
 
 void renderwaterff()
 {
@@ -592,7 +592,7 @@ void preloadwatershaders(bool force)
 
     useshaderbyname(waterrefract ? (waterfade && hasFBO ? "underwaterfade" : "underwaterrefract") : "underwater");
 
-    extern int waterfallenv;
+    extern SharedVar<int> waterfallenv;
     if(waterfallenv && hasCM) useshaderbyname("waterfallenv");
     if(waterfallrefract) useshaderbyname(waterfallenv && hasCM ? "waterfallenvrefract" : "waterfallrefract");
 }
