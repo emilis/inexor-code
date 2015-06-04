@@ -721,7 +721,7 @@ void endmodelquery()
         b.m->startrender();
         do
         {
-            batchedmodel &bm = b.batched.pop();
+            batchedmodel bm = b.batched.pop();
             if(bm.attached>=0) minattached = min(minattached, bm.attached);
             renderbatchedmodel(b.m, bm);
         }

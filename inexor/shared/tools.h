@@ -666,9 +666,15 @@ template <class T, int MINSIZE = 8> struct vector {
 	/// integer version: i must be greater (or equal to) 0
     bool inrange(int i) const { return i>=0 && i<ulen; }
 
-	/// get the last index and decrement the vector's size
-    T &pop() { return buf[--ulen]; }
-	/// get the last index
+    // Get the last element and remove it from the vector
+    //
+    // @sideeffect Removes that same last element from the vector
+    // @return The last element
+    T pop() {
+        ulen--;
+        return std::move(buf[ulen]);
+    }
+    /// get the last index
     T &last() { return buf[ulen-1]; }
 
 	/// decrement vector's size and call the DESTRUCTOR of the template in the last index
